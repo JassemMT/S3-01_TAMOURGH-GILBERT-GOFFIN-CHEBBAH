@@ -18,7 +18,7 @@ Chaque groupe fera l’étude préalable du projet et rédigera un document dans
 - [x]  des DSS
 - [x]  des scénarios pourront les compléter,
 - [ ]  un diagramme d’activités de l’application
-- [ ]  un diagramme d’état de l’objet central de l’application (la tâche) ;
+- [x]  un diagramme d’état de l’objet central de l’application (la tâche) ;
 - [ ]  conception : un diagramme de classe en y précisant les patrons de conception et
 d’architecture que vous prévoyez d’utiliser ;
 - [ ]  une maquette de l’application ;
@@ -66,7 +66,8 @@ document d’étude préalable.
 
 # Diagramme de Cas d’utilisation :
 
-![image.png](attachment:5a964c1e-930e-465a-a0a2-3bae326a2afb:image.png)
+<img width="592" height="632" alt="image" src="https://github.com/user-attachments/assets/54173097-c3b5-4b4b-bea5-daf24f41049c" />
+
 
 ## User :
 
@@ -92,11 +93,10 @@ document d’étude préalable.
 - **Extensions :**
     - *Ajout de sous-tâches :* L'utilisateur peut ajouter directement des sous-tâches à la création.
     - *Données invalides :* Le système signale l'erreur, retour à l'étape 3.
-    
-    ![image.png](attachment:1152b1c3-8f7e-4433-ad8b-610bfa25388b:image.png)
-    
+      
+<img width="1393" height="824" alt="image" src="https://github.com/user-attachments/assets/2b7e6476-4506-4d62-b76b-224dd6350d14" />
 
-[Diagramme de Séquence - Code](https://www.notion.so/Diagramme-de-S-quence-Code-2be67c381a9b8015b832f9784209c43d?pvs=21)
+    
 
 # Supprimer une tâche
 
@@ -108,9 +108,8 @@ Un message informe l’utilisateur que la suppression a été effectuée avec su
 
 ## Diagramme de séquence
 
-![image.png](attachment:76fdccdc-feef-427b-ad93-9fa02009ce0e:image.png)
+<img width="841" height="642" alt="image" src="https://github.com/user-attachments/assets/c99b4b19-f674-43ae-a26b-d168ede70c06" />
 
-[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b80079c62e41045d2debd?pvs=21)
 
 # Visualiser les tâches sous forme de bureau (vue Kanban)
 
@@ -121,9 +120,7 @@ L’interface présente alors une organisation visuelle intuitive ressemblant à
 
 ## Diagramme de séquence
 
-![image.png](attachment:d3d1d990-fa27-49cb-a54a-cb58fdd58477:image.png)
-
-[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b80f790bcd55d529ef55f?pvs=21)
+<img width="1038" height="450" alt="image" src="https://github.com/user-attachments/assets/f3930249-cbf8-4f62-968f-0be9e9203bf5" />
 
 # Visualiser les tâches sous forme de liste
 
@@ -135,9 +132,7 @@ L’utilisateur peut ainsi voir toutes les tâches de manière compacte et trié
 
 ## Diagramme de séquence
 
-![image.png](attachment:10d45679-f6ed-458d-8fb8-cb8f01845150:image.png)
-
-[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b804699c4d97fe18f2bcf?pvs=21)
+<img width="925" height="452" alt="image" src="https://github.com/user-attachments/assets/f6cefdf5-1cab-4942-8c1b-128ced50e5eb" />
 
 # Déplacer une tâche (Kanban)
 
@@ -163,9 +158,7 @@ L’utilisateur effectue un glisser-déposer ou une action équivalente pour dé
 
 ## Diagramme de séquence
 
-![image.png](attachment:834a53e7-4525-47fe-b768-41e1a3584533:image.png)
-
-[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2be67c381a9b80a6a1b4c79a8427285c?pvs=21)
+<img width="1520" height="883" alt="image" src="https://github.com/user-attachments/assets/00559af8-6230-49c9-bd3a-14fc20239b7b" />
 
 # Modifier une tâche
 
@@ -190,17 +183,13 @@ L’utilisateur ouvre une tâche, modifie son titre, sa description, ses dates, 
 
 ## Diagramme de séquence
 
-![image.png](attachment:db1edf4d-50e8-4b26-a7a4-28e9eba344fd:image.png)
-
-[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b8089a04be3de82d942c5?pvs=21)
+<img width="1252" height="629" alt="image" src="https://github.com/user-attachments/assets/67d63011-bce4-4ab2-9f20-89c973e705d0" />
 
 # Archiver une tâche
 
 ## Diagramme de Séquence
 
-![image.png](attachment:9f37c714-9ecb-4495-8ca2-38718c09ebd8:image.png)
-
-[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2be67c381a9b80aa8ba1e6951e39a4e3?pvs=21)
+<img width="915" height="664" alt="image" src="https://github.com/user-attachments/assets/ec24ad23-992e-4363-a1de-787bce60dad6" />
 
 # Créer une colonne
 
@@ -212,9 +201,7 @@ La colonne apparaît immédiatement prête à accueillir des tâches.
 
 ## Diagramme de séquence
 
-![image.png](attachment:02500548-88c2-4478-8deb-6e3f63f89c1a:image.png)
-
-[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b809abd92cb206161c48a?pvs=21)
+<img width="857" height="574" alt="image" src="https://github.com/user-attachments/assets/1d24ba87-1967-4adf-9753-dd78f0a2f812" />
 
 # Modifier libellé d’une colonne
 
@@ -226,9 +213,7 @@ La modification est immédiatement visible pour l’utilisateur.
 
 ## Diagramme de séquence
 
-![image.png](attachment:8bf8e787-de81-4499-b073-b7644ec447a3:image.png)
-
-[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b809fbddedb4a57216344?pvs=21)
+<img width="1203" height="614" alt="image" src="https://github.com/user-attachments/assets/1866c6f0-8dc8-418f-9d19-560f9407e4af" />
 
 # Supprimer une colonne
 
@@ -241,9 +226,7 @@ Un message confirme la suppression.
 
 ## Diagramme de séquence
 
-![image.png](attachment:bbeea98b-d857-4314-a891-27c452127517:image.png)
-
-[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b8046a3d8ef174da386f9?pvs=21)
+<img width="1137" height="661" alt="image" src="https://github.com/user-attachments/assets/8e2b946b-e84b-4f18-abfb-3f51ca2e5cc3" />
 
 # Diagramme d'État de "Tâche"
 
@@ -268,9 +251,7 @@ Un message confirme la suppression.
 - *Fin de travail* -> Transition **In Progress** vers **Done**
 - *Action Utilisateur* -> Transition **Done** vers **Archivée**
 
-![image.png](attachment:b862af23-3d63-4fa9-ad7f-fc1b55b3dc2d:image.png)
-
-[Diagramme d’état code](https://www.notion.so/Diagramme-d-tat-code-2be67c381a9b8073a904f0529e9af6d5?pvs=21)
+<img width="719" height="892" alt="image" src="https://github.com/user-attachments/assets/707576c0-3a51-48d7-a49b-e9da551cf53c" />
 
 # Générer le diagramme de Gantt :
 
@@ -294,9 +275,7 @@ L’utilisateur demande la génération d’un diagramme de Gantt. Le système r
 
 ## Diagramme de séquence
 
-![image.png](attachment:95053756-09ec-4519-b734-47958ce69ca2:image.png)
-
-[Génération diagramme de Gant](https://www.notion.so/G-n-ration-diagramme-de-Gant-2be67c381a9b8006b2c7da6ac427a425?pvs=21)
+<img width="1265" height="593" alt="image" src="https://github.com/user-attachments/assets/8d566e59-2a73-44f9-abe5-855a32926eec" />
 
 Damme de classe
 
