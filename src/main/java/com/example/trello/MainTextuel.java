@@ -42,8 +42,8 @@ public class MainTextuel {
      */
     private static void afficherBienvenue() {
         System.out.println("\n╔════════════════════════════════════════════════════════╗");
-        System.out.println("║     GESTIONNAIRE DE TÂCHES - VERSION CONSOLE          ║");
-        System.out.println("║     Pattern MVC + Observateur + Composite             ║");
+        System.out.println("║     GESTIONNAIRE DE TÂCHES - VERSION CONSOLE           ║");
+        System.out.println("║     Pattern MVC + Observateur + Composite              ║");
         System.out.println("╚════════════════════════════════════════════════════════╝\n");
     }
 
