@@ -5,11 +5,13 @@ import javafx.scene.Scene;
 
 
 class VueKanban  extends Scene implements Observateur {
-    public actualiser(Sujet s) {
-        // TODO
-    }
 
     public VueKanban(Parent parent, double v, double v1) {
         super(parent, v, v1);
+    }
+
+    @Override
+    public void actualiser(Sujet s) {
+
     }
 }
