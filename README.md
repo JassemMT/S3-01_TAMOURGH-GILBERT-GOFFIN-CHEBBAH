@@ -1,7 +1,3 @@
-# S3-01_TAMOURGH-GILBERT-GOFFIN-CHEBBAH
-L’application à réaliser dans cette SAE est un organisateur de tâches. De nombreux sites proposent ce type d’outils (Trello, Asana, …) avec différentes approches. 
-# SAE S3.01
-
 # PARTIE ANALYSE
 
 Semaine 49 et début 50 – 12h + 2h, dépôt d’un document d’étude préalable à la fin de la seconde
@@ -17,12 +13,12 @@ Chaque groupe fera l’étude préalable du projet et rédigera un document dans
 - [x]  des descriptions textuelles
 - [x]  des DSS
 - [x]  des scénarios pourront les compléter,
-- [ ]  un diagramme d’activités de l’application
+- [x]  un diagramme d’activités de l’application
 - [x]  un diagramme d’état de l’objet central de l’application (la tâche) ;
-- [ ]  conception : un diagramme de classe en y précisant les patrons de conception et
+- [x]  conception : un diagramme de classe en y précisant les patrons de conception et
 d’architecture que vous prévoyez d’utiliser ;
-- [ ]  une maquette de l’application ;
-- [ ]  le planning des 6 itérations prévues et les objectifs de chacune (en terme de cas
+- [x]  une maquette de l’application ;
+- [x]  le planning des 6 itérations prévues et les objectifs de chacune (en terme de cas
 d’utilisations) avec identification des risques.
 
 Le trello du groupe devra être rempli selon le planning prévu.
@@ -47,6 +43,7 @@ document d’étude préalable.
 
 ### **Principales :**
 
+- CRUD Colonne
 - **CRUD Tâche :** Créer, Modifier, Supprimer une tâche /coch
 - **Gestion des Dépendances :** Lier une tâche A à une tâche B (B bloque A)
     
@@ -66,7 +63,7 @@ document d’étude préalable.
 
 # Diagramme de Cas d’utilisation :
 
-<img width="592" height="632" alt="image" src="https://github.com/user-attachments/assets/54173097-c3b5-4b4b-bea5-daf24f41049c" />
+<img width="592" height="632" alt="image" src="https://github.com/user-attachments/assets/8c4ba76e-24e7-4441-9411-90645991a5a8" />
 
 
 ## User :
@@ -93,10 +90,13 @@ document d’étude préalable.
 - **Extensions :**
     - *Ajout de sous-tâches :* L'utilisateur peut ajouter directement des sous-tâches à la création.
     - *Données invalides :* Le système signale l'erreur, retour à l'étape 3.
-      
-<img width="1393" height="824" alt="image" src="https://github.com/user-attachments/assets/2b7e6476-4506-4d62-b76b-224dd6350d14" />
-
     
+    ![DSS - Créer une tâche](attachment:1152b1c3-8f7e-4433-ad8b-610bfa25388b:image.png)
+    
+    DSS - Créer une tâche
+    
+
+<img width="1393" height="824" alt="image" src="https://github.com/user-attachments/assets/8cff94b1-3759-411e-aaea-bd11424e46fc" />
 
 # Supprimer une tâche
 
@@ -108,8 +108,9 @@ Un message informe l’utilisateur que la suppression a été effectuée avec su
 
 ## Diagramme de séquence
 
-<img width="841" height="642" alt="image" src="https://github.com/user-attachments/assets/c99b4b19-f674-43ae-a26b-d168ede70c06" />
+![image.png](attachment:76fdccdc-feef-427b-ad93-9fa02009ce0e:image.png)
 
+[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b80079c62e41045d2debd?pvs=21)
 
 # Visualiser les tâches sous forme de bureau (vue Kanban)
 
@@ -120,7 +121,9 @@ L’interface présente alors une organisation visuelle intuitive ressemblant à
 
 ## Diagramme de séquence
 
-<img width="1038" height="450" alt="image" src="https://github.com/user-attachments/assets/f3930249-cbf8-4f62-968f-0be9e9203bf5" />
+![image.png](attachment:d3d1d990-fa27-49cb-a54a-cb58fdd58477:image.png)
+
+[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b80f790bcd55d529ef55f?pvs=21)
 
 # Visualiser les tâches sous forme de liste
 
@@ -132,7 +135,9 @@ L’utilisateur peut ainsi voir toutes les tâches de manière compacte et trié
 
 ## Diagramme de séquence
 
-<img width="925" height="452" alt="image" src="https://github.com/user-attachments/assets/f6cefdf5-1cab-4942-8c1b-128ced50e5eb" />
+![image.png](attachment:10d45679-f6ed-458d-8fb8-cb8f01845150:image.png)
+
+[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b804699c4d97fe18f2bcf?pvs=21)
 
 # Déplacer une tâche (Kanban)
 
@@ -158,7 +163,9 @@ L’utilisateur effectue un glisser-déposer ou une action équivalente pour dé
 
 ## Diagramme de séquence
 
-<img width="1520" height="883" alt="image" src="https://github.com/user-attachments/assets/00559af8-6230-49c9-bd3a-14fc20239b7b" />
+![image.png](attachment:834a53e7-4525-47fe-b768-41e1a3584533:image.png)
+
+[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2be67c381a9b80a6a1b4c79a8427285c?pvs=21)
 
 # Modifier une tâche
 
@@ -183,13 +190,17 @@ L’utilisateur ouvre une tâche, modifie son titre, sa description, ses dates, 
 
 ## Diagramme de séquence
 
-<img width="1252" height="629" alt="image" src="https://github.com/user-attachments/assets/67d63011-bce4-4ab2-9f20-89c973e705d0" />
+![image.png](attachment:db1edf4d-50e8-4b26-a7a4-28e9eba344fd:image.png)
+
+[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b8089a04be3de82d942c5?pvs=21)
 
 # Archiver une tâche
 
 ## Diagramme de Séquence
 
-<img width="915" height="664" alt="image" src="https://github.com/user-attachments/assets/ec24ad23-992e-4363-a1de-787bce60dad6" />
+![image.png](attachment:9f37c714-9ecb-4495-8ca2-38718c09ebd8:image.png)
+
+[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2be67c381a9b80aa8ba1e6951e39a4e3?pvs=21)
 
 # Créer une colonne
 
@@ -201,7 +212,9 @@ La colonne apparaît immédiatement prête à accueillir des tâches.
 
 ## Diagramme de séquence
 
-<img width="857" height="574" alt="image" src="https://github.com/user-attachments/assets/1d24ba87-1967-4adf-9753-dd78f0a2f812" />
+![image.png](attachment:02500548-88c2-4478-8deb-6e3f63f89c1a:image.png)
+
+[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b809abd92cb206161c48a?pvs=21)
 
 # Modifier libellé d’une colonne
 
@@ -213,7 +226,9 @@ La modification est immédiatement visible pour l’utilisateur.
 
 ## Diagramme de séquence
 
-<img width="1203" height="614" alt="image" src="https://github.com/user-attachments/assets/1866c6f0-8dc8-418f-9d19-560f9407e4af" />
+![image.png](attachment:8bf8e787-de81-4499-b073-b7644ec447a3:image.png)
+
+[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b809fbddedb4a57216344?pvs=21)
 
 # Supprimer une colonne
 
@@ -226,7 +241,9 @@ Un message confirme la suppression.
 
 ## Diagramme de séquence
 
-<img width="1137" height="661" alt="image" src="https://github.com/user-attachments/assets/8e2b946b-e84b-4f18-abfb-3f51ca2e5cc3" />
+![image.png](attachment:bbeea98b-d857-4314-a891-27c452127517:image.png)
+
+[Diagramme de séquence - Code](https://www.notion.so/Diagramme-de-s-quence-Code-2c367c381a9b8046a3d8ef174da386f9?pvs=21)
 
 # Diagramme d'État de "Tâche"
 
@@ -251,7 +268,12 @@ Un message confirme la suppression.
 - *Fin de travail* -> Transition **In Progress** vers **Done**
 - *Action Utilisateur* -> Transition **Done** vers **Archivée**
 
-<img width="719" height="892" alt="image" src="https://github.com/user-attachments/assets/707576c0-3a51-48d7-a49b-e9da551cf53c" />
+<img width="719" height="892" alt="image" src="https://github.com/user-attachments/assets/cf62de12-4d58-44f0-844d-58e72412c041" />
+
+
+Diagramme d’état
+
+[Diagramme d’état code](https://www.notion.so/Diagramme-d-tat-code-2be67c381a9b8073a904f0529e9af6d5?pvs=21)
 
 # Générer le diagramme de Gantt :
 
@@ -275,9 +297,128 @@ L’utilisateur demande la génération d’un diagramme de Gantt. Le système r
 
 ## Diagramme de séquence
 
-<img width="1265" height="593" alt="image" src="https://github.com/user-attachments/assets/8d566e59-2a73-44f9-abe5-855a32926eec" />
+<img width="1265" height="593" alt="image" src="https://github.com/user-attachments/assets/c8a9470d-ef09-4378-9500-3a193aca0ecd" />
 
-Damme de classe
 
-DIagramme d’actcivité
-MAquette de l’appli
+[Génération diagramme de Gant](https://www.notion.so/G-n-ration-diagramme-de-Gant-2be67c381a9b8006b2c7da6ac427a425?pvs=21)
+
+# Diagramme d’activités
+
+version  a verifier
+<img width="2048" height="505" alt="image" src="https://github.com/user-attachments/assets/3787af8f-48d7-487c-ace7-ff58845746e3" />
+
+
+![image.png](attachment:161f8784-9d11-491e-89d6-22a000900921:image.png)
+
+![image.png](attachment:8fd350db-29a4-43ed-9508-3143ac99f8fc:image.png)
+
+[Diagramme d’activités - Code](https://www.notion.so/Diagramme-d-activit-s-Code-2c367c381a9b803698a0da7e0919235b?pvs=21)
+
+<img width="681" height="897" alt="image" src="https://github.com/user-attachments/assets/7614ee7c-0d57-4f63-89fb-2526b1ebf21a" />
+
+
+![image.png](attachment:98598fd6-5071-4f94-9ea0-e691360ce47f:image.png)
+
+[UML Diagramme declasse](https://www.notion.so/UML-Diagramme-declasse-2c367c381a9b8005956df5db36f8fdba?pvs=21)
+
+## Maquette:
+
+![image.png](attachment:bb8c488d-605a-43f0-bac1-d0529654b571:image.png)
+<img width="667" height="703" alt="image" src="https://github.com/user-attachments/assets/3ca757ed-1736-4870-82b4-719f45951879" />
+
+
+# Architecture Globale & Choix Techniques (Préalable)
+
+---
+
+Avant de lancer l'itération 1, ces choix doivent être actés dans le document de conception :
+
+- **Architecture :** MVC (Modèle-Vue-Contrôleur).
+- **Patrons probables :**
+    - *Observer/Observable :* Pour que les vues (Liste, Kanban) se mettent à jour quand le modèle change.
+    - *Composite :* Pour gérer la hiérarchie Tâche / Sous-tâches.
+    - *State :* Pour gérer les états (To Do, In Progress, Done, Blocked).
+    - *Factory :* Pour la création des tâches ou des éléments graphiques.
+
+---
+
+### Planning des 6 Itérations
+
+### Itération 1 : Les Fondations & La Vue Liste (MVP)
+
+**Objectif :** Avoir une application qui se lance, stocke des données en mémoire et permet la gestion de base. Puisque vous avez le diagramme, c'est le moment de le coder.
+
+- **Fonctionnalités :**
+    - **Implémentation du Modèle :** Codage des classes métier (Tâche, Liste) d'après votre diagramme.
+    - **CRUD Tâche (Partiel) :** Créer et Supprimer une tâche simple (Titre, Description, Date).
+    - **Vue Liste :** Affichage simple des tâches sous forme de liste textuelle ou tableau.
+- **Technique :**
+    - Mise en place du projet JavaFX et Git.
+    - Mise en place du pattern **MVC**.
+    - Pattern **Factory** pour la création des tâches (si prévu).
+- *Livrable :* Une fenêtre qui affiche une liste où l'on peut ajouter/supprimer une ligne.
+
+### Itération 2 : La Vue Kanban (Structure du Bureau)
+
+**Objectif :** Mettre en place la visualisation principale "Bureau" avec des colonnes.
+
+- **Fonctionnalités :**
+    - **Vue Kanban :** Affichage des tâches réparties dans des colonnes (ex: To Do, Doing, Done).
+    - **CRUD Colonne :** Créer, Renommer et Supprimer une colonne personnalisée.
+    - **Lien Tâche-Colonne :** Assigner une tâche à une colonne lors de la création.
+- **Technique :**
+    - Pattern **Observer** : La vue Kanban doit se mettre à jour si le modèle change (ajout d'une tâche).
+    - Utilisation des conteneurs JavaFX (`HBox`, `VBox` ou `GridPane`).
+- *Livrable :* Un tableau avec des colonnes modifiables contenant des tâches (statiques pour l'instant).
+
+### Itération 3 : Interactivité (Drag & Drop) & Structure (Sous-tâches)
+
+**Objectif :** Rendre l'interface ergonomique et gérer la complexité hiérarchique.
+
+- **Fonctionnalités :**
+    - **Drag & Drop (Glisser-Déposer) :** Déplacer une tâche d'une colonne à l'autre à la souris.
+    - **Sous-tâches :** Créer des tâches filles dans une tâche mère (imbrication).
+    - **Vue Liste Hiérarchique :** Adapter la vue liste (Itération 1) pour afficher l'arborescence (TreeTableView).
+- **Technique :**
+    - Gestion des événements souris complexes (`DragEvent`).
+    - Pattern **Composite** : Pour traiter uniformément les tâches simples et les tâches composées (avec sous-tâches).
+- *Livrable :* Les post-its bougent à la souris et on peut créer des sous-tâches.
+
+### Itération 4 : Logique Métier (Dépendances & États)
+
+**Objectif :** Ajouter l'intelligence de l'application (règles de gestion).
+
+- **Fonctionnalités :**
+    - **Gestion des Dépendances :** Lier une tâche A à une tâche B (B bloque A).
+    - **Gestion des États :** Une tâche passe automatiquement en "Bloquée" ou change de couleur si sa dépendance n'est pas finie.
+    - **CRUD Tâche (Complet) :** Modification complète (dates, description détaillée) et "Cocher" une tâche comme finie.
+- **Technique :**
+    - Pattern **State** : Pour gérer proprement les transitions (En cours -> Fini, Bloqué -> En cours).
+    - Validation logique lors du Drag & Drop (interdire le déplacement si bloqué).
+- *Livrable :* Impossible de finir une tâche si la précédente n'est pas faite.
+
+### Itération 5 : La Vue Gantt (Visualisation Temporelle)
+
+**Objectif :** Offrir une vision chronologique du projet.
+
+- **Fonctionnalités :**
+    - **Calcul de dates :** Si une tâche a une durée, calculer sa date de fin probable.
+    - **Sélection :** Ne générer le Gantt que pour une sélection de tâches.
+- **Technique :**
+    - Utilisation de `Canvas` ou de librairies graphiques JavaFX (`Chart`).
+    - Algorithme de placement pour gérer les chevauchements visuels.
+- *Livrable :* Un troisième onglet/vue affichant le diagramme de Gantt.
+
+### Itération 6 : Archivage, Finalisation
+
+**Objectif :** Nettoyer l'application et ajouter les fonctionnalités de confort.
+
+- **Fonctionnalités :**
+    - **Archivage :** Stocker les tâches "Done" hors du tableau principal pour alléger la vue.
+    - **Catégories/Tags :** Ajouter des codes couleurs (Urgent, Perso...).
+    - **Tri et Filtrage :** Rechercher une tâche dans les listes.
+- **Technique :**
+    - Tests unitaires et d'intégration finaux.
+    - Correction des bugs et polissage de l'interface (CSS).
+    - Préparation de la soutenance finale.
+- *Livrable :* Version finale stable et documentée.
