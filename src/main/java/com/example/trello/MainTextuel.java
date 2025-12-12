@@ -1,7 +1,9 @@
-import Modele.App;
-import Modele.Tache;
-import Modele.TacheComposite;
-import Modele.TacheSimple;
+package com.example.trello;
+
+import com.example.trello.Modele.App;
+import com.example.trello.Modele.Tache;
+import com.example.trello.Modele.TacheComposite;
+import com.example.trello.Modele.TacheSimple;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
