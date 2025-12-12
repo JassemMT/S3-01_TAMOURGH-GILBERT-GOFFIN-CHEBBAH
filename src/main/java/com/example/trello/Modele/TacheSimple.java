@@ -1,4 +1,4 @@
-package Modele;
+package com.example.trello.Modele;
 
 import java.time.LocalDate;
 import java.util.LinkedList;

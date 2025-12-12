@@ -1,6 +1,6 @@
-package Modele;
+package com.example.trello.Modele;
 
-import Vue.Observateur;
+import com.example.trello.Vue.Observateur;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;

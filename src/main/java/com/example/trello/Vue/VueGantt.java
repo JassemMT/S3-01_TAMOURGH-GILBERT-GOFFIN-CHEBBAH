@@ -1,9 +1,9 @@
-package com.example.trello;
+package com.example.trello.Vue;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
 class VueGantt extends Scene implements Observateur {
-    public actualiser(Sujet s) {
+    public actualiser(Modele.Sujet s) {
         // TODO
     }
 

@@ -1,6 +1,8 @@
-package com.example.trello;
+package com.example.trello.Vue;
+import com.example.trello.Modele.Sujet;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+
 
 class VueKanban  extends Scene implements Observateur {
     public actualiser(Sujet s) {

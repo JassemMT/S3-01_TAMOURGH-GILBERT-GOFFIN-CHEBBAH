@@ -1,4 +1,5 @@
-package Modele;
+package com.example.trello.Modele;
+import com.example.trello.Vue.Observateur;
 
 /**
  * Interface Sujet du pattern Observateur
