@@ -23,7 +23,7 @@ public class App extends Application {
         modele.setTypeVue(Modele.VUE_KANBAN);
 
         // Ajoute quelques tâches d'exemple
-        ajouterTachesExemple();
+        //ajouterTachesExemple();
 
         // Initialise la vue Kanban
         vueKanban = new VueKanban(modele);

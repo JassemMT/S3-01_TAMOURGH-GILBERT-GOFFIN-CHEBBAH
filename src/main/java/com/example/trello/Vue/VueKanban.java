@@ -2,9 +2,9 @@ package com.example.trello.Vue;
 
 import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.Sujet;
-import com.example. trello.Modele. Tache;
+import com.example.trello.Modele. Tache;
 import com.example.trello.Modele.TacheSimple;
-import javafx. geometry.Insets;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 
 import java.util. List;
 import java.util. Map;
+
 
 /**
  * Vue Kanban - Affichage en colonnes
@@ -136,7 +137,7 @@ public class VueKanban implements Observateur {
         taskBox.setPadding(new Insets(10));
         taskBox.setMaxWidth(Double.MAX_VALUE);
 
-        Color couleur = determinerCouleur(colonne);
+        Color couleur = Color.web(tache.getColor());
         taskBox.setStyle(String.format("-fx-background-color: %s; -fx-background-radius: 5; -fx-cursor: hand;",
                 toHexString(couleur)));
 
@@ -146,7 +147,6 @@ public class VueKanban implements Observateur {
         taskLabel.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(taskLabel, Priority.ALWAYS);
 
-        // Bouton de suppression
         Button deleteBtn = new Button("×");
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill:  " +
                 (couleur.getBrightness() > 0.5 ? "black" : "white") + "; " +
@@ -157,7 +157,6 @@ public class VueKanban implements Observateur {
 
         taskBox. getChildren().addAll(taskLabel, deleteBtn);
 
-        // Double-clic pour éditer
         taskBox.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
                 afficherDialogueEditionTache(tache);
@@ -165,22 +164,6 @@ public class VueKanban implements Observateur {
         });
 
         return taskBox;
-    }
-
-    /**
-     * Détermine la couleur d'une colonne
-     */
-    private Color determinerCouleur(String nomColonne) {
-        switch (nomColonne) {
-            case "À faire":
-                return Color.rgb(255, 89, 89); // Rouge
-            case "En cours":
-                return Color.rgb(255, 165, 0); // Orange
-            case "Terminé":
-                return Color. LIME; // Vert
-            default:
-                return Color. LIGHTBLUE;
-        }
     }
 
     /**
@@ -212,7 +195,7 @@ public class VueKanban implements Observateur {
         });
 
         Button cancelButton = new Button("Annuler");
-        cancelButton. setOnAction(e -> dialog.close());
+        cancelButton.setOnAction(e -> dialog.close());
 
         HBox buttonsBox = new HBox(10, confirmButton, cancelButton);
         buttonsBox.setAlignment(Pos.CENTER);
@@ -330,7 +313,7 @@ public class VueKanban implements Observateur {
      * Convertit une couleur en format hexadécimal
      */
     private String toHexString(Color color) {
-        return String. format("#%02X%02X%02X",
+        return String.format("#%02X%02X%02X",
                 (int) (color.getRed() * 255),
                 (int) (color.getGreen() * 255),
                 (int) (color.getBlue() * 255));
