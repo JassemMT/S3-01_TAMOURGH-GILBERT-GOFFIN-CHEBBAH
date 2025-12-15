@@ -1,19 +1,15 @@
 package com.example.trello;
 
-import com.example.trello. Modele.Modele;
+import com. example.trello.Modele.Modele;
 import com.example.trello. Modele.Tache;
 import com.example.trello.Modele.TacheSimple;
-import com.example. trello.Vue.VueKanban;
-import javafx. application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout. StackPane;
-import javafx. stage.Stage;
+import com.example.trello. Vue.VueKanban;
+import javafx.application.Application;
+import javafx.stage.Stage;
 
 /**
- * Classe principale de l'application Trello
+ * Classe principale qui lance l'application
+ * Respecte le pattern MVC
  */
 public class App extends Application {
 
@@ -22,82 +18,55 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // Initialiser le modèle
+        // Initialise le modèle
         modele = new Modele();
+        modele.setTypeVue(Modele.VUE_KANBAN);
 
-        // Ajouter des données d'exemple
-        ajouterDonneesExemple();
+        // Ajoute quelques tâches d'exemple
+        ajouterTachesExemple();
 
-        // Créer la vue Kanban
+        // Initialise la vue Kanban
         vueKanban = new VueKanban(modele);
 
-        // Créer le conteneur principal
-        StackPane root = new StackPane();
-        root.getChildren().add(vueKanban);
-
-        /*
-        // Ajouter le bouton flottant en bas à droite (affichage uniquement)
-        Button btnAjoutGlobal = creerBoutonFlottant();
-        StackPane.setAlignment(btnAjoutGlobal, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(btnAjoutGlobal, new Insets(20));
-        root.getChildren().add(btnAjoutGlobal);
-        */
-
-
-        // TODO:  Le contrôleur devra gérer l'action du bouton
-
-        // Créer et configurer la scène
-        Scene scene = new Scene(root, 800, 600);
+        // Configure la fenêtre principale
         primaryStage.setTitle("Trello - Vue Kanban");
-        primaryStage.setScene(scene);
+        primaryStage.setScene(vueKanban.getScene());
+        primaryStage.setMinWidth(800);
+        primaryStage.setMinHeight(500);
         primaryStage.show();
     }
 
     /**
-     * Crée le bouton + flottant en bas à droite (affichage uniquement)
+     * Ajoute quelques tâches d'exemple pour démonstration
      */
-    private Button creerBoutonFlottant() {
-        Button btn = new Button("+");
-        btn.setStyle(
-                "-fx-background-color: #606060; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-font-size: 30px; " +
-                        "-fx-font-weight: bold; " +
-                        "-fx-background-radius: 35; " +
-                        "-fx-min-width: 70px; " +
-                        "-fx-min-height: 70px; " +
-                        "-fx-max-width: 70px; " +
-                        "-fx-max-height: 70px;"
-        );
+    private void ajouterTachesExemple() {
+        // Tâches "À faire"
+        Tache tache1 = new TacheSimple("Tâche 1", "Première tâche à faire");
+        tache1.setColonne("À faire");
+        tache1.setEtat(Tache.ETAT_A_FAIRE);
+        modele.ajouterTache(tache1);
 
-        return btn;
+        Tache tache2 = new TacheSimple("Tâche 2", "Deuxième tâche à faire");
+        tache2.setColonne("À faire");
+        tache2.setEtat(Tache.ETAT_A_FAIRE);
+        modele.ajouterTache(tache2);
+
+        // Tâche "En cours"
+        Tache tache3 = new TacheSimple("Tâche 2", "Tâche en cours de réalisation");
+        tache3.setColonne("En cours");
+        tache3.setEtat(Tache.ETAT_EN_COURS);
+        modele.ajouterTache(tache3);
+
+        // Tâche "Terminé"
+        Tache tache4 = new TacheSimple("Tâche 1", "Tâche terminée");
+        tache4.setColonne("Terminé");
+        tache4.setEtat(Tache.ETAT_TERMINE);
+        modele.ajouterTache(tache4);
     }
 
     /**
-     * Ajoute des données d'exemple dans le modèle pour tester l'affichage
+     * Point d'entrée de l'application
      */
-    private void ajouterDonneesExemple() {
-        // Tâches dans "À faire"
-        for (int i = 1; i <= 7; i++) {
-            Tache tache = new TacheSimple("tâche " + i, "Description de la tâche " + i);
-            tache.setColonne("À faire");
-            tache. setEtat(Tache. ETAT_A_FAIRE);
-            modele.ajouterTache(tache);
-        }
-
-        // Tâche dans "En cours"
-        Tache tacheEnCours = new TacheSimple("tâche 2", "En cours de réalisation");
-        tacheEnCours.setColonne("En cours");
-        tacheEnCours.setEtat(Tache.ETAT_EN_COURS);
-        modele.ajouterTache(tacheEnCours);
-
-        // Tâche dans "Terminé"
-        Tache tacheTerminee = new TacheSimple("tâche 1", "Tâche complétée");
-        tacheTerminee.setColonne("Terminé");
-        tacheTerminee.setEtat(Tache.ETAT_TERMINE);
-        modele.ajouterTache(tacheTerminee);
-    }
-
     public static void main(String[] args) {
         launch(args);
     }

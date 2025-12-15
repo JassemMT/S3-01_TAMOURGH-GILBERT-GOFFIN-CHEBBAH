@@ -147,4 +147,12 @@ public abstract class Tache {
     public String getColor() {
         return this.color;
     }
+
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
+    }
+
+    public void setCommentaire(String commentaire) {
+        this.commentaire = commentaire;
+    }
 }
