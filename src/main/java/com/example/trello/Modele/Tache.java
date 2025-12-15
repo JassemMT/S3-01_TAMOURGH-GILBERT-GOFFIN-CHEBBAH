@@ -16,6 +16,7 @@ public abstract class Tache {
     protected LocalDate dateFin;
     protected String colonne;
     protected int dureeEstimee;
+    protected String color;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -37,6 +38,14 @@ public abstract class Tache {
         this.dateFin = dateFin;
         this.colonne = colonne;
         this.dureeEstimee = dureeEstimee;
+        this.color = "#C5D3D0";
+    }
+
+    public Tache(String libelle, String commentaire) {
+        this.libelle = libelle;
+        this.commentaire = commentaire;
+        this.etat = ETAT_EN_COURS;
+        this.color = "#C5D3D0";
     }
 
     /**
@@ -134,4 +143,8 @@ public abstract class Tache {
      * @return Liste des tâches dont dépend cette tâche
      */
     public abstract LinkedList<Tache> construirDependance();
+
+    public String getColor() {
+        return this.color;
+    }
 }

@@ -17,6 +17,10 @@ public class TacheSimple extends Tache {
         super(libelle, commentaire, dateDebut, dateFin, colonne, dureeEstimee);
     }
 
+    public TacheSimple(String libelle, String commentaire) {
+        super(libelle, commentaire);
+    }
+
     /**
      * Retourne les dépendances de cette tâche
      * Pour une tâche simple, on peut avoir des dépendances externes
