@@ -1,17 +1,20 @@
 package com.example.trello.Vue;
 import com.example.trello.Modele.Sujet;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.geometry.Insets;
+import javafx.scene.layout.GridPane;
 
 
-class VueKanban  extends Scene implements Observateur {
+class VueKanban  extends GridPane implements Observateur {
 
-    public VueKanban(Parent parent, double v, double v1) {
-        super(parent, v, v1);
+    public VueKanban() {
+        super();
+        this.setHgap(10);
+        this.setVgap(10);
+        this.setPadding(new Insets(20));
+        this.setStyle("-fx-background-color: #e0e0e0;");
     }
 
     @Override
     public void actualiser(Sujet s) {
-
     }
 }
