@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  * Classe principale de l'application (Modèle)
  * Implémente le pattern Observateur côté Sujet
  */
-public class App implements Sujet {
+public class Modele implements Sujet {
     // Constantes pour les types de vue
     public static final int VUE_KANBAN = 1;
     public static final int VUE_LISTE = 2;
@@ -24,7 +24,7 @@ public class App implements Sujet {
     /**
      * Constructeur de App
      */
-    public App() {
+    public Modele() {
         this.observateurs = new ArrayList<>();
         this.taches = new ArrayList<>();
         this.mapTaches = new HashMap<>();
@@ -252,4 +252,6 @@ public class App implements Sujet {
             notifierObservateur();
         }
     }
+
+
 }

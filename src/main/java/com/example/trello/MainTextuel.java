@@ -1,6 +1,6 @@
 package com.example.trello;
 
-import com.example.trello.Modele.App;
+import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.Tache;
 import com.example.trello.Modele.TacheComposite;
 import com.example.trello.Modele.TacheSimple;
@@ -18,13 +18,13 @@ import java.util.Scanner;
  * Utilise uniquement les classes du package Modèle
  */
 public class MainTextuel {
-    private static App app;
+    private static Modele app;
     private static Scanner scanner;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public static void main(String[] args) {
         // Initialisation
-        app = new App();
+        app = new Modele();
         scanner = new Scanner(System.in);
 
         // Ajoute des tâches de démonstration
