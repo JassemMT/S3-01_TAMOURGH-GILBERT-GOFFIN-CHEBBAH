@@ -228,7 +228,7 @@ public class VueKanban implements Observateur {
         descField.setPrefRowCount(3);
 
         ComboBox<String> colonneCombo = new ComboBox<>();
-        colonneCombo. getItems().addAll(modele.getColonnes().keySet());
+        colonneCombo.getItems().addAll(modele.getColonnes().keySet());
         colonneCombo.setValue(tache.getColonne());
 
         Button confirmButton = new Button("Enregistrer");
