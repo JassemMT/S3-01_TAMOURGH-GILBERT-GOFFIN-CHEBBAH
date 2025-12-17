@@ -155,4 +155,10 @@ public abstract class Tache {
     public void setCommentaire(String commentaire) {
         this.commentaire = commentaire;
     }
+
+    public void setDates(LocalDate dateDebut, LocalDate dateFin) {
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+    }
+
 }
