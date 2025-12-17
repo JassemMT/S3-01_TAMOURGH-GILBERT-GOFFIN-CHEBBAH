@@ -24,8 +24,7 @@ public class VueEditeurTache {
     private TextField champTitre;
     private TextArea champCommentaire;
     private ComboBox<String> comboEtat;
-    private DatePicker datePickerDebut;
-    private DatePicker datePickerFin;
+    private ComboBox<String> comboJour; // Remplace les DatePicker
     private Spinner<Integer> spinnerDuree;
     private ColorPicker colorPicker;
 
@@ -58,13 +57,15 @@ public class VueEditeurTache {
         grid.add(comboEtat, 1, 1);
 
         // 3. Dates
-        grid.add(new Label("Date début:"), 0, 2);
-        datePickerDebut = new DatePicker(tache.getDateDebutLocal());
-        grid.add(datePickerDebut, 1, 2);
+        // Remplacer la section Dates par :
+        grid.add(new Label("Jour:"), 0, 2);
+        comboJour = new ComboBox<>();
+        // On charge les jours autorisés (triés si besoin, ici Set n'est pas ordonné, attention !)
+        // Pour l'ordre Lundi->Dimanche, mieux vaut une List ordonnée dans Tache
+        comboJour.getItems().addAll("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche");
+        comboJour.setValue(tache.getJour());
+        grid.add(comboJour, 1, 2);
 
-        grid.add(new Label("Date fin:"), 0, 3);
-        datePickerFin = new DatePicker(tache.getDateFinLocal());
-        grid.add(datePickerFin, 1, 3);
 
         // 4. Durée (Spinner)
         grid.add(new Label("Durée (jours):"), 0, 4);
@@ -134,12 +135,9 @@ public class VueEditeurTache {
         return comboEtat.getValue();
     }
 
-    public LocalDate getDateDebut() {
-        return datePickerDebut.getValue();
-    }
-
-    public LocalDate getDateFin() {
-        return datePickerFin.getValue();
+    // Getter pour le contrôleur
+    public String getJourSelectionne() {
+        return comboJour.getValue();
     }
 
     public int getDureeSaisie() {

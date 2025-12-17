@@ -12,14 +12,17 @@ public class TacheSimple extends Tache {
     /**
      * Constructeur de TacheSimple
      */
-    public TacheSimple(String libelle, String commentaire, LocalDate dateDebut,
-                       LocalDate dateFin, String colonne, int dureeEstimee) {
-        super(libelle, commentaire, dateDebut, dateFin, colonne, dureeEstimee);
+    public TacheSimple(String libelle, String commentaire, String jour, String colonne, int dureeEstimee) {
+        super(libelle, commentaire, jour, colonne, dureeEstimee);
     }
 
+    /*
     public TacheSimple(String libelle, String commentaire) {
+
         super(libelle, commentaire);
     }
+
+    */
 
     /**
      * Retourne les dépendances de cette tâche

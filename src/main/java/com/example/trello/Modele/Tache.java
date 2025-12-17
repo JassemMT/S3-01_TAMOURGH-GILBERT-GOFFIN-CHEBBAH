@@ -3,6 +3,7 @@ package com.example.trello.Modele;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Classe abstraite représentant une tâche
@@ -18,35 +19,58 @@ public abstract class Tache {
     protected int dureeEstimee;
     protected String color;
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
     // États possibles
     public static final int ETAT_A_FAIRE = 0;
     public static final int ETAT_EN_COURS = 1;
     public static final int ETAT_TERMINE = 2;
     public static final int ETAT_ARCHIVE = 3;
 
+
+    protected String jour;
+
+
+
+    Set<String> JOURS_AUTORISES = Set.of("Lundi", "Mardi", "Mercredi","Jeudi","Vendredi","Samedi","Dimanche");
+
     /**
      * Constructeur de Tache
      */
-    public Tache(String libelle, String commentaire, LocalDate dateDebut,
-                 LocalDate dateFin, String colonne, int dureeEstimee) {
+    public Tache(String libelle, String commentaire,String jour, String colonne, int dureeEstimee) {
         this.libelle = libelle;
         this.etat = ETAT_A_FAIRE;
         this.commentaire = commentaire;
-        this.dateDebut = dateDebut;
-        this.dateFin = dateFin;
+        if (JOURS_AUTORISES.contains(jour)) {
+            this.jour=jour;
+        } else {this.jour="Lundi";}
         this.colonne = colonne;
         this.dureeEstimee = dureeEstimee;
         this.color = "#C5D3D0";
     }
 
-    public Tache(String libelle, String commentaire) {
+    public Tache(String libelle ,String jour, String commentaire) {
         this.libelle = libelle;
+        if (JOURS_AUTORISES.contains(jour)) {
+            this.jour=jour;
+        } else {this.jour="Lundi";}
         this.commentaire = commentaire;
         this.etat = ETAT_EN_COURS;
         this.color = "#C5D3D0";
     }
+
+    public String getJour() {
+        return jour;
+    }
+
+    public void setJour(String jour) {
+        if (JOURS_AUTORISES.contains(jour)) {
+            this.jour = jour;
+        } else {
+            this.jour = "Lundi"; // Valeur par défaut de sécurité
+        }
+    }
+
+        // --- Méthodes à SUPPRIMER ---
+        // remove: getDateDebut(), getDateFin(), getDateDebutLocal(), getDateFinLocal(), setDates()
 
     /**
      * @return Le libellé de la tâche
@@ -82,19 +106,6 @@ public abstract class Tache {
         return commentaire;
     }
 
-    /**
-     * @return La date de début formatée
-     */
-    public String getDateDebut() {
-        return dateDebut != null ? dateDebut.format(FORMATTER) : "";
-    }
-
-    /**
-     * @return La date de fin formatée
-     */
-    public String getDateFin() {
-        return dateFin != null ? dateFin.format(FORMATTER) : "";
-    }
 
     /**
      * @return La colonne actuelle de la tâche
@@ -125,20 +136,6 @@ public abstract class Tache {
     }
 
     /**
-     * @return La date de début (LocalDate)
-     */
-    public LocalDate getDateDebutLocal() {
-        return dateDebut;
-    }
-
-    /**
-     * @return La date de fin (LocalDate)
-     */
-    public LocalDate getDateFinLocal() {
-        return dateFin;
-    }
-
-    /**
      * Construit la liste des dépendances de cette tâche
      * @return Liste des tâches dont dépend cette tâche
      */
@@ -156,10 +153,6 @@ public abstract class Tache {
         this.commentaire = commentaire;
     }
 
-    public void setDates(LocalDate dateDebut, LocalDate dateFin) {
-        this.dateDebut = dateDebut;
-        this.dateFin = dateFin;
-    }
 
     /**
      * Setter pour la durée
