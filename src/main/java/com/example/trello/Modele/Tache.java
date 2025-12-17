@@ -31,7 +31,7 @@ public abstract class Tache {
 
 
 
-    Set<String> JOURS_AUTORISES = Set.of("Lundi", "Mardi", "Mercredi","Jeudi","Vendredi","Samedi","Dimanche");
+    Set<String> JOURS_AUTORISES = Set.of("lundi", "mardi", "mercredi","jeudi","vendredi","samedi","dimanche");
 
     /**
      * Constructeur de Tache
@@ -52,7 +52,7 @@ public abstract class Tache {
         this.libelle = libelle;
         if (JOURS_AUTORISES.contains(jour)) {
             this.jour=jour;
-        } else {this.jour="Lundi";}
+        } else {this.jour="lundi";}
         this.commentaire = commentaire;
         this.etat = ETAT_EN_COURS;
         this.color = "#C5D3D0";

@@ -186,7 +186,7 @@ public class Modele implements Sujet {
                 }
             }
             notifierObservateur();
-            System.out.println("ajout d'une tâche");
+            System.out.println("ajout d'une tâche dans le modèle");
             System.out.println(tache);
         }
     }

@@ -28,6 +28,9 @@ public class App extends Application {
         // Initialise la vue Kanban
         VueListe vueListe = new VueListe(modele);
 
+        modele.setTypeVue(Modele.VUE_LISTE);
+        modele.ajouterObservateur(vueListe);
+
         Scene scene = new Scene(vueListe, 900, 600);
 
         // Configure la fenêtre principale
@@ -67,36 +70,36 @@ public class App extends Application {
      */
     private void ajouterTachesExempleVueListe() {
         // Tâches pour lundi
-        TacheSimple t1 = new TacheSimple("Réunion d'équipe", "Réunion hebdomadaire avec l'équipe projet", "lundi");
+        TacheSimple t1 = new TacheSimple("Réunion d'équipe", "lundi", "Réunion hebdomadaire avec l'équipe projet");
         modele.ajouterTache(t1);
 
-        TacheSimple t2 = new TacheSimple("Planification sprint", "Définir les objectifs de la semaine", "lundi");
+        TacheSimple t2 = new TacheSimple("Planification sprint", "lundi","Définir les objectifs de la semaine");
         modele.ajouterTache(t2);
 
         // Tâches pour mardi
-        TacheSimple t3 = new TacheSimple("tâche 1", "10/01/2026", "mardi");
+        TacheSimple t3 = new TacheSimple("tâche 1", "mardi", "10/01/2026");
         modele.ajouterTache(t3);
 
         // Tâches pour mercredi
-        TacheSimple t4 = new TacheSimple("Code review", "Relire les PRs en attente", "mercredi");
+        TacheSimple t4 = new TacheSimple("Code review", "mercredi", "Relire les PRs en attente");
         modele.ajouterTache(t4);
 
-        TacheSimple t5 = new TacheSimple("Tests unitaires", "Compléter la couverture de tests", "mercredi");
+        TacheSimple t5 = new TacheSimple("Tests unitaires", "mercredi", "Compléter la couverture de tests");
         modele.ajouterTache(t5);
 
         // Tâche pour jeudi
-        TacheSimple t6 = new TacheSimple("Démo client", "Présenter les nouvelles fonctionnalités", "jeudi");
+        TacheSimple t6 = new TacheSimple("Démo client", "jeudi", "Présenter les nouvelles fonctionnalités");
         modele.ajouterTache(t6);
 
         // Tâches pour vendredi
-        TacheSimple t7 = new TacheSimple("tâche 2", "15/01/2026", "vendredi");
+        TacheSimple t7 = new TacheSimple("tâche 2", "vendredi", "15/01/2026");
         modele.ajouterTache(t7);
 
-        TacheSimple t8 = new TacheSimple("Rétrospective", "Bilan de la semaine écoulée", "vendredi");
+        TacheSimple t8 = new TacheSimple("Rétrospective", "vendredi","Bilan de la semaine écoulée");
         modele.ajouterTache(t8);
 
         // Tâche pour samedi
-        TacheSimple t9 = new TacheSimple("tâche 3", "17/01/2026", "samedie");
+        TacheSimple t9 = new TacheSimple("tâche 3", "samedie", "17/01/2026");
         modele.ajouterTache(t9);
     }
 

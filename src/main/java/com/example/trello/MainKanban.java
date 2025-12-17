@@ -50,6 +50,7 @@ public class MainKanban extends Application {
         VueKanban root = new VueKanban(modele);
 
         modele.ajouterObservateur(root);
+        modele.setTypeVue(Modele.VUE_KANBAN);
 
         // 4. Configuration de la scène
         Scene scene = new Scene(root, 1000, 700);

@@ -16,8 +16,8 @@ public class TacheSimple extends Tache {
         super(libelle, commentaire, jour, colonne, dureeEstimee);
     }
 
-    public TacheSimple(String libelle, String commentaire, String jour) {
-        super(libelle, commentaire, jour);
+    public TacheSimple(String libelle, String jour, String commentaire) {
+        super(libelle, jour, commentaire);
     }
 
     /*
