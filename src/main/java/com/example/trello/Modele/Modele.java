@@ -253,5 +253,16 @@ public class Modele implements Sujet {
         }
     }
 
+    /**
+     * Ajoute une nouvelle colonne
+     */
+    public void ajouterColonne(String nomColonne) {
+        if (nomColonne != null && !nomColonne.trim().isEmpty()) {
+            // La colonne sera créée automatiquement lors du prochain appel à getColonnes()
+            notifierObservateur();
+        }
+    }
+
+
 
 }
