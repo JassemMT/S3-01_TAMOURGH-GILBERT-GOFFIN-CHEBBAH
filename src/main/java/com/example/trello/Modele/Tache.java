@@ -17,7 +17,6 @@ public abstract class Tache {
     protected String colonne;
     protected int dureeEstimee;
     protected String color;
-    protected String jour; // lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -40,7 +39,6 @@ public abstract class Tache {
         this.colonne = colonne;
         this.dureeEstimee = dureeEstimee;
         this.color = "#C5D3D0";
-        this.jour = "";
     }
 
     public Tache(String libelle, String commentaire) {
@@ -48,7 +46,6 @@ public abstract class Tache {
         this.commentaire = commentaire;
         this.etat = ETAT_EN_COURS;
         this.color = "#C5D3D0";
-        this.jour = "";
     }
 
     /**
@@ -71,7 +68,7 @@ public abstract class Tache {
     public String getEtat() {
         switch(etat) {
             case ETAT_A_FAIRE: return "À faire";
-            case ETAT_EN_COURS:  return "En cours";
+            case ETAT_EN_COURS: return "En cours";
             case ETAT_TERMINE: return "Terminé";
             case ETAT_ARCHIVE: return "Archivé";
             default: return "Inconnu";
@@ -89,7 +86,7 @@ public abstract class Tache {
      * @return La date de début formatée
      */
     public String getDateDebut() {
-        return dateDebut != null ?  dateDebut.format(FORMATTER) : "";
+        return dateDebut != null ? dateDebut.format(FORMATTER) : "";
     }
 
     /**
@@ -142,21 +139,6 @@ public abstract class Tache {
     }
 
     /**
-     * @return Le jour de la semaine (lundi, mardi, etc.)
-     */
-    public String getJour() {
-        return jour;
-    }
-
-    /**
-     * Définit le jour de la semaine
-     * @param jour Le jour (lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche)
-     */
-    public void setJour(String jour) {
-        this.jour = jour;
-    }
-
-    /**
      * Construit la liste des dépendances de cette tâche
      * @return Liste des tâches dont dépend cette tâche
      */
@@ -178,4 +160,19 @@ public abstract class Tache {
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
     }
+
+    /**
+     * Setter pour la durée
+     */
+    public void setDureeEstimee(int dureeEstimee) {
+        this.dureeEstimee = dureeEstimee;
+    }
+
+    /**
+     * Setter pour la couleur
+     */
+    public void setColor(String color) {
+        this.color = color;
+    }
+
 }
