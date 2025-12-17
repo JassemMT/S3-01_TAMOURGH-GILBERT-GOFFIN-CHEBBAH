@@ -176,13 +176,18 @@ public class Modele implements Sujet {
         if (tache != null && !taches.contains(tache)) {
             taches.add(tache);
             if (tache.getColonne() != null) {
-                if (colonnes.containsKey(tache.getColonne()) colonnes.put(tache.getColonne(), new ArrayList<>());
+                if (colonnes.containsKey(tache.getColonne())) colonnes.put(tache.getColonne(), new ArrayList<>());
                 colonnes.get(tache.getColonne()).add(tache);
             }
             if (tache.getJour() != null) {
-                jours.get(tache.getJour()).add(tache);
+                String jour = tache.getJour();
+                if (jour.equals("lundi") || jour.equals("mardi") || jour.equals("mercredi") || jour.equals("jeudi") || jour.equals("vendredi") || jour.equals("samedi") || jour.equals("dimanche")) {
+                    jours.get(tache.getJour()).add(tache);
+                }
             }
             notifierObservateur();
+            System.out.println("ajout d'une tâche");
+            System.out.println(tache);
         }
     }
 
@@ -280,6 +285,7 @@ public class Modele implements Sujet {
     public void ajouterColonne(String nomColonne) {
         if (nomColonne != null && !nomColonne.trim().isEmpty()) {
             colonnes.put(nomColonne, new ArrayList<>());
+            System.out.println("ajout d'une colonne : "+nomColonne);
         }
     }
 

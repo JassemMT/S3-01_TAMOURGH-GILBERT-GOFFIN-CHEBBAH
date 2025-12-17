@@ -18,6 +18,7 @@ public abstract class Tache {
     protected String colonne;
     protected int dureeEstimee;
     protected String color;
+    protected String jour;
 
     // États possibles
     public static final int ETAT_A_FAIRE = 0;
@@ -26,7 +27,7 @@ public abstract class Tache {
     public static final int ETAT_ARCHIVE = 3;
 
 
-    protected String jour;
+
 
 
 
@@ -166,6 +167,10 @@ public abstract class Tache {
      */
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String toString() {
+        return  "==========TACHE==========\nLibelle : "+libelle+"\nCommentaire : "+commentaire+"\nColonne : "+colonne+"\nJour : "+jour+"\n";
     }
 
 }

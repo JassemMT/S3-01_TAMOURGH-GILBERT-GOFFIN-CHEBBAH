@@ -2,6 +2,7 @@ package com.example.trello;
 
 import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.TacheSimple;
+import com.example.trello.Vue.Observateur;
 import com.example.trello.Vue.VueKanban;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -20,7 +21,7 @@ public class MainKanban extends Application {
         TacheSimple t1 = new TacheSimple(
                 "Finir le diagramme UML",
                 "Vérifier les relations entre les classes",
-                "Lundi",
+                "lundi",
                 "En cours",
                 2
         );
@@ -28,7 +29,7 @@ public class MainKanban extends Application {
         TacheSimple t2 = new TacheSimple(
                 "Coder les contrôleurs",
                 "Implémenter la logique de sauvegarde",
-                "Mardi",
+                "mardi",
                 "À faire",
                 1
         );
@@ -36,7 +37,7 @@ public class MainKanban extends Application {
         TacheSimple t3 = new TacheSimple(
                 "Réunion client",
                 "Présentation du prototype",
-                "Vendredi",
+                "vendredi",
                 "Terminé",
                 0
         );
@@ -47,6 +48,8 @@ public class MainKanban extends Application {
 
         // 3. Création de la Vue (VueKanban est un BorderPane)
         VueKanban root = new VueKanban(modele);
+
+        modele.ajouterObservateur(root);
 
         // 4. Configuration de la scène
         Scene scene = new Scene(root, 1000, 700);
