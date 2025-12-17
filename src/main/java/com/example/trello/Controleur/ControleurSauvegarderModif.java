@@ -5,7 +5,6 @@ import com.example.trello.Modele.Tache;
 import com.example.trello.Vue.VueEditeurTache;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import java.time.LocalDate;
 
 public class ControleurSauvegarderModif implements EventHandler<ActionEvent> {
 
@@ -25,24 +24,18 @@ public class ControleurSauvegarderModif implements EventHandler<ActionEvent> {
         String nouveauTitre = vue.getTitreSaisi();
         String nouveauCom = vue.getCommentaireSaisi();
         String nouvelEtat = vue.getEtatSelectionne();
-        LocalDate debut = vue.getDateDebut();
-        LocalDate fin = vue.getDateFin();
+        String nouveauJour = vue.getJourSelectionne(); // MODIFIÉ : String au lieu de LocalDate
         int duree = vue.getDureeSaisie();
         String couleur = vue.getCouleurChoisie();
 
-        // 2. Modification des attributs de base
+        // 2. Modification des attributs de la Tâche
         tache.setLibelle(nouveauTitre);
         tache.setCommentaire(nouveauCom);
-        tache.setDates(debut, fin);
-
-        // --- CORRECTION 1 : Sauvegarde de la durée et couleur ---
+        tache.setJour(nouveauJour); // MODIFIÉ : Setter simple
         tache.setDureeEstimee(duree);
         tache.setColor(couleur);
 
-        // --- CORRECTION 2 : Mise à jour de la colonne en fonction de l'état ---
-        // Pour que la tâche bouge visuellement, il faut changer sa "colonne" (String)
-        // et pas seulement son "état" (int).
-
+        // 3. Mise à jour de la colonne en fonction de l'état
         if ("À faire".equals(nouvelEtat)) {
             tache.setEtat(Tache.ETAT_A_FAIRE);
             tache.setColonne("À faire");
@@ -57,11 +50,9 @@ public class ControleurSauvegarderModif implements EventHandler<ActionEvent> {
         }
         else if ("Archivé".equals(nouvelEtat)) {
             tache.setEtat(Tache.ETAT_ARCHIVE);
-            // On ne change pas forcément la colonne ici, car elle va disparaître
-            // de la vue Kanban standard si elle est archivée.
         }
 
-        // 3. Notification et Fermeture
+        // 4. Notification et Fermeture
         modele.notifierObservateur();
         vue.fermer();
     }

@@ -1,9 +1,9 @@
 package com.example.trello.Controleur;
+
 import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.TacheSimple;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import java.time.LocalDate;
 
 public class ControleurCreerTache implements EventHandler<ActionEvent> {
     private Modele modele;
@@ -16,9 +16,15 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
 
     @Override
     public void handle(ActionEvent actionEvent) {
-        TacheSimple nouvelleTache = new TacheSimple("Nouvelle Tâche", "Description...");
-        nouvelleTache.setDates(LocalDate.now(), LocalDate.now().plusDays(1));
-        nouvelleTache.setColonne(nomColonne);
+        // MODIFIÉ : On passe "Lundi" par défaut et 0 pour la durée
+        TacheSimple nouvelleTache = new TacheSimple(
+                "Nouvelle Tâche",
+                "Description...",
+                "Lundi",
+                nomColonne,
+                0
+        );
+
         modele.ajouterTache(nouvelleTache);
     }
 }
