@@ -1,8 +1,8 @@
 package com.example.trello.Modele;
 
-import com.example.trello.Vue.Observateur;
+import com.example.trello.Vue. Observateur;
 import java.time.LocalDate;
-import java.util.*;
+import java. util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -22,13 +22,13 @@ public class Modele implements Sujet {
     private Map<Integer, Tache> mapTaches; // Pour accès rapide par ID
 
     /**
-     * Constructeur de App
+     * Constructeur de Modele
      */
     public Modele() {
         this.observateurs = new ArrayList<>();
         this.taches = new ArrayList<>();
         this.mapTaches = new HashMap<>();
-        this.type_vue = VUE_KANBAN; // Vue par défaut
+        this.type_vue = VUE_LISTE; // Vue par défaut
         this.prochainId = 1;
     }
 
@@ -64,7 +64,7 @@ public class Modele implements Sujet {
      * Définit le type de vue actif
      */
     public void setTypeVue(int type) {
-        if (type >= VUE_KANBAN && type <= VUE_GANTT) {
+        if (type == VUE_KANBAN || type == VUE_LISTE || type == VUE_GANTT) {
             this.type_vue = type;
             notifierObservateur();
         }
@@ -79,30 +79,31 @@ public class Modele implements Sujet {
 
     /**
      * Retourne les tâches d'un jour spécifique
-     * @param jour La date au format String (sera parsée)
+     * @param jour Le nom du jour (lundi, mardi, etc.)
      * @return Liste des tâches pour ce jour
      */
     public List<Tache> getTachesJour(String jour) {
-        List<Tache> tachesJour = new ArrayList<>();
+        ArrayList<Tache> result = new ArrayList<>();
+        for (Tache tache : taches) {
+            if (tache.getJour().equals(jour)) result.add(tache);
+        }
+        return result;
+    }
 
-        try {
-            LocalDate date = LocalDate.parse(jour);
-            for (Tache tache : taches) {
-                LocalDate debut = tache.getDateDebutLocal();
-                LocalDate fin = tache.getDateFinLocal();
+    /**
+     * Retourne les tâches organisées par jour pour la semaine
+     * @return Map avec nom du jour en clé et liste de tâches en valeur
+     */
+    public Map<String, List<Tache>> getTachesSemaine() {
+        Map<String, List<Tache>> tachesSemaine = new LinkedHashMap<>();
 
-                if (debut != null && fin != null) {
-                    // Vérifie si la date est dans l'intervalle
-                    if (!date.isBefore(debut) && !date.isAfter(fin)) {
-                        tachesJour.add(tache);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Erreur de parsing de date: " + e.getMessage());
+        String[] jours = {"lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"};
+
+        for (String jour : jours) {
+            tachesSemaine.put(jour, getTachesJour(jour));
         }
 
-        return tachesJour;
+        return tachesSemaine;
     }
 
     /**
@@ -119,13 +120,13 @@ public class Modele implements Sujet {
 
         // Répartit les tâches dans les colonnes
         for (Tache tache : taches) {
-            if (!tache.isArchived()) {
+            if (! tache.isArchived()) {
                 String colonne = tache.getColonne();
                 if (colonne == null || colonne.isEmpty()) {
                     colonne = "À faire";
                 }
 
-                if (!colonnes.containsKey(colonne)) {
+                if (! colonnes.containsKey(colonne)) {
                     colonnes.put(colonne, new ArrayList<>());
                 }
                 colonnes.get(colonne).add(tache);
@@ -146,9 +147,9 @@ public class Modele implements Sujet {
      * Retourne toutes les tâches non archivées
      */
     public List<Tache> getTaches() {
-        return taches.stream()
-                .filter(t -> !t.isArchived())
-                .collect(Collectors.toList());
+        return taches. stream()
+                . filter(t -> !t.isArchived())
+                .collect(Collectors. toList());
     }
 
     /**
@@ -165,6 +166,15 @@ public class Modele implements Sujet {
         if (tache != null && !taches.contains(tache)) {
             taches.add(tache);
             mapTaches.put(prochainId++, tache);
+            notifierObservateur();
+        }
+    }
+
+    /**
+     * Modifie une tâche existante
+     */
+    public void modifierTache(Tache tache) {
+        if (tache != null && taches.contains(tache)) {
             notifierObservateur();
         }
     }
@@ -227,7 +237,7 @@ public class Modele implements Sujet {
 
         // Si la tâche est composite, utilise sa méthode
         if (tache instanceof TacheComposite) {
-            dependances.addAll(((TacheComposite) tache).construirDependance());
+            dependances. addAll(((TacheComposite) tache).construirDependance());
         }
 
         // Cherche dans toutes les tâches composites si la tâche en fait partie
@@ -262,7 +272,4 @@ public class Modele implements Sujet {
             notifierObservateur();
         }
     }
-
-
-
 }
