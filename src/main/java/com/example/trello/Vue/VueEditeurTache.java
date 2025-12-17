@@ -9,96 +9,107 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-/**
- * Fenêtre d'édition d'une tâche
- */
+import java.time.LocalDate;
+
 public class VueEditeurTache {
     private Tache tache;
+    private Modele modele;
     private Stage stage;
+
+    // Composants graphiques (champs)
     private TextField champTitre;
     private TextArea champCommentaire;
-    private Label labelDateDebut;
-    private Label labelDateFin;
-    private Label labelEtat;
+    private ComboBox<String> comboEtat;
+    private DatePicker datePickerDebut;
+    private DatePicker datePickerFin;
+    private Spinner<Integer> spinnerDuree;
+    private ColorPicker colorPicker;
 
-    public VueEditeurTache(Tache tache) {
+    public VueEditeurTache(Tache tache, Modele modele) {
         this.tache = tache;
+        this.modele = modele;
         initialiserInterface();
     }
 
     private void initialiserInterface() {
         stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle("Éditer la tâche");
+        stage.setTitle("Éditer : " + tache.getLibelle());
 
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // Libellé
-        Label lblTitre = new Label("Titre:");
+        // 1. Titre
+        grid.add(new Label("Titre:"), 0, 0);
         champTitre = new TextField(tache.getLibelle());
-        champTitre.setPrefWidth(300);
-        grid.add(lblTitre, 0, 0);
         grid.add(champTitre, 1, 0);
 
-        // État
-        Label lblEtatLabel = new Label("État:");
-        labelEtat = new Label(tache.getEtat());
-        grid.add(lblEtatLabel, 0, 1);
-        grid.add(labelEtat, 1, 1);
+        // 2. État
+        grid.add(new Label("État:"), 0, 1);
+        comboEtat = new ComboBox<>();
+        comboEtat.getItems().addAll("À faire", "En cours", "Terminé", "Archivé");
+        comboEtat.setValue(tache.getEtat());
+        grid.add(comboEtat, 1, 1);
 
-        // Dates
-        Label lblDateDebut = new Label("Date début:");
-        labelDateDebut = new Label(tache.getDateDebut());
-        grid.add(lblDateDebut, 0, 2);
-        grid.add(labelDateDebut, 1, 2);
+        // 3. Dates
+        grid.add(new Label("Date début:"), 0, 2);
+        datePickerDebut = new DatePicker(tache.getDateDebutLocal());
+        grid.add(datePickerDebut, 1, 2);
 
-        Label lblDateFin = new Label("Date fin:");
-        labelDateFin = new Label(tache.getDateFin());
-        grid.add(lblDateFin, 0, 3);
-        grid.add(labelDateFin, 1, 3);
+        grid.add(new Label("Date fin:"), 0, 3);
+        datePickerFin = new DatePicker(tache.getDateFinLocal());
+        grid.add(datePickerFin, 1, 3);
 
-        // Commentaire
-        Label lblCommentaire = new Label("Commentaire:");
+        // 4. Durée (Spinner)
+        grid.add(new Label("Durée (jours):"), 0, 4);
+        spinnerDuree = new Spinner<>(0, 365, tache.getDureeEstimee());
+        spinnerDuree.setEditable(true);
+        grid.add(spinnerDuree, 1, 4);
+
+        // 5. Couleur
+        grid.add(new Label("Couleur:"), 0, 5);
+        String webColor = tache.getColor() != null ? tache.getColor() : "#FFFFFF";
+        colorPicker = new ColorPicker(Color.web(webColor));
+        grid.add(colorPicker, 1, 5);
+
+        // 6. Commentaire
+        grid.add(new Label("Commentaire:"), 0, 6);
         champCommentaire = new TextArea(tache.getCommentaire());
-        champCommentaire.setPrefRowCount(5);
-        champCommentaire.setPrefWidth(300);
-        grid.add(lblCommentaire, 0, 4);
-        grid.add(champCommentaire, 1, 4);
+        champCommentaire.setPrefRowCount(3);
+        grid.add(champCommentaire, 1, 6);
 
-        // Afficher les sous-tâches si composite
+        // 7. Sous-tâches (Si applicable)
         if (tache instanceof TacheComposite) {
             TacheComposite composite = (TacheComposite) tache;
-            Label lblSousTaches = new Label("Sous-tâches:");
+            grid.add(new Label("Sous-tâches:"), 0, 7);
             ListView<String> listeSousTaches = new ListView<>();
             for (Tache enfant : composite.getEnfants()) {
                 listeSousTaches.getItems().add(enfant.getLibelle());
             }
-            listeSousTaches.setPrefHeight(100);
-            grid.add(lblSousTaches, 0, 5);
-            grid.add(listeSousTaches, 1, 5);
+            listeSousTaches.setPrefHeight(80);
+            grid.add(listeSousTaches, 1, 7);
         }
 
         // Boutons
         Button btnSauvegarder = new Button("Sauvegarder");
         Button btnAnnuler = new Button("Annuler");
 
+        // Utilisation du contrôleur externe pour la sauvegarde
+        btnSauvegarder.setOnAction(new ControleurSauvegarderModif(modele, tache, this));
+
         btnAnnuler.setOnAction(e -> stage.close());
 
         HBox boutons = new HBox(10, btnSauvegarder, btnAnnuler);
-        grid.add(boutons, 1, 6);
+        grid.add(boutons, 1, 8);
 
         Scene scene = new Scene(grid);
         stage.setScene(scene);
-
-        // Note: Le contrôleur sera ajouté depuis l'extérieur
-        // car il nécessite le modèle
-        btnSauvegarder.setId("btnSauvegarder");
     }
 
     public void afficher() {
@@ -109,15 +120,38 @@ public class VueEditeurTache {
         stage.close();
     }
 
-    public String getChampTitre() {
+    // --- ACCESSEURS (Getters) POUR LE CONTRÔLEUR ---
+
+    public String getTitreSaisi() {
         return champTitre.getText();
     }
 
-    public String getChampCommentaire() {
+    public String getCommentaireSaisi() {
         return champCommentaire.getText();
     }
 
-    public Stage getStage() {
-        return stage;
+    public String getEtatSelectionne() {
+        return comboEtat.getValue();
+    }
+
+    public LocalDate getDateDebut() {
+        return datePickerDebut.getValue();
+    }
+
+    public LocalDate getDateFin() {
+        return datePickerFin.getValue();
+    }
+
+    public int getDureeSaisie() {
+        return spinnerDuree.getValue();
+    }
+
+    public String getCouleurChoisie() {
+        // Conversion de l'objet Color JavaFX en String Hexadécimal (#RRGGBB)
+        Color c = colorPicker.getValue();
+        return String.format("#%02X%02X%02X",
+                (int) (c.getRed() * 255),
+                (int) (c.getGreen() * 255),
+                (int) (c.getBlue() * 255));
     }
 }

@@ -161,4 +161,18 @@ public abstract class Tache {
         this.dateFin = dateFin;
     }
 
+    /**
+     * Setter pour la durée
+     */
+    public void setDureeEstimee(int dureeEstimee) {
+        this.dureeEstimee = dureeEstimee;
+    }
+
+    /**
+     * Setter pour la couleur
+     */
+    public void setColor(String color) {
+        this.color = color;
+    }
+
 }
