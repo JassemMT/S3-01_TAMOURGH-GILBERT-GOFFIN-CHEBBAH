@@ -144,7 +144,7 @@ public class ControleurModificationTacheVueListe extends Stage {
             }
 
             // Notifie le modèle
-            modele. modifierTache(tache);
+            modele.modifierTache(tache);
 
             modifie = true;
             close();
