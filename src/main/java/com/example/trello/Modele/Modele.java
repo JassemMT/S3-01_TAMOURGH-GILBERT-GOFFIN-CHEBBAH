@@ -20,6 +20,7 @@ public class Modele implements Sujet {
         this.taches = new ArrayList<>();
         this.type_vue = VUE_KANBAN;
         this.colonnesDisponibles = new LinkedHashSet<>();
+        this.joursDisponibles = new LinkedHashSet<>();
 
         this.colonnesDisponibles.add("Principal");
         this.colonnesDisponibles.add("En cours");
