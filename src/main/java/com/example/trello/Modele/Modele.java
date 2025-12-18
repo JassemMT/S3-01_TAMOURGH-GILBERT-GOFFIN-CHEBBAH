@@ -19,13 +19,12 @@ public class Modele implements Sujet {
         this.taches = new ArrayList<>();
         this.type_vue = VUE_KANBAN;
         this.colonnesDisponibles = new LinkedHashSet<>();
-        // Catégories par défaut (qui ne sont plus forcément des états)
-        this.colonnesDisponibles.add("À faire");
+
+        this.colonnesDisponibles.add("Principal");
         this.colonnesDisponibles.add("En cours");
         this.colonnesDisponibles.add("Terminé");
     }
 
-    // ... (Méthodes Observateur et Vue inchangées) ...
     @Override public void ajouterObservateur(Observateur o) { if (o != null && !observateurs.contains(o)) observateurs.add(o); }
     @Override public void supprimerObservateur(Observateur o) { observateurs.remove(o); }
     @Override public void notifierObservateur() { for (Observateur obs : observateurs) obs.actualiser(this); }
@@ -35,11 +34,7 @@ public class Modele implements Sujet {
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
     public void supprimerTache(Tache tache) { if (tache != null) { taches.remove(tache); notifierObservateur(); } }
     public void archiverTache(Tache tache) { if (tache != null) { tache.setEtat(Tache.ETAT_ARCHIVE); notifierObservateur(); } }
-
-    // NOUVEAU : Accesseur pour que l'éditeur puisse lister les colonnes
-    public Set<String> getColonnesDisponibles() {
-        return new LinkedHashSet<>(colonnesDisponibles);
-    }
+    public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
 
     public Map<String, List<Tache>> getColonnes() {
         Map<String, List<Tache>> colonnesMap = new LinkedHashMap<>();
@@ -47,8 +42,11 @@ public class Modele implements Sujet {
         for (Tache tache : taches) {
             if (!tache.isArchived()) {
                 String nomCol = tache.getColonne();
-                // Sécurité si la colonne n'existe plus
-                if (nomCol == null || !colonnesDisponibles.contains(nomCol)) { nomCol = "À faire"; tache.setColonne(nomCol); }
+                // Repli vers "Principal"
+                if (nomCol == null || !colonnesDisponibles.contains(nomCol)) {
+                    nomCol = "Principal";
+                    tache.setColonne(nomCol);
+                }
                 colonnesMap.get(nomCol).add(tache);
             }
         }
@@ -59,6 +57,13 @@ public class Modele implements Sujet {
 
     public void renommerColonne(String ancienNom, String nouveauNom) {
         if (ancienNom == null || nouveauNom == null || nouveauNom.trim().isEmpty()) return;
+
+        // MODIFIÉ : Protection contre le renommage de "Principal"
+        if ("Principal".equals(ancienNom)) {
+            System.out.println("Impossible de renommer la colonne Principal");
+            return;
+        }
+
         if (!colonnesDisponibles.contains(ancienNom) || colonnesDisponibles.contains(nouveauNom)) return;
 
         Set<String> nouveauSet = new LinkedHashSet<>();
@@ -72,27 +77,27 @@ public class Modele implements Sujet {
     }
 
     public void supprimerColonne(String nomColonne) {
-        if ("À faire".equals(nomColonne)) return;
+        // MODIFIÉ : Protection suppression "Principal"
+        if ("Principal".equals(nomColonne)) return;
+
         if (colonnesDisponibles.contains(nomColonne)) {
-            for (Tache t : taches) { if (nomColonne.equals(t.getColonne())) t.setColonne("À faire"); }
+            // MODIFIÉ : Déplacement des orphelins vers "Principal"
+            for (Tache t : taches) {
+                if (nomColonne.equals(t.getColonne())) {
+                    t.setColonne("Principal");
+                }
+            }
             colonnesDisponibles.remove(nomColonne);
             notifierObservateur();
         }
     }
 
-    // CHANGELENT RELATIF A LA CONFUSION ÉTAT/COLONNE
     public void deplacerTache(Tache tache, String nouvelleColonne) {
         if (tache != null && nouvelleColonne != null && colonnesDisponibles.contains(nouvelleColonne)) {
-            // On change SEULEMENT la colonne (Catégorie)
             tache.setColonne(nouvelleColonne);
-
-            // SUPPRESSION de la mise à jour automatique de l'état (tache.setEtat...)
-            // L'état est maintenant indépendant.
-
             notifierObservateur();
         }
     }
 
-    // Stub
     public LinkedList<Tache> getDependance(Tache tache) { return new LinkedList<>(); }
 }

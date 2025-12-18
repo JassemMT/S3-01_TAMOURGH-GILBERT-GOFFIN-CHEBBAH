@@ -18,12 +18,12 @@ public class ControleurSupprimerColonne implements EventHandler<ActionEvent> {
 
     @Override
     public void handle(ActionEvent event) {
-        // Vérification de sécurité pour "À faire"
-        if ("À faire".equals(nomColonne)) {
+        // Vérification "Principal"
+        if ("Principal".equals(nomColonne)) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Action impossible");
             alert.setHeaderText(null);
-            alert.setContentText("Vous ne pouvez pas supprimer la colonne 'À faire'.");
+            alert.setContentText("Vous ne pouvez pas supprimer la colonne 'Principal'.");
             alert.showAndWait();
             return;
         }

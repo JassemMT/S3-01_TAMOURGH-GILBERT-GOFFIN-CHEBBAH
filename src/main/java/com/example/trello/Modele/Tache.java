@@ -53,7 +53,7 @@ public class Tache {
      * Constructeur simplifié
      */
     public Tache(String libelle, String commentaire) {
-        this(libelle, commentaire, "Lundi", "À faire", 0);
+        this(libelle, commentaire, "Lundi", "Principal", 0);
     }
 
     // --- GESTION DES DÉPENDANCES (Enfants) ---

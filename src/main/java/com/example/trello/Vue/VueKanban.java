@@ -70,7 +70,8 @@ public class VueKanban extends BorderPane implements Observateur {
         Button btnSupprimer = new Button("X");
         btnSupprimer.setStyle("-fx-font-size: 10px; -fx-text-fill: red;");
         btnSupprimer.setOnAction(new ControleurSupprimerColonne(modele, titre));
-        if("À faire".equals(titre)) btnSupprimer.setDisable(true);
+
+        if("Principal".equals(titre)) btnSupprimer.setDisable(true);
 
         HBox actions = new HBox(5, btnRenommer, btnSupprimer);
         actions.setAlignment(Pos.CENTER_RIGHT);
