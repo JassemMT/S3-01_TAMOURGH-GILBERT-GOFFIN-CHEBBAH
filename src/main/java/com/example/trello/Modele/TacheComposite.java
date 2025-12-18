@@ -14,13 +14,10 @@ public class TacheComposite extends Tache {
 
     /**
      * Constructeur de TacheComposite
-     */
-    public TacheComposite(String libelle, String commentaire, LocalDate dateDebut,
-                          LocalDate dateFin, String colonne, int dureeEstimee) {
-        super(libelle, commentaire, dateDebut, dateFin, colonne, dureeEstimee);
-        this.enfants = new ArrayList<>();
+    */
+    public TacheComposite(String libelle, String commentaire, String jour, String colonne, int dureeEstimee) {
+        super(libelle, commentaire, jour, colonne, dureeEstimee);
     }
-
     /**
      * Ajoute une sous-tâche à cette tâche composite
      */
