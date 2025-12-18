@@ -222,10 +222,14 @@ public class Modele implements Sujet {
      */
     public void deplacerTacheColonne(Tache tache, String nouvelleColonne) {
         if (tache != null && nouvelleColonne != null && colonnes.containsKey(nouvelleColonne)) {
-            tache.setColonne(nouvelleColonne);
+
+            System.out.println(tache.getColonne()+" --> "+nouvelleColonne);
 
             colonnes.get(tache.getColonne()).remove(tache);
+            tache.setColonne(nouvelleColonne);
             colonnes.get(nouvelleColonne).add(tache);
+
+            System.out.println(tache);
 
             // Met à jour l'état en fonction de la colonne
             //TODO réfléchir à la distinction entre état et colonne
