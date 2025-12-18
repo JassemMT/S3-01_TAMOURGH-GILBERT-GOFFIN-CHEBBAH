@@ -15,6 +15,7 @@ import java.util.Map;
 public class VueKanban extends BorderPane implements Observateur {
     // ... (Partie Constructeur et initialisation identique à avant) ...
     // Je réécris les méthodes clés pour la lisibilité
+    //
 
     private Modele modele;
     private HBox conteneurColonnes;
