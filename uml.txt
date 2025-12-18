@@ -1,0 +1,192 @@
+@startuml
+'--- STYLE & CONFIGURATION ---
+skinparam classAttributeIconSize 0
+skinparam componentStyle uml2
+
+'--- PACKAGE MODÈLE ---
+package "Modèle" {
+  interface Sujet {
+    + ajouterObservateur(o : Observateur)
+    + supprimerObservateur(o : Observateur)
+    + notifierObservateur()
+  }
+
+  abstract class Tache {
+    - id : int
+    - libelle : String
+    - etat : int
+    - commentaire : String
+    - dateDebut : LocalDate
+    - dateFin : LocalDate
+    - colonne : String
+    - dureeEstimée : int
+    '--- Getters ---
+    + getLibelle() : String
+    + getEtat() : int
+    + getCommentaire() : String
+    + getDateDebut() : LocalDate
+    + getDateFin() : LocalDate
+    + getColonne() : String
+    '--- Setters ---
+    + setLibelle(l : String)
+    + setCommentaire(c : String)
+    + setDates(debut : LocalDate, fin : LocalDate)
+    + setColonne(c : String)
+    + setEtat(e : int)
+    + archiver()
+    + construirDependance() : LinkedList<Tache>
+  }
+
+  class TacheComposite extends Tache {
+    - enfants : List<Tache>
+    + ajouterEnfant(t : Tache)
+    + retirerEnfant(t : Tache)
+    + getDependance(tache : Tache) : LinkedList
+  }
+
+  class TacheSimple extends Tache {
+    + getDependance(tache : Tache) : LinkedList
+  }
+
+  class App implements Sujet {
+    + static final VUE_KANBAN = 1
+    + static final VUE_LISTE = 2
+    + static final VUE_GANTT = 3
+    - type_vue : int
+    - colonnes : Map<String, List<Tache>>
+
+    + ajouterObservateur(o : Observateur)
+    + supprimerObservateur(o : Observateur)
+    + notifierObservateur()
+
+    '--- Gestion Données ---
+    + getTachesJour(jour : String) : List<Tache>
+    + getColonnes() : Map<String, List<Tache>>
+    + getTache(id : int) : Tache
+    + ajouterTache(tache : Tache) : void
+    + supprimerTache(tache : Tache) : void
+
+    '--- Gestion Structure ---
+    + ajouterColonne(titre : String)
+    + supprimerColonne(titre : String)
+    + deplacerTache(tache: Tache, nouvelleColonne: String)
+  }
+}
+
+'--- PACKAGE VUE (JavaFX) ---
+package "Vue (JavaFX)" {
+  interface Observateur {
+    + actualiser(s : Sujet)
+  }
+
+  ' --- VUES MÉTIER ---
+
+  class VueKanban implements Observateur {
+    ' Gestion interne des colonnes via des VBox standards
+    - conteneurColonnes : HBox
+    + actualiser(s : Sujet)
+  }
+
+  class VueListe implements Observateur {
+    + actualiser(s : Sujet)
+  }
+
+  class VueGantt implements Observateur {
+    + actualiser(s : Sujet)
+  }
+
+  ' --- COMPOSANTS UNITAIRES ---
+
+  ' Post-it
+  class VueTache {
+    - tache : Tache
+    + VueTache(t : Tache)
+    + getTache() : Tache
+  }
+
+  ' Popup d édition
+  class VueEditeurTache {
+    - tache : Tache
+    + VueEditeurTache(t : Tache)
+    + afficher() : void
+    + getChampTitre() : String
+    + getChampEtat() : int
+  }
+}
+
+'--- PACKAGE CONTRÔLEUR ---
+package "Contrôleur" {
+
+  interface EventHandler<T> {
+    + handle(event : T)
+  }
+
+  ' -- Actions Globales --
+  class ControleurCreerTache implements EventHandler {
+    - modele : App
+    - colonneCible : String
+    + ControleurCreerTache(m : App, col : String)
+    + handle(event : ActionEvent)
+  }
+
+  class ControleurAjouterColonne implements EventHandler {
+    - modele : App
+    + ControleurAjouterColonne(m : App)
+    + handle(event : ActionEvent)
+  }
+
+  class ControleurChangerVue implements EventHandler {
+    - modele : App
+    - typeVue : int
+    + ControleurChangerVue(m : App, type : int)
+    + handle(event : ActionEvent)
+  }
+
+  ' -- Actions sur Tâche --
+  class ControleurOuvrirEditeur implements EventHandler {
+    - tache : Tache
+    + ControleurOuvrirEditeur(t : Tache)
+    + handle(event : MouseEvent)
+  }
+
+  class ControleurArchiverTache implements EventHandler {
+    - modele : App
+    - tache : Tache
+    + ControleurArchiverTache(m : App, t : Tache)
+    + handle(event : ActionEvent)
+  }
+
+  class ControleurSauvegarderModif implements EventHandler {
+    - modele : App
+    - tache : Tache
+    - vueEditeur : VueEditeurTache
+    + ControleurSauvegarderModif(m:App, t:Tache, v:VueEditeurTache)
+    + handle(event : ActionEvent)
+  }
+}
+
+'--- RELATIONS ---
+
+' MVC - Vue
+' VueKanban contient directement les VueTache (rangées dans des VBox internes)
+VueKanban *-- "0..*" VueTache : contient >
+VueListe *-- "0..*" VueTache : contient >
+VueTache --> "1" Tache : représente >
+
+' MVC - Modèle
+TacheComposite o-- "0..*" Tache : compose >
+App "1" *-- "0..*" Tache : gère >
+
+' Contrôleurs -> Modèle
+ControleurCreerTache --> App
+ControleurAjouterColonne --> App
+ControleurChangerVue --> App
+ControleurArchiverTache --> App
+ControleurSauvegarderModif --> App
+
+' Contrôleurs -> Vues / Taches
+ControleurOuvrirEditeur ..> VueEditeurTache : crée >
+ControleurSauvegarderModif --> VueEditeurTache : lit >
+ControleurSauvegarderModif --> Tache : modifie >
+
+@enduml
