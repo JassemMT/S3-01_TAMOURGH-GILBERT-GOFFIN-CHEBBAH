@@ -153,7 +153,7 @@ public class VueListe extends BorderPane implements Observateur {
         //Autres infos
         Label lEtat = creerBadgeEtat(t.getEtat());
         Label lColonne = new Label(t.getColonne());
-        Label lDuree = new Label(t.getDureeEstimee() + "j");
+        Label lDuree = new Label(t.getDureeEstimee() + "h");
         //Description/commentaire
         String commentaireText = t.getCommentaire() != null ? t.getCommentaire() : "";
         Label lComm = new Label(commentaireText);
