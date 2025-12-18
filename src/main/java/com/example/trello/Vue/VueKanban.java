@@ -203,7 +203,7 @@ public class VueKanban extends BorderPane implements Observateur {
                     VBox carteTache = (VBox) source;
                     Object userData = carteTache.getUserData();
                     if (userData instanceof Tache) {
-                        modele.deplacerTache((Tache) userData, titreColonne);
+                        modele.deplacerTacheColonne((Tache) userData, titreColonne);
                         success = true;
                     }
                 }

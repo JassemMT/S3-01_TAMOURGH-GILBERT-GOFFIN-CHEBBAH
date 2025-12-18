@@ -13,6 +13,7 @@ public class Modele implements Sujet {
     private List<Observateur> observateurs;
     private List<Tache> taches;
     private Set<String> colonnesDisponibles;
+    private Set<String> joursDisponibles;
 
     public Modele() {
         this.observateurs = new ArrayList<>();
@@ -23,6 +24,14 @@ public class Modele implements Sujet {
         this.colonnesDisponibles.add("Principal");
         this.colonnesDisponibles.add("En cours");
         this.colonnesDisponibles.add("Terminé");
+
+        this.joursDisponibles.add("Lundi");
+        this.joursDisponibles.add("Mardi");
+        this.joursDisponibles.add("Mercredi");
+        this.joursDisponibles.add("Jeudi");
+        this.joursDisponibles.add("Vendredi");
+        this.joursDisponibles.add("Samedi");
+        this.joursDisponibles.add("Dimanche");
     }
 
     @Override public void ajouterObservateur(Observateur o) { if (o != null && !observateurs.contains(o)) observateurs.add(o); }
@@ -84,7 +93,7 @@ public class Modele implements Sujet {
             // MODIFIÉ : Déplacement des orphelins vers "Principal"
             for (Tache t : taches) {
                 if (nomColonne.equals(t.getColonne())) {
-                    t.setColonne("Principal");
+                    t.setColonne("Principal"); // Si Principale n'existe pas ???
                 }
             }
             colonnesDisponibles.remove(nomColonne);
@@ -92,11 +101,31 @@ public class Modele implements Sujet {
         }
     }
 
-    public void deplacerTache(Tache tache, String nouvelleColonne) {
+    public void deplacerTacheColonne(Tache tache, String nouvelleColonne) {
         if (tache != null && nouvelleColonne != null && colonnesDisponibles.contains(nouvelleColonne)) {
             tache.setColonne(nouvelleColonne);
             notifierObservateur();
         }
+    }
+
+    public void deplacerTacheJour(Tache tache, String nouveauJour) {
+        if (Tache.JOURS_AUTORISES.contains(nouveauJour)) {
+            tache.setJour(nouveauJour);
+            notifierObservateur();
+        }
+    }
+
+
+    public Map<String, List<Tache>> getJours() {
+        Map<String, List<Tache>> joursMap = new LinkedHashMap<>();
+        for (String jour : joursDisponibles) joursMap.put(jour, new ArrayList<>());
+        for (Tache tache : taches) {
+            if (!tache.isArchived()) {
+                String jourTache = tache.getJour();
+                joursMap.get(jourTache).add(tache);
+            }
+        }
+        return joursMap;
     }
 
     public LinkedList<Tache> getDependance(Tache tache) { return new LinkedList<>(); }
