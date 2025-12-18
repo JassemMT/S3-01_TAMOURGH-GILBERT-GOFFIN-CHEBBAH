@@ -1,0 +1,214 @@
+@startuml
+class com.example.trello.Controleur.ControleurArchiverTache {
+- Modele modele
+- Tache tache
++ void handle(ActionEvent)
+}
+
+
+class com.example.trello.Modele.Modele {
++ {static} int VUE_KANBAN
++ {static} int VUE_LISTE
++ {static} int VUE_GANTT
+- int type_vue
+- List<Observateur> observateurs
+- List<Tache> taches
+- Set<String> colonnesDisponibles
+- Set<String> joursDisponibles
++ void ajouterObservateur(Observateur)
++ void supprimerObservateur(Observateur)
++ void notifierObservateur()
++ void setTypeVue(int)
++ int getTypeVue()
++ List<Tache> getTaches()
++ void ajouterTache(Tache)
++ void supprimerTache(Tache)
++ void archiverTache(Tache)
++ Set<String> getColonnesDisponibles()
++ Map<String,List<Tache>> getColonnes()
++ void ajouterColonne(String)
++ void renommerColonne(String,String)
++ void supprimerColonne(String)
++ void deplacerTacheColonne(Tache,String)
++ void deplacerTacheJour(Tache,String)
++ Map<String,List<Tache>> getJours()
++ LinkedList<Tache> getDependance(Tache)
+}
+
+
+class com.example.trello.Controleur.ControleurOuvrirEditeur {
+- Tache tache
+- Modele modele
++ void handle(MouseEvent)
+}
+
+
+class com.example.trello.Vue.VueEditeurTache {
+- Tache tache
+- Modele modele
+- Stage stage
+- TextField champTitre
+- TextArea champCommentaire
+- ComboBox<String> comboEtat
+- ComboBox<String> comboColonne
+- ComboBox<String> comboJour
+- Spinner<Integer> spinnerDuree
+- ColorPicker colorPicker
+- void initialiserInterface()
+- String getEtatString(int)
++ void afficher()
++ void fermer()
++ String getTitreSaisi()
++ String getCommentaireSaisi()
++ String getEtatSelectionne()
++ String getColonneSelectionnee()
++ String getJourSelectionne()
++ int getDureeSaisie()
++ String getCouleurChoisie()
+}
+
+
+class com.example.trello.Controleur.ControleurRenommerColonne {
+- Modele modele
+- String ancienNom
++ void handle(ActionEvent)
+}
+
+
+class com.example.trello.Controleur.ControleurSauvegarderModif {
+- Modele modele
+- Tache tache
+- VueEditeurTache vue
++ void handle(ActionEvent)
+}
+
+
+class com.example.trello.Controleur.ControleurCreerTache {
+- Modele modele
+- String nomColonne
++ void handle(ActionEvent)
+}
+
+
+class com.example.trello.MainListe {
++ void start(Stage)
+- void initDonneesTest(Modele)
++ {static} void main(String[])
+}
+
+class com.example.trello.Vue.VueListe {
+- Modele modele
+- VBox conteneurPrincipal
+- {static} String[] ORDRE_JOURS
+- void initialiserInterface()
++ void actualiser(Sujet)
+- void rafraichirDonnees(List<Tache>)
+- void construireSectionJour(String,List<Tache>)
+- int ajouterLigneTache(GridPane,Tache,int,int)
+- Label creerBadgeEtat(int)
+}
+
+
+interface com.example.trello.Vue.Observateur {
++ void actualiser(Sujet)
+}
+
+class com.example.trello.MainKanban {
++ void start(Stage)
++ {static} void main(String[])
+}
+
+class com.example.trello.Modele.Tache {
+# String libelle
+# String commentaire
+# int etat
+# String colonne
+# String jour
+# int dureeEstimee
+# String color
+- List<Tache> enfants
++ {static} int ETAT_A_FAIRE
++ {static} int ETAT_EN_COURS
++ {static} int ETAT_TERMINE
++ {static} int ETAT_ARCHIVE
++ {static} Set<String> JOURS_AUTORISES
++ void ajouterEnfant(Tache)
++ List<Tache> getEnfants()
++ boolean aDesEnfants()
++ String getLibelle()
++ void setLibelle(String)
++ String getCommentaire()
++ void setCommentaire(String)
++ int getEtat()
++ void setEtat(int)
++ String getColonne()
++ void setColonne(String)
++ int getDureeEstimee()
++ void setDureeEstimee(int)
++ String getColor()
++ void setColor(String)
++ String getJour()
++ void setJour(String)
++ boolean isArchived()
++ LinkedList<Tache> construirDependance()
++ String toString()
+}
+
+
+interface com.example.trello.Modele.Sujet {
+~ void ajouterObservateur(Observateur)
+~ void supprimerObservateur(Observateur)
+~ void notifierObservateur()
+}
+
+class com.example.trello.Controleur.ControleurAjouterColonne {
+- Modele modele
++ void handle(ActionEvent)
+}
+
+
+class com.example.trello.Vue.VueGantt {
++ void actualiser(Sujet)
+}
+
+class com.example.trello.Controleur.ControleurSupprimerColonne {
+- Modele modele
+- String nomColonne
++ void handle(ActionEvent)
+}
+
+
+class com.example.trello.Vue.VueKanban {
+- Modele modele
+- HBox conteneurColonnes
+- void initialiserInterface()
++ void actualiser(Sujet)
+- VBox creerColonne(String,List<Tache>)
+- VBox creerCarteTache(Tache)
+- String getTexteEtat(int)
+- String getStyleEtat(int)
+- void configurerDragSurCarte(VBox,Tache)
+- void configurerDropSurColonne(VBox,String)
+}
+
+
+com.example.trello.Modele.Modele --> "*" com.example.trello.Modele.Tache : "taches"
+
+
+javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurArchiverTache
+com.example.trello.Modele.Sujet <|.. com.example.trello.Modele.Modele
+javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurOuvrirEditeur
+javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurRenommerColonne
+javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurSauvegarderModif
+javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurCreerTache
+javafx.application.Application <|-- com.example.trello.MainListe
+com.example.trello.Vue.Observateur <|.. com.example.trello.Vue.VueListe
+com.example.trello.Vue.BorderPane <|-- com.example.trello.Vue.VueListe
+javafx.application.Application <|-- com.example.trello.MainKanban
+javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurAjouterColonne
+com.example.trello.Vue.Observateur <|.. com.example.trello.Vue.VueGantt
+javafx.scene.Scene <|-- com.example.trello.Vue.VueGantt
+javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurSupprimerColonne
+com.example.trello.Vue.Observateur <|.. com.example.trello.Vue.VueKanban
+com.example.trello.Vue.BorderPane <|-- com.example.trello.Vue.VueKanban
+@enduml
