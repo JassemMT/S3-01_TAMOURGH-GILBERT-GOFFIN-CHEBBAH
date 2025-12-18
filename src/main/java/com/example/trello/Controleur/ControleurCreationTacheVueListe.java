@@ -102,7 +102,7 @@ public class ControleurCreationTacheVueListe extends Stage {
         }
 
         try {
-            TacheSimple nouvelleTache = new TacheSimple(libelle, commentaire, jour.toLowerCase());
+            TacheSimple nouvelleTache = new TacheSimple(libelle, jour.toLowerCase(), commentaire);
             modele.ajouterTache(nouvelleTache);
             valide = true;
             close();
