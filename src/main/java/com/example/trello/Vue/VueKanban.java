@@ -83,6 +83,7 @@ public class VueKanban extends BorderPane implements Observateur {
         btnAjouter.setOnAction(new ControleurCreerTache(modele, titre));
 
         VBox conteneurTaches = new VBox(8);
+        conteneurTaches.setMinHeight(400);
         conteneurTaches.setStyle("-fx-background-color: transparent;");
         configurerDropSurColonne(conteneurTaches, titre);
 
@@ -190,7 +191,7 @@ public class VueKanban extends BorderPane implements Observateur {
 
     private void configurerDropSurColonne(VBox colonne, String titreColonne) {
         colonne.setOnDragOver(event -> {
-            if (event.getGestureSource() != colonne && event.getDragboard().hasString()) event.acceptTransferModes(TransferMode.MOVE);
+            if (event.getDragboard().hasString()) event.acceptTransferModes(TransferMode.MOVE);
             event.consume();
         });
         colonne.setOnDragDropped(event -> {
