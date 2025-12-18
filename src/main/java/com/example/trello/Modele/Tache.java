@@ -125,12 +125,4 @@ public class Tache {
     public String toString() {
         return libelle; // Utile pour l'affichage dans les ComboBox
     }
-
-    public void setLibelle(String libelle) {
-        this.libelle = libelle;
-    }
-
-    public void setCommentaire(String commentaire) {
-        this.commentaire = commentaire;
-    }
 }
