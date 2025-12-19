@@ -31,7 +31,7 @@ public class ControleurSupprimerColonne implements EventHandler<ActionEvent> {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Supprimer la colonne");
         alert.setHeaderText("Supprimer la colonne : " + nomColonne + " ?");
-        alert.setContentText("Les tâches seront déplacées vers 'À faire'.");
+        alert.setContentText("Les tâches seront déplacées vers 'Principal'.");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
