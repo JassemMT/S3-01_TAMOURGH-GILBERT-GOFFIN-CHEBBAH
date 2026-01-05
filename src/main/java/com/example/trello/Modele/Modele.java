@@ -135,4 +135,38 @@ public class Modele implements Sujet {
         }
         return new LinkedList<>();
     }
+
+    /**
+     * Transforme une TacheSimple en TacheComposite tout en gardant les données.
+     * @param ancienneTache La tâche simple à promouvoir
+     * @return La nouvelle tâche composite (qui remplace l'ancienne)
+     */
+    public TacheComposite promouvoirEnComposite(TacheSimple ancienneTache) {
+        // 1. On crée la nouvelle structure Composite avec les données de base
+        TacheComposite nouvelleTache = new TacheComposite(
+                ancienneTache.getLibelle(),
+                ancienneTache.getCommentaire(),
+                ancienneTache.getJour(),
+                ancienneTache.getColonne(),
+                ancienneTache.getDureeEstimee()
+        );
+
+        // 2. On copie les autres attributs importants
+        nouvelleTache.setEtat(ancienneTache.getEtat());
+        nouvelleTache.setColor(ancienneTache.getColor());
+        // Copiez ici d'autres attributs si vous en avez ajouté (date limite, etc.)
+
+        // 3. On remplace l'objet dans la liste principale
+        int index = taches.indexOf(ancienneTache);
+        if (index != -1) {
+            taches.set(index, nouvelleTache); // REMPLACEMENT
+        } else {
+            taches.add(nouvelleTache);
+        }
+
+        // 4. On notifie les vues pour qu'elles se redessinent avec le nouvel objet
+        notifierObservateur();
+
+        return nouvelleTache;
+    }
 }
