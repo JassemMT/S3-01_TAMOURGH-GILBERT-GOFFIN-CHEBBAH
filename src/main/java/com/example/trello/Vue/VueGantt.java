@@ -23,9 +23,7 @@ public class VueGantt extends BorderPane implements Observateur {
     private VBox conteneurLignes;
     private GridPane headerJours;
 
-    // On définit ici qu'une journée de travail visuelle vaut 8h
     private static final int HEURES_PAR_JOUR = 8;
-
     private static final String[] JOURS_SEMAINE = {
             "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"
     };
@@ -39,18 +37,16 @@ public class VueGantt extends BorderPane implements Observateur {
     }
 
     private void initialiserInterface() {
-        // 1. En-tête
+        // 1. En-tête de la vue
         Label titreVue = new Label("Vue Gantt Hebdomadaire");
-        titreVue.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-padding: 10;");
+        titreVue.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-padding: 15;");
         setTop(titreVue);
 
-        // 2. Structure Centrale
         VBox layoutCentral = new VBox(0);
 
-        // A. Header des Jours
+        // 2. Header des Jours avec lignes verticales
         headerJours = new GridPane();
-        headerJours.setStyle("-fx-background-color: #eee; -fx-border-color: #ccc; -fx-border-width: 0 0 1 0;");
-        headerJours.setPadding(new Insets(5, 0, 5, 0));
+        headerJours.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #ccc; -fx-border-width: 1 0 1 0;");
 
         ColumnConstraints colTitre = new ColumnConstraints();
         colTitre.setPercentWidth(30);
@@ -65,18 +61,24 @@ public class VueGantt extends BorderPane implements Observateur {
             lblJour.setFont(Font.font("System", FontWeight.BOLD, 12));
             lblJour.setMaxWidth(Double.MAX_VALUE);
             lblJour.setAlignment(Pos.CENTER);
+
+            // Bordures verticales du header
+            String styleBordure = "-fx-border-color: #ccc; -fx-border-width: 0 1 0 0; -fx-padding: 10 0 10 0;";
+            if (i == 0) styleBordure = "-fx-border-color: #ccc; -fx-border-width: 0 1 0 1; -fx-padding: 10 0 10 0;";
+            lblJour.setStyle(styleBordure);
+
             headerJours.add(lblJour, i + 1, 0);
         }
 
         layoutCentral.getChildren().add(headerJours);
 
-        // Liste des tâches
+        // 3. Conteneur des lignes de tâches
         conteneurLignes = new VBox(0);
         layoutCentral.getChildren().add(conteneurLignes);
 
         ScrollPane scroll = new ScrollPane(layoutCentral);
         scroll.setFitToWidth(true);
-        scroll.setStyle("-fx-background-color: transparent;");
+        scroll.setStyle("-fx-background-color: transparent; -fx-background: white;");
 
         setCenter(scroll);
     }
@@ -105,10 +107,11 @@ public class VueGantt extends BorderPane implements Observateur {
 
     private void ajouterLigneTache(Tache t, int niveauIndent) {
         GridPane ligne = new GridPane();
-        ligne.setPadding(new Insets(5, 0, 5, 0));
-        ligne.setStyle("-fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;");
+        ligne.setMinHeight(40);
+        // Ligne horizontale de délimitation
+        ligne.setStyle("-fx-border-color: #eee; -fx-border-width: 0 0 1 0; -fx-background-color: white;");
 
-        // Configuration des colonnes (Identique au Header pour alignement)
+        // Configuration des colonnes
         ColumnConstraints colTitre = new ColumnConstraints();
         colTitre.setPercentWidth(30);
         ligne.getColumnConstraints().add(colTitre);
@@ -118,9 +121,12 @@ public class VueGantt extends BorderPane implements Observateur {
             colJour.setPercentWidth(10);
             ligne.getColumnConstraints().add(colJour);
 
-            // Guides visuels verticaux
+            // Guides visuels verticaux (Le Quadrillage)
             Pane guideVisuel = new Pane();
-            guideVisuel.setStyle("-fx-border-color: #f0f0f0; -fx-border-width: 0 1 0 0;");
+            String styleGuide = "-fx-border-color: #f2f2f2; -fx-border-width: 0 1 0 0;";
+            if (i == 0) styleGuide = "-fx-border-color: #f2f2f2; -fx-border-width: 0 1 0 1;";
+            guideVisuel.setStyle(styleGuide);
+            guideVisuel.setMouseTransparent(true); // Pour cliquer à travers vers la ligne
             ligne.add(guideVisuel, i + 1, 0);
         }
 
@@ -129,85 +135,73 @@ public class VueGantt extends BorderPane implements Observateur {
         boxNom.setAlignment(Pos.CENTER_LEFT);
         boxNom.setPadding(new Insets(0, 0, 0, 10 + (niveauIndent * 20)));
 
-        if (niveauIndent > 0) boxNom.getChildren().add(new Label("↳"));
+        if (niveauIndent > 0) {
+            Label sub = new Label("↳");
+            sub.setTextFill(Color.GRAY);
+            boxNom.getChildren().add(sub);
+        }
 
         Label lblNom = new Label(t.getLibelle());
-        lblNom.setFont(Font.font("System", FontWeight.NORMAL, 13));
+        lblNom.setFont(Font.font("System", niveauIndent == 0 ? FontWeight.BOLD : FontWeight.NORMAL, 13));
         boxNom.getChildren().add(lblNom);
-
         boxNom.setOnMouseClicked(new ControleurOuvrirEditeur(t, modele));
         boxNom.setCursor(javafx.scene.Cursor.HAND);
-
         ligne.add(boxNom, 0, 0);
 
-        // --- BARRE GANTT AVEC DÉPASSEMENT ---
+        // --- PARTIE DROITE : BARRE PROPORTIONNELLE ---
         int indexJourDebut = getIndexJour(t.getJour());
         if (indexJourDebut != -1) {
+            AnchorPane conteneurBarre = new AnchorPane();
+            ligne.add(conteneurBarre, 1, 0, 7, 1);
 
-            // Calcul du nombre de jours nécessaires (Arrondi supérieur)
-            // Ex: 4h -> 1 jour | 10h -> 2 jours
-            int duree = t.getDureeEstimee();
-            int nbJoursNecessaires = (int) Math.ceil((double) duree / HEURES_PAR_JOUR);
-            if (nbJoursNecessaires < 1) nbJoursNecessaires = 1;
+            double largeurUnJourPct = 100.0 / 7.0;
+            double departXPct = indexJourDebut * largeurUnJourPct;
+            double largeurBarrePct = (t.getDureeEstimee() / (double) HEURES_PAR_JOUR) * largeurUnJourPct;
 
-            // Gestion du débordement de semaine (Max 7 jours affichés)
-            // Combien de jours reste-t-il dans la semaine à partir du jour de début ?
-            // Ex: Mercredi (index 2) -> Reste 5 jours (Mer, Jeu, Ven, Sam, Dim)
-            int joursRestantsSemaine = 7 - indexJourDebut;
-
-            // Le span réel est le minimum entre le besoin et la place disponible
-            int spanReel = Math.min(nbJoursNecessaires, joursRestantsSemaine);
-
-            // Création de la barre
             HBox barre = new HBox();
+            barre.setAlignment(Pos.CENTER);
+            barre.setPrefHeight(24);
+
             String couleurHex = t.getColor() != null ? t.getColor() : "#4A90E2";
-
-            // Style de base
-            String styleBarre = "-fx-background-color: " + couleurHex + "; " +
-                    "-fx-background-radius: 4; " +
-                    "-fx-border-color: derive(" + couleurHex + ", -20%); " +
-                    "-fx-border-radius: 4; ";
-
-            // Si la tâche est coupée (elle continue la semaine d'après), on ouvre la bordure droite
-            if (nbJoursNecessaires > joursRestantsSemaine) {
-                styleBarre += "-fx-border-width: 1 0 1 1; " + // Pas de bordure à droite
-                        "-fx-background-radius: 4 0 0 4; " +
-                        "-fx-border-radius: 4 0 0 4;";
-            }
-
-            barre.setStyle(styleBarre);
-            barre.setPrefHeight(20);
-            GridPane.setMargin(barre, new Insets(2, 5, 2, 5));
+            barre.setStyle("-fx-background-color: " + couleurHex + "; " +
+                    "-fx-background-radius: 5; " +
+                    "-fx-border-color: rgba(0,0,0,0.1); " +
+                    "-fx-border-radius: 5; " +
+                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3, 0, 0, 1);");
 
             Label lblDuree = new Label(t.getDureeEstimee() + "h");
             lblDuree.setTextFill(contrasteCouleur(couleurHex));
             lblDuree.setFont(Font.font("System", FontWeight.BOLD, 10));
-            barre.setAlignment(Pos.CENTER);
             barre.getChildren().add(lblDuree);
+
+            // Bindings pour le responsive
+            barre.translateXProperty().bind(conteneurBarre.widthProperty().multiply(departXPct / 100.0));
+            barre.prefWidthProperty().bind(conteneurBarre.widthProperty().multiply(largeurBarrePct / 100.0));
+
+            // Centrage vertical de la barre dans la ligne
+            AnchorPane.setTopAnchor(barre, 8.0);
 
             // Interactions
             barre.setOnMouseClicked(new ControleurOuvrirEditeur(t, modele));
             barre.setCursor(javafx.scene.Cursor.HAND);
 
-            // Note: j'utilise getCommentaire() comme vu précédemment
-            String description = t.getCommentaire() != null ? t.getCommentaire() : "";
-            Tooltip tp = new Tooltip(t.getLibelle() + "\n" + description + "\nÉtat: " + getEtatString(t.getEtat()));
+            // Tooltip
+            Tooltip tp = new Tooltip(t.getLibelle() + "\nDurée : " + t.getDureeEstimee() + "h\nÉtat : " + getEtatString(t.getEtat()));
             Tooltip.install(barre, tp);
 
+            // Menu contextuel
             ContextMenu contextMenu = new ContextMenu();
             MenuItem itemArchiver = new MenuItem("Archiver la tâche");
             itemArchiver.setOnAction(new ControleurArchiverTache(modele, t));
             contextMenu.getItems().add(itemArchiver);
             barre.setOnContextMenuRequested(e -> contextMenu.show(barre, e.getScreenX(), e.getScreenY()));
 
-            // 4. Ajout et Application du SPAN
-            // indexJourDebut + 1 car la colonne 0 est le titre
-            ligne.add(barre, indexJourDebut + 1, 0);
-            GridPane.setColumnSpan(barre, spanReel);
+            conteneurBarre.getChildren().add(barre);
         }
 
         conteneurLignes.getChildren().add(ligne);
 
+        // Récursion pour les sous-tâches
         if (t.aDesEnfants()) {
             for (Tache enfant : t.getEnfants()) {
                 ajouterLigneTache(enfant, niveauIndent + 1);
@@ -220,14 +214,14 @@ public class VueGantt extends BorderPane implements Observateur {
         for (int i = 0; i < JOURS_SEMAINE.length; i++) {
             if (JOURS_SEMAINE[i].equalsIgnoreCase(jour)) return i;
         }
-        return 0;
+        return -1;
     }
 
     private Color contrasteCouleur(String hexColor) {
         try {
             Color c = Color.web(hexColor);
             double brightness = c.getRed() * 0.299 + c.getGreen() * 0.587 + c.getBlue() * 0.114;
-            return brightness > 0.5 ? Color.BLACK : Color.WHITE;
+            return brightness > 0.6 ? Color.BLACK : Color.WHITE;
         } catch (Exception e) {
             return Color.BLACK;
         }
@@ -238,7 +232,7 @@ public class VueGantt extends BorderPane implements Observateur {
             case Tache.ETAT_A_FAIRE: return "À faire";
             case Tache.ETAT_EN_COURS: return "En cours";
             case Tache.ETAT_TERMINE: return "Terminé";
-            default: return "";
+            default: return "Inconnu";
         }
     }
 }

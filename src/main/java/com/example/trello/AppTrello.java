@@ -64,7 +64,7 @@ public class AppTrello extends Application {
         t2.setEtat(Tache.ETAT_EN_COURS);
 
         Tache parent = new Tache("Interface Graphique", "JavaFX", "Mardi", "Principal", 10);
-        Tache enfant = new Tache("Vue Liste", "Implémentation", "Mardi", "A faire", 5);
+        Tache enfant = new Tache("Vue Liste", "Implémentation", "Mardi", "A faire", 8);
         parent.ajouterEnfant(enfant);
 
         modele.ajouterTache(t1);
