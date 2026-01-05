@@ -24,7 +24,9 @@ public class Tache {
     public static final int ETAT_TERMINE = 2;
     public static final int ETAT_ARCHIVE = 3;
 
-    // Jours autorisés
+    // Jours autorisés, implémenté dans une liste au lieu d'un set
+    // car l'utilisation d'un set n'implique pas d'ordre spécifique ce qui fait que dans l'éditeur de tâche
+    // les jours soient dans un ordre random
     public static final List<String> JOURS_AUTORISES = Arrays.asList(
             "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"
     );
@@ -48,6 +50,7 @@ public class Tache {
 
     /**
      * Constructeur simplifié
+     * permettant de créer une tâche et de la modifier par la suite
      */
     public Tache(String libelle, String commentaire) {
         this(libelle, commentaire, "Lundi", "Principal", 0);
@@ -56,7 +59,7 @@ public class Tache {
     // --- GESTION DES DÉPENDANCES (Enfants) ---
 
     /**
-     * Ajoute une sous-tâche
+     * Ajoute une sous-tâche a une tâche parent passée en paramètre
      */
     public void ajouterEnfant(Tache t) {
         if (t != null && !enfants.contains(t) && t != this) {

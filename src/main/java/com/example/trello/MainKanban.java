@@ -17,6 +17,7 @@ public class MainKanban extends Application {
         // 2. Ajout de données de test adaptées au nouveau constructeur
         // Signature : (Libellé, Commentaire, Jour, Colonne, Durée)
 
+        // Création des différentes tâches de test
         Tache t1 = new Tache(
                 "Finir le diagramme UML",
                 "Vérifier les relations entre les classes",
@@ -41,6 +42,7 @@ public class MainKanban extends Application {
                 0
         );
 
+        // On ajoute les différentes tâches au modèle
         modele.ajouterTache(t1);
         modele.ajouterTache(t2);
         modele.ajouterTache(t3);
