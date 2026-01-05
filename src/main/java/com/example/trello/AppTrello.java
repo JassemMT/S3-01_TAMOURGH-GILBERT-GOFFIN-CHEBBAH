@@ -2,6 +2,7 @@ package com.example.trello;
 
 import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.Tache;
+import com.example.trello.Vue.VueGantt;
 import com.example.trello.Vue.VueKanban;
 import com.example.trello.Vue.VueListe;
 import javafx.application.Application;
@@ -23,6 +24,7 @@ public class AppTrello extends Application {
         // Création des vues Liste et Kanban + Gantt
         VueListe vueListe = new VueListe(modele);
         VueKanban vueKanban = new VueKanban(modele);
+        VueGantt vueGantt = new VueGantt(modele);
 
         // TabPane pour gérer les trois vues
         // TabPane est un conteneur qui agit comme un navigateur avec différents onglets
@@ -37,8 +39,12 @@ public class AppTrello extends Application {
         tabKanban.setContent(vueKanban);
         tabKanban.setClosable(false);
 
+        Tab tabGantt = new Tab("Vue Gantt");
+        tabGantt.setContent(vueGantt);
+        tabGantt.setClosable(false);
+
         // ajout des onglets dans le tabpane
-        tabPane.getTabs().addAll(tabListe, tabKanban);
+        tabPane.getTabs().addAll(tabListe, tabKanban, tabGantt);
 
 
         // Pour choisir une vue spécifique en par défaut :
@@ -58,9 +64,11 @@ public class AppTrello extends Application {
         t2.setEtat(Tache.ETAT_EN_COURS);
 
         Tache parent = new Tache("Interface Graphique", "JavaFX", "Mardi", "Principal", 10);
-        Tache enfant = new Tache("Vue Liste", "Implémentation", "Mardi", "A faire", 5);
-        parent.ajouterEnfant(enfant);
+        Tache enfant = new Tache("Vue Liste", "Implémentation", "Mardi", "A faire", 8);
+        Tache enfant1 = new Tache("Vue Liste 2", "Implémentation", "Mardi", "A faire", 4);
 
+        parent.ajouterEnfant(enfant);
+        enfant.ajouterEnfant(enfant1);
         modele.ajouterTache(t1);
         modele.ajouterTache(t2);
         modele.ajouterTache(parent);
