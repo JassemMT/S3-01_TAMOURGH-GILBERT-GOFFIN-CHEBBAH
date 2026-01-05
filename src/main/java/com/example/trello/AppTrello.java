@@ -1,7 +1,9 @@
 package com.example.trello;
 
 import com.example.trello.Modele.Modele;
-import com.example.trello.Modele.Tache;
+import com.example.trello.Modele.TacheComposite;
+import com.example.trello.Modele.TacheSimple;
+import com.example.trello.Modele.Tache; // Import nécessaire pour les constantes d'état
 import com.example.trello.Vue.VueKanban;
 import com.example.trello.Vue.VueListe;
 import javafx.application.Application;
@@ -20,45 +22,46 @@ public class AppTrello extends Application {
         modele = new Modele();
         initDonneesTest(modele);
 
-        // Création des vues Liste et Kanban + Gantt
+        // Création des 3 vues
         VueListe vueListe = new VueListe(modele);
         VueKanban vueKanban = new VueKanban(modele);
 
-        // TabPane pour gérer les trois vues
-        // TabPane est un conteneur qui agit comme un navigateur avec différents onglets
+        // TabPane pour gérer les trois vues (Navigation par onglets)
         TabPane tabPane = new TabPane();
 
+        // Onglet 1 : Liste
         Tab tabListe = new Tab("Vue Liste");
         tabListe.setContent(vueListe);
-        // empêche l'user de fermer l'onglet (sinon impossible de l'ouvrir à nouveau)
-        tabListe.setClosable(false);
+        tabListe.setClosable(false); // Empêche la fermeture accidentelle
 
+        // Onglet 2 : Kanban
         Tab tabKanban = new Tab("Vue Kanban");
         tabKanban.setContent(vueKanban);
         tabKanban.setClosable(false);
 
-        // ajout des onglets dans le tabpane
-        tabPane.getTabs().addAll(tabListe, tabKanban);
+        // Onglet 3 : Gantt
+        Tab tabGantt = new Tab("Vue Gantt");
+        tabGantt.setClosable(false);
 
-
-        // Pour choisir une vue spécifique en par défaut :
-        // tabPane.getSelectionModel().select(tabKanban);
+        // Ajout des onglets dans le conteneur
+        tabPane.getTabs().addAll(tabListe, tabKanban, tabGantt);
 
         // création de la scène
         Scene scene = new Scene(tabPane, 1200, 700);
-        primaryStage.setTitle("Trello Clone - Multi Vues");
+        primaryStage.setTitle("Gestion de Projet - Trello Clone (Composite)");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    // fonction permettant de créer des données factices pour faire des tests
     private void initDonneesTest(Modele modele) {
-        Tache t1 = new Tache("Réunion Projet", "Discuter budget", "Lundi", "Principal", 2);
-        Tache t2 = new Tache("Dev Backend", "API Rest", "Lundi", "En cours", 4);
+        // CORRECTION : Les tâches racines doivent être Composite pour pouvoir accueillir des enfants plus tard
+        TacheComposite t1 = new TacheComposite("Réunion Projet", "Discuter budget", "Lundi", "Principal", 2);
+        TacheComposite t2 = new TacheComposite("Dev Backend", "API Rest", "Lundi", "En cours", 4);
         t2.setEtat(Tache.ETAT_EN_COURS);
 
-        Tache parent = new Tache("Interface Graphique", "JavaFX", "Mardi", "Principal", 10);
-        Tache enfant = new Tache("Vue Liste", "Implémentation", "Mardi", "A faire", 5);
+        // Hiérarchie existante
+        TacheComposite parent = new TacheComposite("Interface Graphique", "JavaFX", "Mardi", "Principal", 10);
+        TacheSimple enfant = new TacheSimple("Vue Liste", "Implémentation", "Mardi", "A faire", 5);
         parent.ajouterEnfant(enfant);
 
         modele.ajouterTache(t1);
