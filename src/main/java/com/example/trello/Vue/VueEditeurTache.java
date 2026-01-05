@@ -28,69 +28,73 @@ public class VueEditeurTache {
     private Spinner<Integer> spinnerDuree;
     private ColorPicker colorPicker;
 
-    // Constructeur de la vueEditeurTache
+    // Constructeur de la vueEditeurTache avec en paramètre la tâche courante et le modèle
     public VueEditeurTache(Tache tache, Modele modele) {
         this.tache = tache;
         this.modele = modele;
         initialiserInterface();
     }
 
+    // Méthode permettant de créer l'interface graphique
     private void initialiserInterface() {
         stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Éditer : " + tache.getLibelle());
 
+        // création d'un gridpane pour contenir les différents éléments de modification
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10); grid.setVgap(10);
 
-        // 1. Titre
+        // 1. Ajout de l'élément graphique (label + textfield) concernant le Titre de la tâche
         grid.add(new Label("Titre:"), 0, 0);
         champTitre = new TextField(tache.getLibelle());
         grid.add(champTitre, 1, 0);
 
-        // 2. Colonne (Catégorie) - NOUVEAU
+        // 2. Ajout de l'élément graphique concernant la Colonne (label + comboBox) (désigne la catégorie de la ta^che)
         grid.add(new Label("Colonne:"), 0, 1);
         comboColonne = new ComboBox<>();
         comboColonne.getItems().addAll(modele.getColonnesDisponibles());
         comboColonne.setValue(tache.getColonne());
         grid.add(comboColonne, 1, 1);
 
-        // 3. État (Progression)
+        // 3. Ajout de l'élément graphique pour gérer l'état (label + comboBox) (désigne la progression de la tâche)
         grid.add(new Label("État (Pastille):"), 0, 2);
         comboEtat = new ComboBox<>();
         comboEtat.getItems().addAll("À faire", "En cours", "Terminé", "Archivé");
         comboEtat.setValue(getEtatString(tache.getEtat()));
         grid.add(comboEtat, 1, 2);
 
-        // 4. Jour
+        // 4. élément graphique pour gérer le jour (label + comboBox)
         grid.add(new Label("Jour:"), 0, 3);
         comboJour = new ComboBox<>();
         comboJour.getItems().addAll(Tache.JOURS_AUTORISES);
         comboJour.setValue(tache.getJour());
         grid.add(comboJour, 1, 3);
 
-        // 5. Durée
+        // 5. élément graphique pour gérer la durée d'une tâche (label + Spinner)
         grid.add(new Label("Durée (h):"), 0, 4);
         spinnerDuree = new Spinner<>(0, 100, tache.getDureeEstimee());
         spinnerDuree.setEditable(true);
         grid.add(spinnerDuree, 1, 4);
 
-        // 6. Couleur
+        // 6. élément graphique pour gérer la couleur d'une tâche (label + colorPicker)
         grid.add(new Label("Couleur:"), 0, 5);
         String webColor = tache.getColor() != null ? tache.getColor() : "#FFFFFF";
         colorPicker = new ColorPicker(Color.web(webColor));
         grid.add(colorPicker, 1, 5);
 
-        // 7. Commentaire
+        // 7. élément graphique pour gérer la description d'une tâche (label + textArea)
         grid.add(new Label("Commentaire:"), 0, 6);
         champCommentaire = new TextArea(tache.getCommentaire());
         champCommentaire.setPrefRowCount(3);
         grid.add(champCommentaire, 1, 6);
 
-        // Boutons
+        // Initialisation des boutons
         Button btnSauvegarder = new Button("Sauvegarder");
         Button btnAnnuler = new Button("Annuler");
+
+        // Initialisation des actions pour chaque bouton
         btnSauvegarder.setOnAction(new ControleurSauvegarderModif(modele, tache, this));
         btnAnnuler.setOnAction(e -> stage.close());
 
@@ -101,6 +105,7 @@ public class VueEditeurTache {
         stage.setScene(scene);
     }
 
+    // Getters
     private String getEtatString(int etat) {
         switch (etat) {
             case Tache.ETAT_A_FAIRE: return "À faire";
