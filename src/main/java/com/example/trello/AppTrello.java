@@ -54,19 +54,25 @@ public class AppTrello extends Application {
     }
 
     private void initDonneesTest(Modele modele) {
-        // CORRECTION : Les tâches racines doivent être Composite pour pouvoir accueillir des enfants plus tard
-        TacheComposite t1 = new TacheComposite("Réunion Projet", "Discuter budget", "Lundi", "Principal", 2);
-        TacheComposite t2 = new TacheComposite("Dev Backend", "API Rest", "Lundi", "En cours", 4);
-        t2.setEtat(Tache.ETAT_EN_COURS);
+        // On crée tout en "Simple" au début
+        TacheSimple t1 = new TacheSimple("Réunion", "Budget", "Lundi", "Principal", 2);
+        TacheSimple t2 = new TacheSimple("Dev Backend", "API", "Lundi", "En cours", 4);
 
-        // Hiérarchie existante
-        TacheComposite parent = new TacheComposite("Interface Graphique", "JavaFX", "Mardi", "Principal", 10);
+        // Futur parent (créé comme simple)
+        TacheSimple parent = new TacheSimple("Interface Graphique", "JavaFX", "Mardi", "Principal", 10);
+
+        // Enfant
         TacheSimple enfant = new TacheSimple("Vue Liste", "Implémentation", "Mardi", "A faire", 5);
-        parent.ajouterEnfant(enfant);
 
+        // Ajout au modèle
         modele.ajouterTache(t1);
         modele.ajouterTache(t2);
         modele.ajouterTache(parent);
+
+
+        TacheComposite parentPromu = modele.promouvoirEnComposite(parent);
+        parentPromu.ajouterEnfant(enfant);
+
         modele.ajouterTache(enfant);
     }
 

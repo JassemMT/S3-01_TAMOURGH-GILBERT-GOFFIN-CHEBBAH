@@ -2,8 +2,8 @@ package com.example.trello.Controleur;
 
 import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.Tache;
-import com.example.trello.Modele.TacheComposite; // <--- Import
-import com.example.trello.Modele.TacheSimple;    // <--- Import
+import com.example.trello.Modele.TacheComposite;
+import com.example.trello.Modele.TacheSimple;
 import com.example.trello.Vue.VueEditeurTache;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -37,17 +37,14 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
         TextField champTitre = new TextField();
         champTitre.setPromptText("Titre de la tâche");
 
-        // --- FILTRAGE DES PARENTS ---
-        // Seules les TacheComposite peuvent être parents.
-        // On filtre la liste pour ne pas proposer de rattacher à une TacheSimple.
+        // --- 1. LISTE DES PARENTS ---
+        // CHANGEMENT : On affiche TOUTES les tâches du modèle.
+        // Raison : Une TacheSimple peut être sélectionnée, elle sera promue en Composite ensuite.
         ComboBox<Tache> comboParents = new ComboBox<>();
-        for (Tache t : modele.getTaches()) {
-            if (t instanceof TacheComposite) {
-                comboParents.getItems().add(t);
-            }
-        }
-        comboParents.setPromptText("Aucun parent");
+        comboParents.getItems().addAll(modele.getTaches());
+        comboParents.setPromptText("Aucun parent (Racine)");
 
+        // Affichage propre (Libellé uniquement)
         comboParents.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Tache item, boolean empty) {
@@ -65,33 +62,43 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
 
         dialog.getDialogPane().setContent(grid);
 
+        // Validation du bouton (désactivé si titre vide)
         javafx.scene.Node loginButton = dialog.getDialogPane().lookupButton(createButtonType);
         loginButton.setDisable(true);
         champTitre.textProperty().addListener((observable, oldValue, newValue) -> {
             loginButton.setDisable(newValue.trim().isEmpty());
         });
 
+        // --- 2. LOGIQUE DE CRÉATION ET PROMOTION ---
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == createButtonType) {
-                Tache parentSelectionne = comboParents.getValue();
-                Tache nouvelleTache;
+                // A. Par défaut, on crée TOUJOURS une TacheSimple (feuille)
+                TacheSimple nouvelleTache = new TacheSimple(
+                        champTitre.getText(),
+                        "", "Lundi", nomColonne, 0
+                );
 
-                // ---  Composite par défaut, Simple si enfant ---
-                if (parentSelectionne == null) {
-                    // Pas de parent = Racine = TacheComposite (Projet/Dossier)
-                    nouvelleTache = new TacheComposite(
-                            champTitre.getText(),
-                            "", "Lundi", nomColonne, 0
-                    );
-                } else {
-                    // A un parent = Sous-tâche = TacheSimple
-                    nouvelleTache = new TacheSimple(
-                            champTitre.getText(),
-                            "", "Lundi", nomColonne, 0
-                    );
-                    // L'ajout effectif à la liste des enfants du parent se fait juste après
-                    parentSelectionne.ajouterEnfant(nouvelleTache);
+                // B. Gestion du Parent et Promotion
+                Tache parentSelectionne = comboParents.getValue();
+
+                if (parentSelectionne != null) {
+
+                    // CAS 1 : Le parent est déjà un Composite (c'est un Projet existant)
+                    if (parentSelectionne instanceof TacheComposite) {
+                        parentSelectionne.ajouterEnfant(nouvelleTache);
+                    }
+
+                    // CAS 2 : Le parent est Simple (c'était une tâche standard) -> PROMOTION
+                    else if (parentSelectionne instanceof TacheSimple) {
+                        // 1. On demande au modèle de transformer le Simple en Composite
+                        // Cette méthode doit retourner la nouvelle instance de TacheComposite
+                        TacheComposite nouveauParent = modele.promouvoirEnComposite((TacheSimple) parentSelectionne);
+
+                        // 2. On ajoute l'enfant au NOUVEAU parent
+                        nouveauParent.ajouterEnfant(nouvelleTache);
+                    }
                 }
+                // Si parentSelectionne est null, la tâche est créée à la racine comme Simple.
 
                 return nouvelleTache;
             }
@@ -101,10 +108,12 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
         Optional<Tache> result = dialog.showAndWait();
 
         result.ifPresent(tache -> {
-            // On ajoute toujours au modèle global pour qu'elle apparaisse dans les vues
+            // Note : Si la tâche est racine (pas de parent), on doit l'ajouter au modèle.
+            // Si elle est enfant, elle est liée à son parent, mais selon votre implémentation de VueListe,
+            // il est souvent plus simple d'ajouter aussi l'enfant au modèle principal pour les recherches/filtres.
             modele.ajouterTache(tache);
 
-            // Ouverture immédiate de l'éditeur
+            // Ouverture de l'éditeur
             VueEditeurTache editeur = new VueEditeurTache(tache, modele);
             editeur.afficher();
         });
