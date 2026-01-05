@@ -104,8 +104,7 @@ public class VueListe extends BorderPane implements Observateur {
                 }
             }
 
-            // --- MODIFICATION : On appelle construireSectionJour QUOI QU'IL ARRIVE ---
-            // On a supprimé le "if (!racinesVisuellesDuJour.isEmpty())"
+            // --- MODIFICATION : On appelle construireSectionJour de tt maniere ---
             construireSectionJour(jour, racinesVisuellesDuJour);
         }
     }
@@ -156,7 +155,6 @@ public class VueListe extends BorderPane implements Observateur {
     }
 
     private int ajouterLigneTache(GridPane grille, Tache t, int row, int niveauIndent) {
-        // ... (Cette méthode reste exactement la même que précédemment) ...
 
         HBox boxTitre = new HBox(5);
         boxTitre.setAlignment(Pos.CENTER_LEFT);
