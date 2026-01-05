@@ -1,12 +1,13 @@
 package com.example.trello.Modele;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Classe unique représentant une tâche.
  * Gère les données, l'état, la position (colonne/jour) et la hiérarchie (enfants).
  */
-public class Tache {
+public class Tache implements Serializable {
     protected String libelle;
     protected String commentaire;
     protected int etat;           // Avancement (À faire, Terminé...)

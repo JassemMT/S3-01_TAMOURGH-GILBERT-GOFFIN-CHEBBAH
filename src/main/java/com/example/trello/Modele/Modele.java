@@ -1,10 +1,11 @@
 package com.example.trello.Modele;
-
 import com.example.trello.Vue.Observateur;
+
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Modele implements Sujet {
+public class Modele implements Sujet, Serializable {
     public static final int VUE_KANBAN = 1;
     public static final int VUE_LISTE = 2;
     public static final int VUE_GANTT = 3;
