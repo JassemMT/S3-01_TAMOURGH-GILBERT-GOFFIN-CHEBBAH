@@ -1,9 +1,6 @@
 package com.example.trello.Modele;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Classe unique représentant une tâche.
@@ -28,7 +25,7 @@ public class Tache {
     public static final int ETAT_ARCHIVE = 3;
 
     // Jours autorisés
-    public static final Set<String> JOURS_AUTORISES = Set.of(
+    public static final List<String> JOURS_AUTORISES = Arrays.asList(
             "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"
     );
 
