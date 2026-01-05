@@ -37,7 +37,7 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
         TextField champTitre = new TextField();
         champTitre.setPromptText("Titre de la tâche");
 
-        // --- 1. FILTRAGE DES PARENTS ---
+        // --- FILTRAGE DES PARENTS ---
         // Seules les TacheComposite peuvent être parents.
         // On filtre la liste pour ne pas proposer de rattacher à une TacheSimple.
         ComboBox<Tache> comboParents = new ComboBox<>();
