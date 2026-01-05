@@ -28,6 +28,7 @@ public class VueEditeurTache {
     private Spinner<Integer> spinnerDuree;
     private ColorPicker colorPicker;
 
+    // Constructeur de la vueEditeurTache
     public VueEditeurTache(Tache tache, Modele modele) {
         this.tache = tache;
         this.modele = modele;
