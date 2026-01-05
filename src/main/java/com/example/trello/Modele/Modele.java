@@ -19,6 +19,8 @@ public class Modele implements Sujet {
         this.observateurs = new ArrayList<>();
         this.taches = new ArrayList<>();
         this.type_vue = VUE_KANBAN;
+
+        // Utilisation de LinkedHashSet pour garder l'ordre d'insertion
         this.colonnesDisponibles = new LinkedHashSet<>();
         this.joursDisponibles = new LinkedHashSet<>();
 
@@ -38,12 +40,16 @@ public class Modele implements Sujet {
     @Override public void ajouterObservateur(Observateur o) { if (o != null && !observateurs.contains(o)) observateurs.add(o); }
     @Override public void supprimerObservateur(Observateur o) { observateurs.remove(o); }
     @Override public void notifierObservateur() { for (Observateur obs : observateurs) obs.actualiser(this); }
+
     public void setTypeVue(int type) { if (type >= VUE_KANBAN && type <= VUE_GANTT) { this.type_vue = type; notifierObservateur(); } }
     public int getTypeVue() { return type_vue; }
+
     public List<Tache> getTaches() { return taches.stream().filter(t -> !t.isArchived()).collect(Collectors.toList()); }
+
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
     public void supprimerTache(Tache tache) { if (tache != null) { taches.remove(tache); notifierObservateur(); } }
     public void archiverTache(Tache tache) { if (tache != null) { tache.setEtat(Tache.ETAT_ARCHIVE); notifierObservateur(); } }
+
     public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
 
     public Map<String, List<Tache>> getColonnes() {
@@ -52,7 +58,6 @@ public class Modele implements Sujet {
         for (Tache tache : taches) {
             if (!tache.isArchived()) {
                 String nomCol = tache.getColonne();
-                // Repli vers "Principal"
                 if (nomCol == null || !colonnesDisponibles.contains(nomCol)) {
                     nomCol = "Principal";
                     tache.setColonne(nomCol);
@@ -67,12 +72,7 @@ public class Modele implements Sujet {
 
     public void renommerColonne(String ancienNom, String nouveauNom) {
         if (ancienNom == null || nouveauNom == null || nouveauNom.trim().isEmpty()) return;
-
-        // MODIFIÉ : Protection contre le renommage de "Principal"
-        if ("Principal".equals(ancienNom)) {
-            System.out.println("Impossible de renommer la colonne Principal");
-            return;
-        }
+        if ("Principal".equals(ancienNom)) return; // Protection
 
         if (!colonnesDisponibles.contains(ancienNom) || colonnesDisponibles.contains(nouveauNom)) return;
 
@@ -87,14 +87,12 @@ public class Modele implements Sujet {
     }
 
     public void supprimerColonne(String nomColonne) {
-        // MODIFIÉ : Protection suppression "Principal"
         if ("Principal".equals(nomColonne)) return;
 
         if (colonnesDisponibles.contains(nomColonne)) {
-            // MODIFIÉ : Déplacement des orphelins vers "Principal"
             for (Tache t : taches) {
                 if (nomColonne.equals(t.getColonne())) {
-                    t.setColonne("Principal"); // Si Principale n'existe pas ???
+                    t.setColonne("Principal");
                 }
             }
             colonnesDisponibles.remove(nomColonne);
@@ -116,18 +114,25 @@ public class Modele implements Sujet {
         }
     }
 
-
     public Map<String, List<Tache>> getJours() {
         Map<String, List<Tache>> joursMap = new LinkedHashMap<>();
         for (String jour : joursDisponibles) joursMap.put(jour, new ArrayList<>());
         for (Tache tache : taches) {
             if (!tache.isArchived()) {
                 String jourTache = tache.getJour();
-                joursMap.get(jourTache).add(tache);
+                if (joursMap.containsKey(jourTache)) {
+                    joursMap.get(jourTache).add(tache);
+                }
             }
         }
         return joursMap;
     }
 
-    public LinkedList<Tache> getDependance(Tache tache) { return new LinkedList<>(); }
+    // CORRECTION : Délégation au pattern Composite
+    public LinkedList<Tache> getDependance(Tache tache) {
+        if (tache != null) {
+            return tache.construirDependance();
+        }
+        return new LinkedList<>();
+    }
 }
