@@ -65,8 +65,10 @@ public class AppTrello extends Application {
 
         Tache parent = new Tache("Interface Graphique", "JavaFX", "Mardi", "Principal", 10);
         Tache enfant = new Tache("Vue Liste", "Implémentation", "Mardi", "A faire", 8);
-        parent.ajouterEnfant(enfant);
+        Tache enfant1 = new Tache("Vue Liste 2", "Implémentation", "Mardi", "A faire", 4);
 
+        parent.ajouterEnfant(enfant);
+        enfant.ajouterEnfant(enfant1);
         modele.ajouterTache(t1);
         modele.ajouterTache(t2);
         modele.ajouterTache(parent);
