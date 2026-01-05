@@ -2,7 +2,9 @@ package com.example.trello.Controleur;
 
 import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.Tache;
-import com.example.trello.Vue.VueEditeurTache; // <--- Import nécessaire
+import com.example.trello.Modele.TacheComposite; // <--- Import
+import com.example.trello.Modele.TacheSimple;    // <--- Import
+import com.example.trello.Vue.VueEditeurTache;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
@@ -20,7 +22,8 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
     }
 
     @Override
-    public void handle(ActionEvent actionEvent) {Dialog<Tache> dialog = new Dialog<>();
+    public void handle(ActionEvent actionEvent) {
+        Dialog<Tache> dialog = new Dialog<>();
         dialog.setTitle("Nouvelle Tâche");
         dialog.setHeaderText("Création rapide dans : " + nomColonne);
 
@@ -34,11 +37,17 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
         TextField champTitre = new TextField();
         champTitre.setPromptText("Titre de la tâche");
 
+        // --- 1. FILTRAGE DES PARENTS ---
+        // Seules les TacheComposite peuvent être parents.
+        // On filtre la liste pour ne pas proposer de rattacher à une TacheSimple.
         ComboBox<Tache> comboParents = new ComboBox<>();
-        comboParents.getItems().addAll(modele.getTaches());
-        comboParents.setPromptText("Aucun parent (Racine)");
+        for (Tache t : modele.getTaches()) {
+            if (t instanceof TacheComposite) {
+                comboParents.getItems().add(t);
+            }
+        }
+        comboParents.setPromptText("Aucun parent");
 
-        // Affichage propre dans la combobox
         comboParents.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Tache item, boolean empty) {
@@ -51,7 +60,7 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
 
         grid.add(new Label("Titre:"), 0, 0);
         grid.add(champTitre, 1, 0);
-        grid.add(new Label("Parent:"), 0, 1);
+        grid.add(new Label("Rattacher à:"), 0, 1);
         grid.add(comboParents, 1, 1);
 
         dialog.getDialogPane().setContent(grid);
@@ -64,18 +73,26 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == createButtonType) {
-                Tache nouvelleTache = new Tache(
-                        champTitre.getText(),
-                        "",
-                        "Lundi",
-                        nomColonne,
-                        0
-                );
-
                 Tache parentSelectionne = comboParents.getValue();
-                if (parentSelectionne != null) {
+                Tache nouvelleTache;
+
+                // ---  Composite par défaut, Simple si enfant ---
+                if (parentSelectionne == null) {
+                    // Pas de parent = Racine = TacheComposite (Projet/Dossier)
+                    nouvelleTache = new TacheComposite(
+                            champTitre.getText(),
+                            "", "Lundi", nomColonne, 0
+                    );
+                } else {
+                    // A un parent = Sous-tâche = TacheSimple
+                    nouvelleTache = new TacheSimple(
+                            champTitre.getText(),
+                            "", "Lundi", nomColonne, 0
+                    );
+                    // L'ajout effectif à la liste des enfants du parent se fait juste après
                     parentSelectionne.ajouterEnfant(nouvelleTache);
                 }
+
                 return nouvelleTache;
             }
             return null;
@@ -84,11 +101,10 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
         Optional<Tache> result = dialog.showAndWait();
 
         result.ifPresent(tache -> {
-            // On l'ajoute au modèle (elle apparait dans les vues)
+            // On ajoute toujours au modèle global pour qu'elle apparaisse dans les vues
             modele.ajouterTache(tache);
 
-            //On ouvre immédiatement la fenêtre d'édition complète
-            // On appelle directement la Vue, pas besoin de passer par le ControleurOuvrirEditeur qui attend un MouseEvent
+            // Ouverture immédiate de l'éditeur
             VueEditeurTache editeur = new VueEditeurTache(tache, modele);
             editeur.afficher();
         });
