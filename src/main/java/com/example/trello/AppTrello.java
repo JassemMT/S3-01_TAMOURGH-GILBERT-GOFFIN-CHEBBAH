@@ -1,6 +1,7 @@
 package com.example.trello;
 
 import com.example.trello.Modele.Modele;
+import com.example.trello.Modele.ModeleRepository;
 import com.example.trello.Modele.Tache;
 import com.example.trello.Vue.VueKanban;
 import com.example.trello.Vue.VueListe;
@@ -13,12 +14,14 @@ import javafx.stage.Stage;
 public class AppTrello extends Application {
 
     private Modele modele;
+    private ModeleRepository repository;
 
     @Override
     public void start(Stage primaryStage) {
         // Initialisation unique du modèle
-        modele = new Modele();
-        initDonneesTest(modele);
+        repository = new ModeleRepository("Sauvegarde/app.save");
+        modele = repository.load();
+
 
         // Création des vues Liste et Kanban + Gantt
         VueListe vueListe = new VueListe(modele);
@@ -41,14 +44,19 @@ public class AppTrello extends Application {
         tabPane.getTabs().addAll(tabListe, tabKanban);
 
 
-        // Pour choisir une vue spécifique en par défaut :
-        // tabPane.getSelectionModel().select(tabKanban);
-
         // création de la scène
         Scene scene = new Scene(tabPane, 1200, 700);
         primaryStage.setTitle("Trello Clone - Multi Vues");
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        if (repository != null && modele != null) {
+            modele.exit(repository);
+        }
+        super.stop();
     }
 
     // fonction permettant de créer des données factices pour faire des tests

@@ -1,11 +1,15 @@
 package com.example.trello.Modele;
 import com.example.trello.Vue.Observateur;
+import org.controlsfx.control.PropertySheet;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Modele implements Sujet, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     public static final int VUE_KANBAN = 1;
     public static final int VUE_LISTE = 2;
     public static final int VUE_GANTT = 3;
@@ -131,4 +135,9 @@ public class Modele implements Sujet, Serializable {
     }
 
     public LinkedList<Tache> getDependance(Tache tache) { return new LinkedList<>(); }
+
+    public void exit(ModeleRepository repo) {
+        this.observateurs = new ArrayList<>();
+        repo.save(this);
+    }
 }

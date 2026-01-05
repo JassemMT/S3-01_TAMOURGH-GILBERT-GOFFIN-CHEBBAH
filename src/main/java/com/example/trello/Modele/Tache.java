@@ -8,6 +8,9 @@ import java.util.*;
  * Gère les données, l'état, la position (colonne/jour) et la hiérarchie (enfants).
  */
 public class Tache implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     protected String libelle;
     protected String commentaire;
     protected int etat;           // Avancement (À faire, Terminé...)
