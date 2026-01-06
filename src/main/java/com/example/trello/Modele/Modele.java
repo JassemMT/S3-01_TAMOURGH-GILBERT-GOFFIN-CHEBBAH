@@ -125,6 +125,11 @@ public class Modele implements Sujet, Serializable {
     public void deplacerTacheColonne(Tache tache, String nouvelleColonne) {
         if (tache != null && nouvelleColonne != null && colonnesDisponibles.contains(nouvelleColonne)) {
             tache.setColonne(nouvelleColonne);
+            if (tache instanceof TacheComposite){
+                for (Tache t : tache.getEnfants()) {
+                    t.setColonne(nouvelleColonne);
+                }
+            }
             notifierObservateur();
         }
     }
