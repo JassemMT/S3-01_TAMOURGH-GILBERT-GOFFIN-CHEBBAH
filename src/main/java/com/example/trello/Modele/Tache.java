@@ -39,6 +39,17 @@ public abstract class Tache implements Serializable {
         this(libelle, commentaire, "Lundi", "Principal", 0);
     }
 
+    protected Tache() {
+        this.libelle = "";
+        this.commentaire = "";
+        this.etat = this.ETAT_A_FAIRE;
+        this.colonne = "";
+        this.jour = "";
+        this.dureeEstimee = 0;
+        this.color = "#C5D3D0";
+
+    }
+
     // --- MÉTHODES ABSTRAITES (Le cœur du Composite) ---
     public abstract void ajouterEnfant(Tache t);
     public abstract List<Tache> getEnfants();

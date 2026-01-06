@@ -1,10 +1,11 @@
 package com.example.trello.Modele;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TacheSimple extends Tache {
+public class TacheSimple extends Tache implements Serializable {
 
 
     private static final long serialVersionUID = 1L;
@@ -18,6 +19,8 @@ public class TacheSimple extends Tache {
     public TacheSimple(String libelle, String commentaire) {
         super(libelle, commentaire);
     }
+
+    public TacheSimple() {super();}
 
     @Override
     public void ajouterEnfant(Tache t) {
