@@ -3,24 +3,17 @@ package com.example.trello.Modele;
 import java.io.Serializable;
 import java.util.*;
 
-/**
- * Classe unique représentant une tâche.
- * Gère les données, l'état, la position (colonne/jour) et la hiérarchie (enfants).
- */
-public class Tache implements Serializable {
+public abstract class Tache implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     protected String libelle;
     protected String commentaire;
-    protected int etat;           // Avancement (À faire, Terminé...)
-    protected String colonne;     // Catégorie visuelle
-    protected String jour;        // Planification (Lundi, Mardi...)
+    protected int etat;
+    protected String colonne;
+    protected String jour;
     protected int dureeEstimee;
     protected String color;
-
-    // Hiérarchie : Liste des sous-tâches
-    private List<Tache> enfants;
 
     // Constantes d'état
     public static final int ETAT_A_FAIRE = 0;
@@ -28,62 +21,31 @@ public class Tache implements Serializable {
     public static final int ETAT_TERMINE = 2;
     public static final int ETAT_ARCHIVE = 3;
 
-    // Jours autorisés
     public static final List<String> JOURS_AUTORISES = Arrays.asList(
             "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"
     );
 
-    /**
-     * Constructeur complet
-     */
     public Tache(String libelle, String commentaire, String jour, String colonne, int dureeEstimee) {
         this.libelle = libelle;
         this.commentaire = commentaire;
         this.colonne = colonne;
         this.dureeEstimee = dureeEstimee;
-
-        // Valeurs par défaut
         this.etat = ETAT_A_FAIRE;
         this.color = "#C5D3D0";
-        this.enfants = new ArrayList<>(); // Initialisation de la liste
-
-        setJour(jour); // Vérification du jour
+        setJour(jour);
     }
 
-    /**
-     * Constructeur simplifié
-     */
     public Tache(String libelle, String commentaire) {
         this(libelle, commentaire, "Lundi", "Principal", 0);
     }
 
-    // --- GESTION DES DÉPENDANCES (Enfants) ---
+    // --- MÉTHODES ABSTRAITES (Le cœur du Composite) ---
+    public abstract void ajouterEnfant(Tache t);
+    public abstract List<Tache> getEnfants();
+    public abstract boolean aDesEnfants();
+    public abstract LinkedList<Tache> construirDependance();
 
-    /**
-     * Ajoute une sous-tâche
-     */
-    public void ajouterEnfant(Tache t) {
-        if (t != null && !enfants.contains(t) && t != this) {
-            enfants.add(t);
-        }
-    }
-
-    /**
-     * Retourne une copie de la liste des enfants
-     */
-    public List<Tache> getEnfants() {
-        return new ArrayList<>(enfants);
-    }
-
-    /**
-     * Vérifie si la tâche a des enfants (utile pour l'affichage)
-     */
-    public boolean aDesEnfants() {
-        return enfants != null && !enfants.isEmpty();
-    }
-
-    // --- GETTERS ET SETTERS ---
-
+    // --- GETTERS ET SETTERS COMMUNS ---
     public String getLibelle() { return libelle; }
     public void setLibelle(String libelle) { this.libelle = libelle; }
 
@@ -110,20 +72,6 @@ public class Tache implements Serializable {
 
     public boolean isArchived() { return etat == ETAT_ARCHIVE; }
 
-    /**
-     * Récupère récursivement toutes les dépendances
-     */
-    public LinkedList<Tache> construirDependance() {
-        LinkedList<Tache> dependances = new LinkedList<>();
-        for (Tache enfant : enfants) {
-            dependances.add(enfant);
-            dependances.addAll(enfant.construirDependance());
-        }
-        return dependances;
-    }
-
     @Override
-    public String toString() {
-        return libelle; // Utile pour l'affichage dans les ComboBox
-    }
+    public String toString() { return libelle; }
 }

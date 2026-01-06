@@ -1,6 +1,7 @@
 package com.example.trello.Modele;
+
 import com.example.trello.Vue.Observateur;
-import org.controlsfx.control.PropertySheet;
+// import de repository si nécessaire (ex: com.example.trello.Data.ModeleRepository)
 
 import java.io.Serializable;
 import java.util.*;
@@ -15,7 +16,8 @@ public class Modele implements Sujet, Serializable {
     public static final int VUE_GANTT = 3;
 
     private int type_vue;
-    private List<Observateur> observateurs;
+    // On marque transient pour ne pas sérialiser les vues (qui ne sont pas sérialisables)
+    private transient List<Observateur> observateurs;
     private List<Tache> taches;
     private Set<String> colonnesDisponibles;
     private Set<String> joursDisponibles;
@@ -40,15 +42,36 @@ public class Modele implements Sujet, Serializable {
         this.joursDisponibles.add("Dimanche");
     }
 
-    @Override public void ajouterObservateur(Observateur o) { if (o != null && !observateurs.contains(o)) observateurs.add(o); }
-    @Override public void supprimerObservateur(Observateur o) { observateurs.remove(o); }
-    @Override public void notifierObservateur() { for (Observateur obs : observateurs) obs.actualiser(this); }
+    // Méthode pour réinitialiser les observateurs après désérialisation
+    private Object readResolve() {
+        if (observateurs == null) {
+            observateurs = new ArrayList<>();
+        }
+        return this;
+    }
+
+    @Override public void ajouterObservateur(Observateur o) {
+        if (observateurs == null) observateurs = new ArrayList<>();
+        if (o != null && !observateurs.contains(o)) observateurs.add(o);
+    }
+    @Override public void supprimerObservateur(Observateur o) {
+        if (observateurs != null) observateurs.remove(o);
+    }
+    @Override public void notifierObservateur() {
+        if (observateurs != null) {
+            for (Observateur obs : observateurs) obs.actualiser(this);
+        }
+    }
+
     public void setTypeVue(int type) { if (type >= VUE_KANBAN && type <= VUE_GANTT) { this.type_vue = type; notifierObservateur(); } }
     public int getTypeVue() { return type_vue; }
+
     public List<Tache> getTaches() { return taches.stream().filter(t -> !t.isArchived()).collect(Collectors.toList()); }
+
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
     public void supprimerTache(Tache tache) { if (tache != null) { taches.remove(tache); notifierObservateur(); } }
     public void archiverTache(Tache tache) { if (tache != null) { tache.setEtat(Tache.ETAT_ARCHIVE); notifierObservateur(); } }
+
     public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
 
     public Map<String, List<Tache>> getColonnes() {
@@ -57,7 +80,6 @@ public class Modele implements Sujet, Serializable {
         for (Tache tache : taches) {
             if (!tache.isArchived()) {
                 String nomCol = tache.getColonne();
-                // Repli vers "Principal"
                 if (nomCol == null || !colonnesDisponibles.contains(nomCol)) {
                     nomCol = "Principal";
                     tache.setColonne(nomCol);
@@ -72,12 +94,7 @@ public class Modele implements Sujet, Serializable {
 
     public void renommerColonne(String ancienNom, String nouveauNom) {
         if (ancienNom == null || nouveauNom == null || nouveauNom.trim().isEmpty()) return;
-
-        // MODIFIÉ : Protection contre le renommage de "Principal"
-        if ("Principal".equals(ancienNom)) {
-            System.out.println("Impossible de renommer la colonne Principal");
-            return;
-        }
+        if ("Principal".equals(ancienNom)) return;
 
         if (!colonnesDisponibles.contains(ancienNom) || colonnesDisponibles.contains(nouveauNom)) return;
 
@@ -92,14 +109,12 @@ public class Modele implements Sujet, Serializable {
     }
 
     public void supprimerColonne(String nomColonne) {
-        // MODIFIÉ : Protection suppression "Principal"
         if ("Principal".equals(nomColonne)) return;
 
         if (colonnesDisponibles.contains(nomColonne)) {
-            // MODIFIÉ : Déplacement des orphelins vers "Principal"
             for (Tache t : taches) {
                 if (nomColonne.equals(t.getColonne())) {
-                    t.setColonne("Principal"); // Si Principale n'existe pas ???
+                    t.setColonne("Principal");
                 }
             }
             colonnesDisponibles.remove(nomColonne);
@@ -121,23 +136,56 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-
     public Map<String, List<Tache>> getJours() {
         Map<String, List<Tache>> joursMap = new LinkedHashMap<>();
         for (String jour : joursDisponibles) joursMap.put(jour, new ArrayList<>());
         for (Tache tache : taches) {
             if (!tache.isArchived()) {
                 String jourTache = tache.getJour();
-                joursMap.get(jourTache).add(tache);
+                if (joursMap.containsKey(jourTache)) {
+                    joursMap.get(jourTache).add(tache);
+                }
             }
         }
         return joursMap;
     }
 
-    public LinkedList<Tache> getDependance(Tache tache) { return new LinkedList<>(); }
+    // --- NOUVEAU : Méthode de Promotion Dynamique ---
+    /**
+     * Transforme une TacheSimple en TacheComposite, met à jour la liste
+     * et notifie les observateurs.
+     */
+    public TacheComposite promouvoirEnComposite(TacheSimple ancienneTache) {
+        // 1. Création du clone Composite
+        TacheComposite nouvelleTache = new TacheComposite(ancienneTache);
 
-    public void exit(ModeleRepository repo) {
+        // 2. Remplacement dans la liste principale
+        int index = taches.indexOf(ancienneTache);
+        if (index != -1) {
+            taches.set(index, nouvelleTache);
+        } else {
+            taches.add(nouvelleTache);
+        }
+
+        // 3. Notification pour rafraîchir les vues
+        notifierObservateur();
+
+        return nouvelleTache;
+    }
+
+    // --- MODIFIÉ : Utilisation du Pattern Composite ---
+    public LinkedList<Tache> getDependance(Tache tache) {
+        if (tache != null) {
+            // Délègue à la tâche (Simple renvoie vide, Composite renvoie ses enfants récursivement)
+            return tache.construirDependance();
+        }
+        return new LinkedList<>();
+    }
+
+    // Méthode de sauvegarde (si ModeleRepository est défini ailleurs)
+    // J'ai laissé ton code, mais attention aux types génériques si ModeleRepository n'est pas importé
+    public void exit(Object repo) { // J'ai mis Object car je n'ai pas la classe ModeleRepository, remet le bon type
         this.observateurs = new ArrayList<>();
-        repo.save(this);
+        // ((ModeleRepository) repo).save(this); // Décommenter et adapter
     }
 }

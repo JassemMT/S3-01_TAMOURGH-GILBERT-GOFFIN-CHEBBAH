@@ -2,6 +2,8 @@ package com.example.trello.Controleur;
 
 import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.Tache;
+import com.example.trello.Modele.TacheComposite; // Import nécessaire
+import com.example.trello.Modele.TacheSimple;    // Import nécessaire
 import com.example.trello.Vue.VueEditeurTache;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,7 +22,8 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
     }
 
     @Override
-    public void handle(ActionEvent actionEvent) {Dialog<Tache> dialog = new Dialog<>();
+    public void handle(ActionEvent actionEvent) {
+        Dialog<Tache> dialog = new Dialog<>();
         dialog.setTitle("Nouvelle Tâche");
         dialog.setHeaderText("Création rapide dans : " + nomColonne);
 
@@ -34,11 +37,12 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
         TextField champTitre = new TextField();
         champTitre.setPromptText("Titre de la tâche");
 
+        // On charge toutes les tâches comme parents potentiels
+        // (Même les Simples, car elles peuvent être promues)
         ComboBox<Tache> comboParents = new ComboBox<>();
         comboParents.getItems().addAll(modele.getTaches());
         comboParents.setPromptText("Aucun parent (Racine)");
 
-        // Affichage propre dans la combobox
         comboParents.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Tache item, boolean empty) {
@@ -51,7 +55,7 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
 
         grid.add(new Label("Titre:"), 0, 0);
         grid.add(champTitre, 1, 0);
-        grid.add(new Label("Parent:"), 0, 1);
+        grid.add(new Label("Rattacher à:"), 0, 1);
         grid.add(comboParents, 1, 1);
 
         dialog.getDialogPane().setContent(grid);
@@ -62,9 +66,11 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
             loginButton.setDisable(newValue.trim().isEmpty());
         });
 
+        // --- C'EST ICI QUE LA LOGIQUE DE PROMOTION S'APPLIQUE ---
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == createButtonType) {
-                Tache nouvelleTache = new Tache(
+                // 1. Par défaut, toute nouvelle tâche est SIMPLE (feuille)
+                TacheSimple nouvelleTache = new TacheSimple(
                         champTitre.getText(),
                         "",
                         "Lundi",
@@ -73,8 +79,21 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
                 );
 
                 Tache parentSelectionne = comboParents.getValue();
+
                 if (parentSelectionne != null) {
-                    parentSelectionne.ajouterEnfant(nouvelleTache);
+                    // 2. Vérification du type du parent
+                    if (parentSelectionne instanceof TacheComposite) {
+                        // Cas facile : Le parent est déjà un conteneur
+                        parentSelectionne.ajouterEnfant(nouvelleTache);
+                    }
+                    else if (parentSelectionne instanceof TacheSimple) {
+                        // Cas complexe : Le parent est simple, il faut le PROMOUVOIR
+                        // On appelle le modèle pour transformer le parent Simple en Composite
+                        TacheComposite nouveauParent = modele.promouvoirEnComposite((TacheSimple) parentSelectionne);
+
+                        // On ajoute l'enfant au NOUVEAU parent composite
+                        nouveauParent.ajouterEnfant(nouvelleTache);
+                    }
                 }
                 return nouvelleTache;
             }
@@ -84,11 +103,7 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
         Optional<Tache> result = dialog.showAndWait();
 
         result.ifPresent(tache -> {
-            // On l'ajoute au modèle (elle apparait dans les vues)
             modele.ajouterTache(tache);
-
-            //On ouvre immédiatement la fenêtre d'édition complète
-            // On appelle directement la Vue, pas besoin de passer par le ControleurOuvrirEditeur qui attend un MouseEvent
             VueEditeurTache editeur = new VueEditeurTache(tache, modele);
             editeur.afficher();
         });

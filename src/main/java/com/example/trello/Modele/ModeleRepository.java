@@ -49,28 +49,28 @@ public class ModeleRepository {
      * @return Le modèle chargé, ou un nouveau modèle si le fichier n'existe pas
      */
     public Modele load() {
-        // Si le fichier n'existe pas, retourner un nouveau modèle
+        // 1. Si le fichier n'existe pas
         if (!exists()) {
-            System.out.println("Aucun fichier trouvé, création d'un nouveau modèle");
-            return new Modele();
+            System.out.println("Aucune sauvegarde trouvée.");
+            return null; // Retourner null permet à AppTrello de créer les données de test
         }
 
         try (FileInputStream fileIn = new FileInputStream(filePath);
              ObjectInputStream in = new ObjectInputStream(fileIn)) {
 
             Modele modele = (Modele) in.readObject();
-            System.out.println("Modèle chargé depuis : " + filePath);
+            System.out.println("Modèle chargé avec succès depuis : " + filePath);
             return modele;
 
-        } catch (IOException e) {
-            System.err. println("Erreur lors du chargement du modèle (IOException)");
-            e.printStackTrace();
-            return new Modele();
+        } catch (java.io.InvalidClassException e) {
+            // C'est l'erreur spécifique que vous avez eue (changement de version de classe)
+            System.out.println("Fichier de sauvegarde obsolète (incompatible avec la nouvelle version). Reset.");
+            return null; // On renvoie null pour forcer la création de nouvelles données
 
-        } catch (ClassNotFoundException e) {
-            System.err. println("Erreur lors du chargement du modèle (ClassNotFoundException)");
-            e.printStackTrace();
-            return new Modele();
+        } catch (IOException | ClassNotFoundException e) {
+            // Autres erreurs (fichier corrompu, etc.)
+            System.err.println("Erreur lors du chargement : " + e.getMessage());
+            return null;
         }
     }
 
