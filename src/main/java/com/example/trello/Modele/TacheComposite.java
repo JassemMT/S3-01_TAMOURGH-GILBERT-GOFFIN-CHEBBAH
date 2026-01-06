@@ -6,6 +6,9 @@ import java.util.List;
 
 public class TacheComposite extends Tache {
 
+    private static final long serialVersionUID = 1L;
+
+
     private List<Tache> enfants;
 
     public TacheComposite(String libelle, String commentaire, String jour, String colonne, int dureeEstimee) {

@@ -6,6 +6,10 @@ import java.util.List;
 
 public class TacheSimple extends Tache {
 
+
+    private static final long serialVersionUID = 1L;
+
+
     public TacheSimple(String libelle, String commentaire, String jour, String colonne, int dureeEstimee) {
         super(libelle, commentaire, jour, colonne, dureeEstimee);
     }
