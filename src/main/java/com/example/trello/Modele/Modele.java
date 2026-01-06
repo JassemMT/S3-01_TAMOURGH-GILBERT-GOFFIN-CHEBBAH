@@ -1,4 +1,5 @@
 package com.example.trello.Modele;
+
 import com.example.trello.Vue.Observateur;
 import org.controlsfx.control.PropertySheet;
 
@@ -24,6 +25,8 @@ public class Modele implements Sujet, Serializable {
         this.observateurs = new ArrayList<>();
         this.taches = new ArrayList<>();
         this.type_vue = VUE_KANBAN;
+
+        // Utilisation de LinkedHashSet pour garder l'ordre d'insertion
         this.colonnesDisponibles = new LinkedHashSet<>();
         this.joursDisponibles = new LinkedHashSet<>();
 
@@ -43,12 +46,16 @@ public class Modele implements Sujet, Serializable {
     @Override public void ajouterObservateur(Observateur o) { if (o != null && !observateurs.contains(o)) observateurs.add(o); }
     @Override public void supprimerObservateur(Observateur o) { observateurs.remove(o); }
     @Override public void notifierObservateur() { for (Observateur obs : observateurs) obs.actualiser(this); }
+
     public void setTypeVue(int type) { if (type >= VUE_KANBAN && type <= VUE_GANTT) { this.type_vue = type; notifierObservateur(); } }
     public int getTypeVue() { return type_vue; }
+
     public List<Tache> getTaches() { return taches.stream().filter(t -> !t.isArchived()).collect(Collectors.toList()); }
+
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
     public void supprimerTache(Tache tache) { if (tache != null) { taches.remove(tache); notifierObservateur(); } }
     public void archiverTache(Tache tache) { if (tache != null) { tache.setEtat(Tache.ETAT_ARCHIVE); notifierObservateur(); } }
+
     public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
 
     public Map<String, List<Tache>> getColonnes() {
@@ -128,12 +135,54 @@ public class Modele implements Sujet, Serializable {
         for (Tache tache : taches) {
             if (!tache.isArchived()) {
                 String jourTache = tache.getJour();
-                joursMap.get(jourTache).add(tache);
+                if (joursMap.containsKey(jourTache)) {
+                    joursMap.get(jourTache).add(tache);
+                }
             }
         }
         return joursMap;
     }
 
+    public LinkedList<Tache> getDependance(Tache tache) {
+        if (tache != null) {
+            return tache.construirDependance();
+        }
+        return new LinkedList<>();
+    }
+
+    /**
+     * Transforme une TacheSimple en TacheComposite tout en gardant les données.
+     * @param ancienneTache La tâche simple à promouvoir
+     * @return La nouvelle tâche composite (qui remplace l'ancienne)
+     */
+    public TacheComposite promouvoirEnComposite(TacheSimple ancienneTache) {
+        // 1. On crée la nouvelle structure Composite avec les données de base
+        TacheComposite nouvelleTache = new TacheComposite(
+                ancienneTache.getLibelle(),
+                ancienneTache.getCommentaire(),
+                ancienneTache.getJour(),
+                ancienneTache.getColonne(),
+                ancienneTache.getDureeEstimee()
+        );
+
+        // 2. On copie les autres attributs importants
+        nouvelleTache.setEtat(ancienneTache.getEtat());
+        nouvelleTache.setColor(ancienneTache.getColor());
+        // Copiez ici d'autres attributs si vous en avez ajouté (date limite, etc.)
+
+        // 3. On remplace l'objet dans la liste principale
+        int index = taches.indexOf(ancienneTache);
+        if (index != -1) {
+            taches.set(index, nouvelleTache); // REMPLACEMENT
+        } else {
+            taches.add(nouvelleTache);
+        }
+
+        // 4. On notifie les vues pour qu'elles se redessinent avec le nouvel objet
+        notifierObservateur();
+
+        return nouvelleTache;
+    }
     public LinkedList<Tache> getDependance(Tache tache) { return new LinkedList<>(); }
 
     public void exit(ModeleRepository repo) {

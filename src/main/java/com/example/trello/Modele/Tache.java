@@ -2,12 +2,15 @@ package com.example.trello.Modele;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * Classe unique représentant une tâche.
- * Gère les données, l'état, la position (colonne/jour) et la hiérarchie (enfants).
+ * Classe ABSTRAITE représentant le composant de base du pattern Composite.
+ * Elle contient les données communes mais délègue la gestion des enfants aux sous-classes.
  */
-public class Tache implements Serializable {
+public abstract class Tache implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -45,7 +48,8 @@ public class Tache implements Serializable {
         // Valeurs par défaut
         this.etat = ETAT_A_FAIRE;
         this.color = "#C5D3D0";
-        this.enfants = new ArrayList<>(); // Initialisation de la liste
+
+        // NOTE : On n'initialise plus 'enfants' ici, car TacheSimple n'en a pas.
 
         setJour(jour); // Vérification du jour
     }
@@ -57,32 +61,31 @@ public class Tache implements Serializable {
         this(libelle, commentaire, "Lundi", "Principal", 0);
     }
 
-    // --- GESTION DES DÉPENDANCES (Enfants) ---
+    // --- MÉTHODES ABSTRAITES (Le cœur du Composite) ---
+    // Ces méthodes doivent être implémentées différemment selon si c'est une feuille ou un noeud.
 
     /**
-     * Ajoute une sous-tâche
+     * Tente d'ajouter une sous-tâche.
      */
-    public void ajouterEnfant(Tache t) {
-        if (t != null && !enfants.contains(t) && t != this) {
-            enfants.add(t);
-        }
-    }
+    public abstract void ajouterEnfant(Tache t);
 
     /**
-     * Retourne une copie de la liste des enfants
+     * Retourne la liste des enfants (vide ou remplie).
      */
-    public List<Tache> getEnfants() {
-        return new ArrayList<>(enfants);
-    }
+    public abstract List<Tache> getEnfants();
 
     /**
-     * Vérifie si la tâche a des enfants (utile pour l'affichage)
+     * Vérifie si la tâche a des enfants (utile pour l'affichage).
      */
-    public boolean aDesEnfants() {
-        return enfants != null && !enfants.isEmpty();
-    }
+    public abstract boolean aDesEnfants();
 
-    // --- GETTERS ET SETTERS ---
+    /**
+     * Récupère récursivement toutes les dépendances.
+     */
+    public abstract LinkedList<Tache> construirDependance();
+
+
+    // --- GETTERS ET SETTERS COMMUNS (Concrets) ---
 
     public String getLibelle() { return libelle; }
     public void setLibelle(String libelle) { this.libelle = libelle; }

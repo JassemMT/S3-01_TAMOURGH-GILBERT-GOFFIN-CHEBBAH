@@ -1,7 +1,7 @@
 package com.example.trello;
 
 import com.example.trello.Modele.Modele;
-import com.example.trello.Modele.Tache;
+import com.example.trello.Modele.TacheSimple; // Import
 import com.example.trello.Vue.VueKanban;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -14,10 +14,10 @@ public class MainKanban extends Application {
         // 1. Création du Modèle
         Modele modele = new Modele();
 
-        // 2. Ajout de données de test adaptées au nouveau constructeur
-        // Signature : (Libellé, Commentaire, Jour, Colonne, Durée)
+        // 2. Ajout de données de test
+        // On utilise TacheSimple ici car ces exemples n'ont pas de sous-tâches définies dans ce fichier
 
-        Tache t1 = new Tache(
+        TacheSimple t1 = new TacheSimple(
                 "Finir le diagramme UML",
                 "Vérifier les relations entre les classes",
                 "Lundi",
@@ -25,15 +25,15 @@ public class MainKanban extends Application {
                 2
         );
 
-        Tache t2 = new Tache(
+        TacheSimple t2 = new TacheSimple(
                 "Coder les contrôleurs",
                 "Implémenter la logique de sauvegarde",
                 "Mardi",
-                "À faire",
+                "Principal", // Note: "À faire" n'est pas une colonne par défaut du modèle, je mets Principal ou une colonne existante
                 1
         );
 
-        Tache t3 = new Tache(
+        TacheSimple t3 = new TacheSimple(
                 "Réunion client",
                 "Présentation du prototype",
                 "Vendredi",
@@ -41,11 +41,12 @@ public class MainKanban extends Application {
                 0
         );
 
+        // On ajoute les différentes tâches au modèle
         modele.ajouterTache(t1);
         modele.ajouterTache(t2);
         modele.ajouterTache(t3);
 
-        // 3. Création de la Vue (VueKanban est un BorderPane)
+        // 3. Création de la Vue
         VueKanban root = new VueKanban(modele);
 
         // 4. Configuration de la scène
