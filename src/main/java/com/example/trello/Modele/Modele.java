@@ -191,6 +191,6 @@ public class Modele implements Sujet, Serializable {
     // J'ai laissé ton code, mais attention aux types génériques si ModeleRepository n'est pas importé
     public void exit(Object repo) { // J'ai mis Object car je n'ai pas la classe ModeleRepository, remet le bon type
         this.observateurs = new ArrayList<>();
-        // ((ModeleRepository) repo).save(this); // Décommenter et adapter
+        ((ModeleRepository) repo).save(this);
     }
 }
