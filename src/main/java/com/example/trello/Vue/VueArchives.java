@@ -70,8 +70,10 @@ public class VueArchives extends BorderPane implements Observateur {
 
     // permet de rafraichir les données
     private void rafraichirDonnees(List<Tache> lesTaches) {
+        // nettoie le conteneur principal
         conteneurPrincipal.getChildren().clear();
 
+        // affiche un message si la liste est vide
         if (lesTaches.isEmpty()) {
             Label lblVide = new Label("La corbeille est vide.");
             lblVide.setFont(Font.font("System", FontPosture.ITALIC, 14));
@@ -80,6 +82,7 @@ public class VueArchives extends BorderPane implements Observateur {
             return;
         }
 
+        // permet de regrouper toutes les dates dans un hashSet
         Set<LocalDate> datesUtilisees = new HashSet<>();
         for (Tache t : lesTaches) {
             if (t.getDateDebut() != null) datesUtilisees.add(t.getDateDebut());
