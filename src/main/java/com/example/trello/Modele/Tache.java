@@ -24,6 +24,7 @@ public abstract class Tache implements Serializable {
     public static final int ETAT_TERMINE = 2;
     public static final int ETAT_ARCHIVE = 3;
 
+    // constructeur complet
     public Tache(String libelle, String commentaire, LocalDate dateDebut, String colonne, int dureeEstimee) {
         this.libelle = libelle;
         this.commentaire = commentaire;
@@ -35,10 +36,12 @@ public abstract class Tache implements Serializable {
         this.dateDebut = (dateDebut != null) ? dateDebut : LocalDate.now();
     }
 
+    // constructeur simplifié
     public Tache(String libelle, String commentaire) {
         this(libelle, commentaire, LocalDate.now(), "Principal", 0);
     }
 
+    // constructeur automatique
     protected Tache() {
         this.libelle = "";
         this.commentaire = "";

@@ -12,11 +12,13 @@ public class TacheComposite extends Tache implements Serializable {
 
     private List<Tache> enfants;
 
+    // constructeur complet
     public TacheComposite(String libelle, String commentaire, LocalDate dateDebut, String colonne, int dureeEstimee) {
         super(libelle, commentaire, dateDebut, colonne, dureeEstimee);
         this.enfants = new ArrayList<>();
     }
 
+    // constructeur pour passer une tache simple en tache composite
     public TacheComposite(TacheSimple t) {
         super(t.getLibelle(), t.getCommentaire(), t.getDateDebut(), t.getColonne(), t.getDureeEstimee());
         this.enfants = new ArrayList<>();
@@ -24,6 +26,7 @@ public class TacheComposite extends Tache implements Serializable {
         this.setColor(t.getColor());
     }
 
+    // constructeur automatique
     public TacheComposite() {
         super();
         this.enfants = new ArrayList<>();
