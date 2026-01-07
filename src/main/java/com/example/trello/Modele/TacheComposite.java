@@ -66,7 +66,7 @@ public class TacheComposite extends Tache implements Serializable {
         return dependances;
     }
 
-    // --- Remplace l'ancienne référence par la nouvelle ---
+    // Remplace l'ancienne référence par la nouvelle
     @Override
     public void remplacerEnfant(Tache ancienne, Tache nouvelle) {
         int index = enfants.indexOf(ancienne);
