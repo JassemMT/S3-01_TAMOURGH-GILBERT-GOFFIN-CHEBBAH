@@ -83,20 +83,16 @@ public class VueGantt extends BorderPane implements Observateur {
             return;
         }
 
-        // 1. CALCULER LA PLAGE DE TEMPS (Min Date -> Max Date)
         calculerLimitesTemporelles(taches);
-
-        // 2. CONSTRUIRE LE HEADER (Les dates)
         construireHeader();
 
-        // 3. AFFICHER LES TÂCHES
         Set<Tache> sontDesEnfants = new HashSet<>();
         for (Tache t : taches) {
             if (t.aDesEnfants()) sontDesEnfants.addAll(t.getEnfants());
         }
 
         for (Tache t : taches) {
-            if (!sontDesEnfants.contains(t)) {
+            if (!sontDesEnfants.contains(t) && !t.isArchived()) {
                 ajouterLigneTache(t, 0);
             }
         }
@@ -269,10 +265,13 @@ public class VueGantt extends BorderPane implements Observateur {
 
         conteneurLignes.getChildren().add(ligne);
 
-        // Récursion enfants
+
         if (t.aDesEnfants()) {
             for (Tache enfant : t.getEnfants()) {
-                ajouterLigneTache(enfant, niveauIndent + 1);
+                // --- IL MANQUAIT LE FILTRE ---
+                if (!enfant.isArchived()) {
+                    ajouterLigneTache(enfant, niveauIndent + 1);
+                }
             }
         }
     }
