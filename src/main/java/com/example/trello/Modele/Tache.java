@@ -28,6 +28,7 @@ public abstract class Tache implements Serializable {
         this.libelle = libelle;
         this.commentaire = commentaire;
         this.colonne = colonne;
+        if (dureeEstimee < 1) dureeEstimee = 1;
         this.dureeEstimee = dureeEstimee;
         this.etat = ETAT_A_FAIRE;
         this.color = "#C5D3D0";
@@ -44,7 +45,7 @@ public abstract class Tache implements Serializable {
         this.etat = ETAT_A_FAIRE;
         this.colonne = "";
         this.dateDebut = LocalDate.now();
-        this.dureeEstimee = 0;
+        this.dureeEstimee = 1;
         this.color = "#C5D3D0";
     }
 
