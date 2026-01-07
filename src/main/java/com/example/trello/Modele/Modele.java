@@ -4,6 +4,7 @@ import com.example.trello.Vue.Observateur;
 // import de repository si nécessaire (ex: com.example.trello.Data.ModeleRepository)
 
 import java.io.Serializable;
+import java.time.LocalDate; // <--- IMPORTANT
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,33 +17,23 @@ public class Modele implements Sujet, Serializable {
     public static final int VUE_GANTT = 3;
 
     private int type_vue;
-    // On marque transient pour ne pas sérialiser les vues (qui ne sont pas sérialisables)
     private transient List<Observateur> observateurs;
     private List<Tache> taches;
     private Set<String> colonnesDisponibles;
-    private Set<String> joursDisponibles;
 
     public Modele() {
         this.observateurs = new ArrayList<>();
         this.taches = new ArrayList<>();
         this.type_vue = VUE_KANBAN;
         this.colonnesDisponibles = new LinkedHashSet<>();
-        this.joursDisponibles = new LinkedHashSet<>();
 
+        // Initialisation des colonnes
         this.colonnesDisponibles.add("Principal");
         this.colonnesDisponibles.add("En cours");
         this.colonnesDisponibles.add("Terminé");
 
-        this.joursDisponibles.add("Lundi");
-        this.joursDisponibles.add("Mardi");
-        this.joursDisponibles.add("Mercredi");
-        this.joursDisponibles.add("Jeudi");
-        this.joursDisponibles.add("Vendredi");
-        this.joursDisponibles.add("Samedi");
-        this.joursDisponibles.add("Dimanche");
     }
 
-    // Méthode pour réinitialiser les observateurs après désérialisation
     private Object readResolve() {
         if (observateurs == null) {
             observateurs = new ArrayList<>();
@@ -63,15 +54,18 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
+    // --- GESTION VUES ---
     public void setTypeVue(int type) { if (type >= VUE_KANBAN && type <= VUE_GANTT) { this.type_vue = type; notifierObservateur(); } }
     public int getTypeVue() { return type_vue; }
 
+    // --- GESTION TACHES ---
     public List<Tache> getTaches() { return taches.stream().filter(t -> !t.isArchived()).collect(Collectors.toList()); }
 
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
     public void supprimerTache(Tache tache) { if (tache != null) { taches.remove(tache); notifierObservateur(); } }
     public void archiverTache(Tache tache) { if (tache != null) { tache.setEtat(Tache.ETAT_ARCHIVE); notifierObservateur(); } }
 
+    // --- GESTION COLONNES ---
     public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
 
     public Map<String, List<Tache>> getColonnes() {
@@ -134,62 +128,56 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    public void deplacerTacheJour(Tache tache, String nouveauJour) {
-        if (Tache.JOURS_AUTORISES.contains(nouveauJour)) {
-            tache.setJour(nouveauJour);
+    // --- GESTION DATES (Remplacement de la gestion "Jours String") ---
+
+    // Ancienne méthode : deplacerTacheJour(String) -> Supprimée
+    // Nouvelle méthode :
+    public void deplacerTacheDate(Tache tache, LocalDate nouvelleDate) {
+        if (tache != null && nouvelleDate != null) {
+            tache.setDateDebut(nouvelleDate); // Utilise la nouvelle méthode de Tache
             notifierObservateur();
         }
     }
 
-    public Map<String, List<Tache>> getJours() {
-        Map<String, List<Tache>> joursMap = new LinkedHashMap<>();
-        for (String jour : joursDisponibles) joursMap.put(jour, new ArrayList<>());
+    // Ancienne méthode : getJours() avec String -> Remplacée par LocalDate
+    public Map<LocalDate, List<Tache>> getJours() {
+        // TreeMap pour que les dates soient automatiquement triées
+        Map<LocalDate, List<Tache>> joursMap = new TreeMap<>();
+
         for (Tache tache : taches) {
             if (!tache.isArchived()) {
-                String jourTache = tache.getJour();
-                if (joursMap.containsKey(jourTache)) {
-                    joursMap.get(jourTache).add(tache);
-                }
+                LocalDate d = tache.getDateDebut();
+                // Si la date n'existe pas encore dans la map, on crée la liste
+                joursMap.putIfAbsent(d, new ArrayList<>());
+                // On ajoute la tâche
+                joursMap.get(d).add(tache);
             }
         }
         return joursMap;
     }
 
-    // --- NOUVEAU : Méthode de Promotion Dynamique ---
-    /**
-     * Transforme une TacheSimple en TacheComposite, met à jour la liste
-     * et notifie les observateurs.
-     */
-    public TacheComposite promouvoirEnComposite(TacheSimple ancienneTache) {
-        // 1. Création du clone Composite
-        TacheComposite nouvelleTache = new TacheComposite(ancienneTache);
+    // --- PROMOTION & COMPOSITE ---
 
-        // 2. Remplacement dans la liste principale
+    public TacheComposite promouvoirEnComposite(TacheSimple ancienneTache) {
+        TacheComposite nouvelleTache = new TacheComposite(ancienneTache);
         int index = taches.indexOf(ancienneTache);
         if (index != -1) {
             taches.set(index, nouvelleTache);
         } else {
             taches.add(nouvelleTache);
         }
-
-        // 3. Notification pour rafraîchir les vues
         notifierObservateur();
-
         return nouvelleTache;
     }
 
-    // --- MODIFIÉ : Utilisation du Pattern Composite ---
     public LinkedList<Tache> getDependance(Tache tache) {
         if (tache != null) {
-            // Délègue à la tâche (Simple renvoie vide, Composite renvoie ses enfants récursivement)
             return tache.construirDependance();
         }
         return new LinkedList<>();
     }
 
-    // Méthode de sauvegarde (si ModeleRepository est défini ailleurs)
-    // J'ai laissé ton code, mais attention aux types génériques si ModeleRepository n'est pas importé
-    public void exit(Object repo) { // J'ai mis Object car je n'ai pas la classe ModeleRepository, remet le bon type
+    public void exit(Object repo) {
         this.observateurs = new ArrayList<>();
         ((ModeleRepository) repo).save(this);
     }

@@ -37,8 +37,11 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
         TextField champTitre = new TextField();
         champTitre.setPromptText("Titre de la tâche");
 
+        // --- NOUVEAU : DatePicker pour choisir la date ---
+        DatePicker datePicker = new DatePicker(LocalDate.now());
+        datePicker.setPromptText("Date de début");
+
         // On charge toutes les tâches comme parents potentiels
-        // (Même les Simples, car elles peuvent être promues)
         ComboBox<Tache> comboParents = new ComboBox<>();
         comboParents.getItems().addAll(modele.getTaches());
         comboParents.setPromptText("Aucun parent (Racine)");
@@ -55,8 +58,10 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
 
         grid.add(new Label("Titre:"), 0, 0);
         grid.add(champTitre, 1, 0);
-        grid.add(new Label("Rattacher à:"), 0, 1);
-        grid.add(comboParents, 1, 1);
+        grid.add(new Label("Date début:"), 0, 1); // Ajout du label date
+        grid.add(datePicker, 1, 1);               // Ajout du picker
+        grid.add(new Label("Rattacher à:"), 0, 2);
+        grid.add(comboParents, 1, 2);
 
         dialog.getDialogPane().setContent(grid);
 
@@ -66,14 +71,17 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
             loginButton.setDisable(newValue.trim().isEmpty());
         });
 
-        // --- C'EST ICI QUE LA LOGIQUE DE PROMOTION S'APPLIQUE ---
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == createButtonType) {
-                // 1. Par défaut, toute nouvelle tâche est SIMPLE (feuille)
+                // Récupération de la date (ou aujourd'hui par défaut)
+                LocalDate dateChoisie = datePicker.getValue();
+                if (dateChoisie == null) dateChoisie = LocalDate.now();
+
+                // 1. Création avec LocalDate
                 TacheSimple nouvelleTache = new TacheSimple(
                         champTitre.getText(),
                         "",
-                        "Lundi",
+                        dateChoisie, // <-- Utilisation de la date
                         nomColonne,
                         0
                 );
@@ -81,17 +89,11 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
                 Tache parentSelectionne = comboParents.getValue();
 
                 if (parentSelectionne != null) {
-                    // 2. Vérification du type du parent
                     if (parentSelectionne instanceof TacheComposite) {
-                        // Cas facile : Le parent est déjà un conteneur
                         parentSelectionne.ajouterEnfant(nouvelleTache);
                     }
                     else if (parentSelectionne instanceof TacheSimple) {
-                        // Cas complexe : Le parent est simple, il faut le PROMOUVOIR
-                        // On appelle le modèle pour transformer le parent Simple en Composite
                         TacheComposite nouveauParent = modele.promouvoirEnComposite((TacheSimple) parentSelectionne);
-
-                        // On ajoute l'enfant au NOUVEAU parent composite
                         nouveauParent.ajouterEnfant(nouvelleTache);
                     }
                 }

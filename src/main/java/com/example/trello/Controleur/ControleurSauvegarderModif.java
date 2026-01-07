@@ -6,6 +6,8 @@ import com.example.trello.Vue.VueEditeurTache;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
+import java.time.LocalDate; // <--- Import indispensable
+
 public class ControleurSauvegarderModif implements EventHandler<ActionEvent> {
 
     private Modele modele;
@@ -24,19 +26,22 @@ public class ControleurSauvegarderModif implements EventHandler<ActionEvent> {
         String nouveauTitre = vue.getTitreSaisi();
         String nouveauCom = vue.getCommentaireSaisi();
         String nouvelEtatStr = vue.getEtatSelectionne();
-        String nouvelleColonne = vue.getColonneSelectionnee(); // NOUVEAU
-        String nouveauJour = vue.getJourSelectionne();
+        String nouvelleColonne = vue.getColonneSelectionnee();
         int duree = vue.getDureeSaisie();
         String couleur = vue.getCouleurChoisie();
 
-        // 2. Modification des attributs simples
+        LocalDate nouvelleDate = vue.getDateSelectionnee();
+
         tache.setLibelle(nouveauTitre);
         tache.setCommentaire(nouveauCom);
-        tache.setJour(nouveauJour);
         tache.setDureeEstimee(duree);
         tache.setColor(couleur);
 
-        // 3. Modification INDÉPENDANTE de la colonne
+        // --- Mise à jour de la date (remplace setJour) ---
+        if (nouvelleDate != null) {
+            tache.setDateDebut(nouvelleDate);
+        }
+
         if (nouvelleColonne != null) {
             tache.setColonne(nouvelleColonne);
         }
@@ -49,6 +54,8 @@ public class ControleurSauvegarderModif implements EventHandler<ActionEvent> {
 
         // 5. Notification
         modele.notifierObservateur();
+
+        // 6. Fermeture de la fenêtre
         vue.fermer();
     }
 }

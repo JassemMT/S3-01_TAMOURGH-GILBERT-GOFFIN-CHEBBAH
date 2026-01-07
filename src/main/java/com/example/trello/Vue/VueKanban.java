@@ -9,20 +9,22 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
+
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 public class VueKanban extends BorderPane implements Observateur {
-    // ... (Partie Constructeur et initialisation identique à avant) ...
-    // Je réécris les méthodes clés pour la lisibilité
-    //
 
     private Modele modele;
     private HBox conteneurColonnes;
 
+    // Formatter for short date display (e.g. "12/10")
+    private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("dd/MM");
+
     public VueKanban(Modele modele) {
         this.modele = modele;
-        modele.ajouterObservateur(this);
+        this.modele.ajouterObservateur(this);
         initialiserInterface();
         actualiser(modele);
     }
@@ -32,11 +34,19 @@ public class VueKanban extends BorderPane implements Observateur {
         titre.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         Button btnAjouterColonne = new Button("+ Colonne");
         btnAjouterColonne.setOnAction(new ControleurAjouterColonne(modele));
+
         HBox entete = new HBox(20, titre, btnAjouterColonne);
-        entete.setAlignment(Pos.CENTER_LEFT); entete.setPadding(new Insets(10));
+        entete.setAlignment(Pos.CENTER_LEFT);
+        entete.setPadding(new Insets(10));
         setTop(entete);
-        conteneurColonnes = new HBox(15); conteneurColonnes.setPadding(new Insets(10)); conteneurColonnes.setAlignment(Pos.TOP_LEFT);
-        ScrollPane scrollPane = new ScrollPane(conteneurColonnes); scrollPane.setFitToHeight(true); scrollPane.setStyle("-fx-background: #f5f5f5;");
+
+        conteneurColonnes = new HBox(15);
+        conteneurColonnes.setPadding(new Insets(10));
+        conteneurColonnes.setAlignment(Pos.TOP_LEFT);
+
+        ScrollPane scrollPane = new ScrollPane(conteneurColonnes);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setStyle("-fx-background: #f5f5f5;");
         setCenter(scrollPane);
     }
 
@@ -44,7 +54,9 @@ public class VueKanban extends BorderPane implements Observateur {
     public void actualiser(Sujet s) {
         if (s instanceof Modele) {
             Modele m = (Modele) s;
-            if (m.getTypeVue() != Modele.VUE_KANBAN) return;
+            // Removed check for VUE_KANBAN to allow updates even if not active view
+            // if (m.getTypeVue() != Modele.VUE_KANBAN) return;
+
             conteneurColonnes.getChildren().clear();
             Map<String, List<Tache>> colonnes = m.getColonnes();
             for (Map.Entry<String, List<Tache>> entry : colonnes.entrySet()) {
@@ -54,7 +66,6 @@ public class VueKanban extends BorderPane implements Observateur {
     }
 
     private VBox creerColonne(String titre, List<Tache> taches) {
-        // (Identique à l'étape précédente avec les boutons Renommer/Supprimer)
         VBox colonne = new VBox(10);
         colonne.setPrefWidth(300);
         colonne.setStyle("-fx-background-color: #e8e8e8; -fx-background-radius: 5;");
@@ -110,15 +121,16 @@ public class VueKanban extends BorderPane implements Observateur {
         lblLibelle.setStyle("-fx-font-weight: bold;");
         lblLibelle.setWrapText(true);
 
-        // 2. Jour
-        Label lblJour = new Label("📅 " + tache.getJour());
-        lblJour.setStyle("-fx-font-size: 10px; -fx-text-fill: #444;");
+        // 2. Date (CORRECTION ICI)
+        String dateStr = tache.getDateDebut().format(SHORT_DATE);
+        Label lblDate = new Label("📅 " + dateStr);
+        lblDate.setStyle("-fx-font-size: 10px; -fx-text-fill: #444;");
 
-        // 3. NOUVEAU : Affichage de l'état (Pastille)
+        // 3. État
         Label lblEtat = new Label(getTexteEtat(tache.getEtat()));
         lblEtat.setStyle("-fx-font-size: 9px; -fx-padding: 2 5; -fx-background-radius: 10; " + getStyleEtat(tache.getEtat()));
 
-        HBox ligneInfos = new HBox(10, lblJour, lblEtat);
+        HBox ligneInfos = new HBox(10, lblDate, lblEtat);
         ligneInfos.setAlignment(Pos.CENTER_LEFT);
 
         carte.getChildren().addAll(lblLibelle, ligneInfos);
@@ -129,9 +141,11 @@ public class VueKanban extends BorderPane implements Observateur {
             VBox boxEnfants = new VBox(2);
             boxEnfants.setPadding(new Insets(5, 0, 0, 10));
             boxEnfants.setStyle("-fx-border-color: transparent transparent transparent #888; -fx-border-width: 0 0 0 2;");
+
             Label lblSousTaches = new Label("Sous-tâches :");
             lblSousTaches.setStyle("-fx-font-size: 9px; -fx-font-style: italic;");
             boxEnfants.getChildren().add(lblSousTaches);
+
             for (Tache enfant : enfants) {
                 Label lblEnfant = new Label("• " + enfant.getLibelle());
                 lblEnfant.setStyle("-fx-font-size: 10px;");
@@ -141,23 +155,27 @@ public class VueKanban extends BorderPane implements Observateur {
         }
 
         // 5. Bouton archiver
-        Button btnArchiver = new Button("🗄 Archiver");
-        btnArchiver.setStyle("-fx-font-size: 10px;");
+        Button btnArchiver = new Button("🗄"); // Icone seule pour gagner de la place
+        btnArchiver.setStyle("-fx-font-size: 10px; -fx-background-color: transparent; -fx-text-fill: #666;");
+        btnArchiver.setTooltip(new Tooltip("Archiver"));
         btnArchiver.setOnAction(new ControleurArchiverTache(modele, tache));
-        carte.getChildren().add(btnArchiver);
+
+        HBox boxActions = new HBox(btnArchiver);
+        boxActions.setAlignment(Pos.CENTER_RIGHT);
+        carte.getChildren().add(boxActions);
 
         // Interactions
         carte.setOnMouseClicked(new ControleurOuvrirEditeur(tache, modele));
         configurerDragSurCarte(carte, tache);
 
         String styleNormal = carte.getStyle();
+        // Hover effect
         carte.setOnMouseEntered(e -> carte.setStyle("-fx-background-color: " + couleurHex + "; -fx-background-radius: 3; -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 3; -fx-cursor: hand;"));
         carte.setOnMouseExited(e -> carte.setStyle(styleNormal));
 
         return carte;
     }
 
-    // Helpers pour l'affichage de l'état
     private String getTexteEtat(int etat) {
         switch(etat) {
             case Tache.ETAT_A_FAIRE: return "À faire";
@@ -169,12 +187,11 @@ public class VueKanban extends BorderPane implements Observateur {
     }
 
     private String getStyleEtat(int etat) {
-        // Couleurs de fond pour les pastilles
         switch(etat) {
             case Tache.ETAT_A_FAIRE: return "-fx-background-color: #ddd; -fx-text-fill: black;";
-            case Tache.ETAT_EN_COURS: return "-fx-background-color: #fff3cd; -fx-text-fill: #856404;"; // Jaune
-            case Tache.ETAT_TERMINE: return "-fx-background-color: #d4edda; -fx-text-fill: #155724;"; // Vert
-            case Tache.ETAT_ARCHIVE: return "-fx-background-color: #f8d7da; -fx-text-fill: #721c24;"; // Rouge
+            case Tache.ETAT_EN_COURS: return "-fx-background-color: #fff3cd; -fx-text-fill: #856404;";
+            case Tache.ETAT_TERMINE: return "-fx-background-color: #d4edda; -fx-text-fill: #155724;";
+            case Tache.ETAT_ARCHIVE: return "-fx-background-color: #f8d7da; -fx-text-fill: #721c24;";
             default: return "";
         }
     }

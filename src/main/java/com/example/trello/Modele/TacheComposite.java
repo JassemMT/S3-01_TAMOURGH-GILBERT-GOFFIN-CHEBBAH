@@ -1,6 +1,7 @@
 package com.example.trello.Modele;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,24 +10,34 @@ public class TacheComposite extends Tache implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-
     private List<Tache> enfants;
 
-    public TacheComposite(String libelle, String commentaire, String jour, String colonne, int dureeEstimee) {
-        super(libelle, commentaire, jour, colonne, dureeEstimee);
+    /**
+     * Constructeur standard avec LocalDate
+     */
+    public TacheComposite(String libelle, String commentaire, LocalDate dateDebut, String colonne, int dureeEstimee) {
+        super(libelle, commentaire, dateDebut, colonne, dureeEstimee);
         this.enfants = new ArrayList<>();
     }
 
-    // Constructeur utile pour la promotion (copie)
+    /**
+     * Constructeur de promotion (Copie les données d'une TacheSimple)
+     */
     public TacheComposite(TacheSimple t) {
-        super(t.getLibelle(), t.getCommentaire(), t.getJour(), t.getColonne(), t.getDureeEstimee());
+        // Modification ici : on utilise getDateDebut()
+        super(t.getLibelle(), t.getCommentaire(), t.getDateDebut(), t.getColonne(), t.getDureeEstimee());
         this.enfants = new ArrayList<>();
-        // On copie les autres attributs
+
+        // Copie des attributs visuels et d'état
         this.setEtat(t.getEtat());
         this.setColor(t.getColor());
     }
 
-    public TacheComposite() {super();}
+    public TacheComposite() {
+        super();
+        // IMPORTANT : Initialiser la liste pour éviter le NullPointerException
+        this.enfants = new ArrayList<>();
+    }
 
     @Override
     public void ajouterEnfant(Tache t) {

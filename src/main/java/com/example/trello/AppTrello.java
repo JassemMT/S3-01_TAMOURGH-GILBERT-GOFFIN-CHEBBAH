@@ -14,6 +14,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 
+import java.time.LocalDate; // <--- Import indispensable
+
 public class AppTrello extends Application {
 
     private Modele modele;
@@ -72,17 +74,45 @@ public class AppTrello extends Application {
 
     // Fonction permettant de créer des données factices
     private void initDonneesTest(Modele modele) {
-        // Utilisation de TacheSimple pour les tâches standard
-        TacheSimple t1 = new TacheSimple("Réunion Projet", "Discuter budget", "Lundi", "Principal", 2);
+        // CORRECTION : Utilisation de LocalDate au lieu de String
+        LocalDate aujourdhui = LocalDate.now();
+        LocalDate demain = aujourdhui.plusDays(1);
 
-        TacheSimple t2 = new TacheSimple("Dev Backend", "API Rest", "Lundi", "En cours", 4);
+        // Tâche simple pour aujourd'hui
+        TacheSimple t1 = new TacheSimple(
+                "Réunion Projet",
+                "Discuter budget",
+                aujourdhui, // <-- LocalDate
+                "Principal",
+                2
+        );
+
+        TacheSimple t2 = new TacheSimple(
+                "Dev Backend",
+                "API Rest",
+                aujourdhui, // <-- LocalDate
+                "En cours",
+                4
+        );
         t2.setEtat(Tache.ETAT_EN_COURS);
 
-        // Utilisation de TacheComposite pour les parents (Dossiers)
-        TacheComposite parent = new TacheComposite("Interface Graphique", "JavaFX", "Mardi", "Principal", 10);
+        // Tâche Composite (Dossier) pour demain
+        TacheComposite parent = new TacheComposite(
+                "Interface Graphique",
+                "JavaFX",
+                demain, // <-- LocalDate
+                "Principal",
+                10
+        );
 
-        // L'enfant est une TacheSimple
-        TacheSimple enfant = new TacheSimple("Vue Liste", "Implémentation", "Mardi", "A faire", 5);
+        // L'enfant est une TacheSimple (même jour que le parent ici)
+        TacheSimple enfant = new TacheSimple(
+                "Vue Liste",
+                "Implémentation",
+                demain, // <-- LocalDate
+                "A faire",
+                5
+        );
 
         // Ajout de l'enfant au parent
         parent.ajouterEnfant(enfant);
@@ -91,8 +121,6 @@ public class AppTrello extends Application {
         modele.ajouterTache(t1);
         modele.ajouterTache(t2);
         modele.ajouterTache(parent);
-        // Important : On ajoute aussi l'enfant au modèle global pour qu'il soit visible
-        // (selon la logique de vos vues actuelles)
         modele.ajouterTache(enfant);
     }
 
