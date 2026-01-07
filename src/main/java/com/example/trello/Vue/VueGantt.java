@@ -75,22 +75,23 @@ public class VueGantt extends BorderPane implements Observateur {
     @Override
     public void actualiser(Sujet s) {
         if (s instanceof Modele) {
-            // 1. On vide tout pour repartir sur une base propre
+            // On vide tout pour repartir sur une base propre
             barresGraphiques.clear();
             layerFleches.getChildren().clear();
             conteneurLignes.getChildren().clear();
 
-            // 2. On reconstruit la structure (dates, colonnes, lignes)
+            // On reconstruit la structure (dates, colonnes, lignes)
             // C'est ici que calculerLimitesTemporelles est appelé
             construireGantt(((Modele) s).getTaches());
 
-            // 3. On attend que JavaFX ait fini de dessiner les barres
+            // On attend que JavaFX ait fini de dessiner les barres
             // pour calculer les coordonnées des flèches
             javafx.application.Platform.runLater(() -> {
                 dessinerToutesLesFleches();
             });
         }
     }
+    // méthode permettant de créer les éléments du diagramme
     private void construireGantt(List<Tache> taches) {
         conteneurLignes.getChildren().clear();
         headerJours.getChildren().clear();
@@ -116,6 +117,7 @@ public class VueGantt extends BorderPane implements Observateur {
         }
     }
 
+    // permet de déterminer la date min et la date max à afficher
     private void calculerLimitesTemporelles(List<Tache> taches) {
         LocalDate min = LocalDate.MAX;
         LocalDate max = LocalDate.MIN;
@@ -142,6 +144,7 @@ public class VueGantt extends BorderPane implements Observateur {
         if (nombreJoursTotal < 7) nombreJoursTotal = 7; // Minimum une semaine d'affichage
     }
 
+    // Permet de construire le header avec les dates, tache etc
     private void construireHeader() {
         // Colonne 0 : Titre de la tâche (Fixe, 25%)
         ColumnConstraints colTitre = new ColumnConstraints();
@@ -181,6 +184,7 @@ public class VueGantt extends BorderPane implements Observateur {
         }
     }
 
+    // Permet de créer les barres correspondantes aux taches
     private void ajouterLigneTache(Tache t, int niveauIndent) {
         GridPane ligne = new GridPane();
         ligne.setMinHeight(40);
@@ -226,22 +230,22 @@ public class VueGantt extends BorderPane implements Observateur {
         ligne.add(boxNom, 0, 0);
 
         // --- BARRE GANTT ---
-        // 1. Calculer le décalage (offset) par rapport au début du projet
+        // Calculer le décalage par rapport au début du projet
         long joursDepuisDebut = ChronoUnit.DAYS.between(dateDebutProjet, t.getDateDebut());
 
-        // Sécurité : si la tâche commence avant le début (ne devrait pas arriver avec notre calcul min/max)
+        // Vérifie si la tâche commence avant le début (ne devrait pas arriver avec notre calcul min/max)
         if (joursDepuisDebut < 0) joursDepuisDebut = 0;
 
-        // 2. Calculer la durée en jours
+        // Calculer la durée en jours
         int dureeJours = t.getDureeEstimee();
         if (dureeJours < 1) dureeJours = 1; // Minimum visuel
 
-        // 3. Création du conteneur pour placer la barre
+        // Création du conteneur pour placer la barre
         AnchorPane conteneurBarre = new AnchorPane();
         // Le conteneur s'étend sur toutes les colonnes de jours (de 1 à la fin)
         ligne.add(conteneurBarre, 1, 0, (int)nombreJoursTotal, 1);
 
-        // 4. Calculs de position en pourcentage
+        // Calcul de position en pourcentage
         double largeurUnJour = 100.0 / nombreJoursTotal;
         double startPercent = joursDepuisDebut * largeurUnJour;
         double widthPercent = dureeJours * largeurUnJour;
@@ -260,7 +264,7 @@ public class VueGantt extends BorderPane implements Observateur {
         lblDuree.setFont(Font.font("System", FontWeight.BOLD, 9));
         barre.getChildren().add(lblDuree);
 
-        // Liaison (Binding) pour que la barre suive le redimensionnement de la fenêtre
+        // Liaison pour que la barre suive le redimensionnement de la fenêtre
         barre.translateXProperty().bind(conteneurBarre.widthProperty().multiply(startPercent / 100.0));
         barre.prefWidthProperty().bind(conteneurBarre.widthProperty().multiply(widthPercent / 100.0));
 
@@ -270,6 +274,7 @@ public class VueGantt extends BorderPane implements Observateur {
         barre.setOnMouseClicked(new ControleurOuvrirEditeur(t, modele));
         barre.setCursor(javafx.scene.Cursor.HAND);
 
+        // permet d'afficher une petite popup lorsque l'on survole une barre dans la vue gantt
         Tooltip tp = new Tooltip(t.getLibelle() + "\nDébut : " + t.getDateDebut() + "\nDurée : " + dureeJours + " jours");
         Tooltip.install(barre, tp);
 
@@ -284,9 +289,9 @@ public class VueGantt extends BorderPane implements Observateur {
         conteneurLignes.getChildren().add(ligne);
 
 
+        // permet de créer les barres pour les sous-taches d'une tache mère
         if (t.aDesEnfants()) {
             for (Tache enfant : t.getEnfants()) {
-                // --- IL MANQUAIT LE FILTRE ---
                 if (!enfant.isArchived()) {
                     ajouterLigneTache(enfant, niveauIndent + 1);
                 }
@@ -294,6 +299,7 @@ public class VueGantt extends BorderPane implements Observateur {
         }
     }
 
+    // Méthode permettant de créer toutes les relations sur le diagramme de gantt
     private void dessinerToutesLesFleches() {
         layerFleches.getChildren().clear();
         for (Tache mere : barresGraphiques.keySet()) {
@@ -307,6 +313,7 @@ public class VueGantt extends BorderPane implements Observateur {
         }
     }
 
+    // Méthode permettant de créer un lien, ici une flèche pour représenter le lien entre les tâches mères et filles
     private void tracerLienBezier(Tache enfant, Tache mere) {
         HBox bEnfant = barresGraphiques.get(enfant);
         HBox bMere = barresGraphiques.get(mere);
@@ -318,21 +325,21 @@ public class VueGantt extends BorderPane implements Observateur {
 
         if (boundsLayer == null) return;
 
-        // Coordonnées relatives au layerFleches
+        // Coordonnées pour définir la relation
         double xSortie = boundsEnfant.getMaxX() - boundsLayer.getMinX();
         double ySortie = boundsEnfant.getMinY() + (boundsEnfant.getHeight() / 2) - boundsLayer.getMinY();
 
         double xEntree = boundsMere.getMinX() - boundsLayer.getMinX();
         double yEntree = boundsMere.getMinY() + (boundsMere.getHeight() / 2) - boundsLayer.getMinY();
 
-        // Dessin de la courbe
+        // Permet dessiner la courbe
         javafx.scene.shape.CubicCurve courbe = new javafx.scene.shape.CubicCurve();
         courbe.setStartX(xSortie);
         courbe.setStartY(ySortie);
         courbe.setEndX(xEntree);
         courbe.setEndY(yEntree);
 
-        // Points de contrôle pour l'effet "S"
+        // Permet de définir le style de la flèche en forme de S
         double distance = Math.abs(xEntree - xSortie) * 0.5;
         courbe.setControlX1(xSortie + distance);
         courbe.setControlY1(ySortie);
@@ -343,7 +350,7 @@ public class VueGantt extends BorderPane implements Observateur {
         courbe.setStrokeWidth(1.5);
         courbe.setFill(null);
 
-        // Petite pointe de flèche (Triangle)
+        // Permet de créer la pointe de la flèche
         javafx.scene.shape.Polygon pointe = new javafx.scene.shape.Polygon(0,0, -6,-4, -6,4);
         pointe.setFill(Color.web("#666666", 0.6));
         pointe.setTranslateX(xEntree);
@@ -351,7 +358,8 @@ public class VueGantt extends BorderPane implements Observateur {
 
         layerFleches.getChildren().addAll(courbe, pointe);
     }
-
+    // Permet de savoir si le contraste entre la couleur du texte et la couleur du fond pose probème ou non
+    // cela va déterminer le fait que le texte soit blanc ou noir
     private Color contrasteCouleur(String hexColor) {
         try {
             Color c = Color.web(hexColor);
