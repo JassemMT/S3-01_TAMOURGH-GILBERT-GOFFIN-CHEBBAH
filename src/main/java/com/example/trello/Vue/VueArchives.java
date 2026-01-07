@@ -90,6 +90,7 @@ public class VueArchives extends BorderPane implements Observateur {
 
         if (datesUtilisees.isEmpty()) return;
 
+        // on détermine la date minimum et maximum présente dans la liste des dates
         LocalDate minDate = Collections.min(datesUtilisees);
         LocalDate maxDate = Collections.max(datesUtilisees);
 
@@ -107,20 +108,23 @@ public class VueArchives extends BorderPane implements Observateur {
             currentDate = currentDate.plusDays(1);
         }
     }
-
+    // permet de créer graphiquement la représentation des jours dans la vueArchive
     private void construireSectionJour(LocalDate dateDuJour, List<Tache> taches) {
+        // création d'une vbox pour délimiter chaque jours
         VBox section = new VBox(10);
         section.setStyle("-fx-background-color: #FFF; -fx-background-radius: 5; -fx-padding: 10; -fx-border-color: #EEE; -fx-border-radius: 5;");
 
         String titreFormatte = dateDuJour.format(FORMAT_DATE_COMPLET);
         titreFormatte = titreFormatte.substring(0, 1).toUpperCase() + titreFormatte.substring(1);
-
+        // objet label pour la date du jour avec un style spécifique
         Label lblJour = new Label(titreFormatte);
         lblJour.setFont(Font.font("Arial", FontWeight.BOLD, 16));
         lblJour.setTextFill(Color.GRAY);
 
+        // ajout du label dans la vbox
         section.getChildren().add(lblJour);
 
+        // création d'un gridPane pour placer tous les élements graphiques
         GridPane grille = new GridPane();
         grille.setHgap(10);
         grille.setVgap(8);
