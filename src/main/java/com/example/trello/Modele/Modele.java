@@ -265,7 +265,42 @@ public class Modele implements Sujet, Serializable {
         return false; // Pas trouvé dans cette branche
     }
 
-    private Tache getFirstParent() {
+    /**
 
+     Trouve le parent direct (père) d'une tâche.
+     @param cible La tâche dont on cherche le père.
+     @return La tâche parente, ou null si la cible est une racine (pas de parent).*/
+    public Tache getParentDirect(Tache cible) {
+        if (cible == null) return null;
+
+        for (Tache racine : taches) {
+            // Si la racine est la cible, elle n'a pas de parent
+            if (racine == cible) return null;
+
+            // Sinon on cherche dans ses descendants
+            Tache parentTrouve = chercherParentDirectRecursif(racine, cible);
+            if (parentTrouve != null) {
+                return parentTrouve;
+            }
+        }
+        return null; // Pas trouvé (cas bizarre ou tâche orpheline)
     }
+
+    private Tache chercherParentDirectRecursif(Tache parentActuel, Tache cible) {
+        // 1. Vérification directe : Est-ce que JE suis ton père ?
+        if (parentActuel.aDesEnfants()) {
+            // On regarde si la liste de mes enfants contient la cible
+            if (parentActuel.getEnfants().contains(cible)) {
+                return parentActuel;
+            }
+
+            // 2. Sinon, on demande à mes enfants de chercher dans leurs propres enfants
+            for (Tache enfant : parentActuel.getEnfants()) {
+                Tache res = chercherParentDirectRecursif(enfant, cible);
+                if (res != null) return res;
+            }
+        }
+        return null;
+    }
+
 }

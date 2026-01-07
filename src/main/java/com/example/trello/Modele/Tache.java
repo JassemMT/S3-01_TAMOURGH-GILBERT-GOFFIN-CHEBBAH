@@ -72,8 +72,11 @@ public abstract class Tache implements Serializable {
 
     public int getDureeEstimee() { return dureeEstimee; }
     public void setDureeEstimee(int dureeEstimee) { this.dureeEstimee = dureeEstimee; }
-    public void setDureeEstimee(int dureeEstimee, List<Tache> parents) {
-
+    public void setDureeEstimee(int dureeEstimee, Tache parent) {
+        if (parent == null) this.setDureeEstimee(dureeEstimee);
+        else if (parent.getDateFin().isAfter(this.dateDebut)) {
+            parent.setDureeEstimee(parent.calculerComplement(this.dateDebut));
+        }
     }
 
     public String getColor() { return color; }

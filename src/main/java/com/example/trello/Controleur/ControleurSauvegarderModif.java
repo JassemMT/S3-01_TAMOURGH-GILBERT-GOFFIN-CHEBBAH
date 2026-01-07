@@ -34,7 +34,7 @@ public class ControleurSauvegarderModif implements EventHandler<ActionEvent> {
 
         tache.setLibelle(nouveauTitre);
         tache.setCommentaire(nouveauCom);
-        tache.setDureeEstimee(duree);
+        tache.setDureeEstimee(duree, modele.getParentDirect(tache));
         tache.setColor(couleur);
 
         // --- Mise à jour de la date (remplace setJour) ---
