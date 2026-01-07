@@ -27,6 +27,7 @@ public class ControleurSupprimerTache implements EventHandler<ActionEvent> {
         alert.setHeaderText("Supprimer '" + tache.getLibelle() + "' ?");
         alert.setContentText("Cette action est irréversible. La tâche et ses sous-tâches seront perdues.");
 
+        // récupération du résultat
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK){
             modele.supprimerTache(tache);
