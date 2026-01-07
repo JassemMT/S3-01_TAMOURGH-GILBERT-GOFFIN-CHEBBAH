@@ -48,11 +48,14 @@ public class TacheComposite extends Tache implements Serializable {
         return new ArrayList<>(enfants);
     }
 
+    // permet de vérifier si la tache courante possède des enfants
     @Override
     public boolean aDesEnfants() {
         return !enfants.isEmpty();
     }
 
+    // permet de construire les dépendances de la tache courante
+    // en faisant une boucle sur les enfants de la tache
     @Override
     public LinkedList<Tache> construirDependance() {
         LinkedList<Tache> dependances = new LinkedList<>();
