@@ -55,6 +55,7 @@ public abstract class Tache implements Serializable {
     public abstract List<Tache> getEnfants();
     public abstract boolean aDesEnfants();
     public abstract LinkedList<Tache> construirDependance();
+    public abstract void supprimerEnfant(Tache t);
 
     // --- GETTERS ET SETTERS COMMUNS ---
     public String getLibelle() { return libelle; }

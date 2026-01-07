@@ -34,6 +34,12 @@ public class TacheComposite extends Tache implements Serializable {
             enfants.add(t);
         }
     }
+    @Override
+    public void supprimerEnfant(Tache t) {
+        if (enfants != null) {
+            enfants.remove(t);
+        }
+    }
 
     @Override
     public List<Tache> getEnfants() {
