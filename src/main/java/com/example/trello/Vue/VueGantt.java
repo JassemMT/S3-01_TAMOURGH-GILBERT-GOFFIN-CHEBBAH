@@ -28,6 +28,9 @@ public class VueGantt extends BorderPane implements Observateur {
     private GridPane headerJours;
     private ScrollPane scrollPane;
 
+    private Pane layerFleches; // Couche transparente pour les flèches
+    private java.util.Map<Tache, HBox> barresGraphiques = new java.util.HashMap<>(); // Stocke les barres pour trouver leurs positions
+
     // Plage de dates globale du projet pour l'affichage
     private LocalDate dateDebutProjet;
     private long nombreJoursTotal;
@@ -43,36 +46,51 @@ public class VueGantt extends BorderPane implements Observateur {
     }
 
     private void initialiserInterface() {
-        // 1. En-tête de la vue
         Label titreVue = new Label("Vue Gantt (Chronologique)");
         titreVue.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-padding: 15;");
         setTop(titreVue);
 
+        StackPane stackCentral = new StackPane(); // Permet la superposition
         VBox layoutCentral = new VBox(0);
 
-        // 2. Header des Jours (La grille temporelle)
         headerJours = new GridPane();
         headerJours.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #ccc; -fx-border-width: 1 0 1 0;");
         layoutCentral.getChildren().add(headerJours);
 
-        // 3. Conteneur des lignes de tâches
         conteneurLignes = new VBox(0);
         layoutCentral.getChildren().add(conteneurLignes);
 
-        scrollPane = new ScrollPane(layoutCentral);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: white;");
+        // Initialisation du calque des flèches
+        layerFleches = new Pane();
+        layerFleches.setMouseTransparent(true); // Pour cliquer sur les tâches à travers
 
+        // On empile : le tableau en dessous, les flèches au dessus
+        stackCentral.getChildren().addAll(layoutCentral, layerFleches);
+
+        scrollPane = new ScrollPane(stackCentral); // On met le stack dans le scroll
+        scrollPane.setFitToWidth(true);
         setCenter(scrollPane);
     }
 
     @Override
     public void actualiser(Sujet s) {
         if (s instanceof Modele) {
+            // 1. On vide tout pour repartir sur une base propre
+            barresGraphiques.clear();
+            layerFleches.getChildren().clear();
+            conteneurLignes.getChildren().clear();
+
+            // 2. On reconstruit la structure (dates, colonnes, lignes)
+            // C'est ici que calculerLimitesTemporelles est appelé
             construireGantt(((Modele) s).getTaches());
+
+            // 3. On attend que JavaFX ait fini de dessiner les barres
+            // pour calculer les coordonnées des flèches
+            javafx.application.Platform.runLater(() -> {
+                dessinerToutesLesFleches();
+            });
         }
     }
-
     private void construireGantt(List<Tache> taches) {
         conteneurLignes.getChildren().clear();
         headerJours.getChildren().clear();
@@ -262,7 +280,7 @@ public class VueGantt extends BorderPane implements Observateur {
         barre.setOnContextMenuRequested(e -> contextMenu.show(barre, e.getScreenX(), e.getScreenY()));
 
         conteneurBarre.getChildren().add(barre);
-
+        barresGraphiques.put(t, barre);
         conteneurLignes.getChildren().add(ligne);
 
 
@@ -274,6 +292,64 @@ public class VueGantt extends BorderPane implements Observateur {
                 }
             }
         }
+    }
+
+    private void dessinerToutesLesFleches() {
+        layerFleches.getChildren().clear();
+        for (Tache mere : barresGraphiques.keySet()) {
+            if (mere.aDesEnfants()) {
+                for (Tache enfant : mere.getEnfants()) {
+                    if (barresGraphiques.containsKey(enfant) && !enfant.isArchived()) {
+                        tracerLienBezier(enfant, mere);
+                    }
+                }
+            }
+        }
+    }
+
+    private void tracerLienBezier(Tache enfant, Tache mere) {
+        HBox bEnfant = barresGraphiques.get(enfant);
+        HBox bMere = barresGraphiques.get(mere);
+
+        // Récupération des positions absolues dans la scène
+        javafx.geometry.Bounds boundsEnfant = bEnfant.localToScene(bEnfant.getBoundsInLocal());
+        javafx.geometry.Bounds boundsMere = bMere.localToScene(bMere.getBoundsInLocal());
+        javafx.geometry.Bounds boundsLayer = layerFleches.localToScene(layerFleches.getBoundsInLocal());
+
+        if (boundsLayer == null) return;
+
+        // Coordonnées relatives au layerFleches
+        double xSortie = boundsEnfant.getMaxX() - boundsLayer.getMinX();
+        double ySortie = boundsEnfant.getMinY() + (boundsEnfant.getHeight() / 2) - boundsLayer.getMinY();
+
+        double xEntree = boundsMere.getMinX() - boundsLayer.getMinX();
+        double yEntree = boundsMere.getMinY() + (boundsMere.getHeight() / 2) - boundsLayer.getMinY();
+
+        // Dessin de la courbe
+        javafx.scene.shape.CubicCurve courbe = new javafx.scene.shape.CubicCurve();
+        courbe.setStartX(xSortie);
+        courbe.setStartY(ySortie);
+        courbe.setEndX(xEntree);
+        courbe.setEndY(yEntree);
+
+        // Points de contrôle pour l'effet "S"
+        double distance = Math.abs(xEntree - xSortie) * 0.5;
+        courbe.setControlX1(xSortie + distance);
+        courbe.setControlY1(ySortie);
+        courbe.setControlX2(xEntree - distance);
+        courbe.setControlY2(yEntree);
+
+        courbe.setStroke(Color.web("#666666", 0.6));
+        courbe.setStrokeWidth(1.5);
+        courbe.setFill(null);
+
+        // Petite pointe de flèche (Triangle)
+        javafx.scene.shape.Polygon pointe = new javafx.scene.shape.Polygon(0,0, -6,-4, -6,4);
+        pointe.setFill(Color.web("#666666", 0.6));
+        pointe.setTranslateX(xEntree);
+        pointe.setTranslateY(yEntree);
+
+        layerFleches.getChildren().addAll(courbe, pointe);
     }
 
     private Color contrasteCouleur(String hexColor) {
