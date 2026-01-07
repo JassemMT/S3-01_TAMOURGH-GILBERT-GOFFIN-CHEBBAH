@@ -5,11 +5,16 @@ import com.example.trello.Controleur.ControleurOuvrirEditeur;
 import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.Sujet;
 import com.example.trello.Modele.Tache;
+import javafx.application.Platform;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.CubicCurve;
+import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
@@ -86,7 +91,7 @@ public class VueGantt extends BorderPane implements Observateur {
 
             // On attend que JavaFX ait fini de dessiner les barres
             // pour calculer les coordonnées des flèches
-            javafx.application.Platform.runLater(() -> {
+            Platform.runLater(() -> {
                 dessinerToutesLesFleches();
             });
         }
@@ -226,7 +231,7 @@ public class VueGantt extends BorderPane implements Observateur {
         lblNom.setFont(Font.font("System", niveauIndent == 0 ? FontWeight.BOLD : FontWeight.NORMAL, 13));
         boxNom.getChildren().add(lblNom);
         boxNom.setOnMouseClicked(new ControleurOuvrirEditeur(t, modele));
-        boxNom.setCursor(javafx.scene.Cursor.HAND);
+        boxNom.setCursor(Cursor.HAND);
         ligne.add(boxNom, 0, 0);
 
         // --- BARRE GANTT ---
@@ -272,7 +277,7 @@ public class VueGantt extends BorderPane implements Observateur {
 
         // Interactions
         barre.setOnMouseClicked(new ControleurOuvrirEditeur(t, modele));
-        barre.setCursor(javafx.scene.Cursor.HAND);
+        barre.setCursor(Cursor.HAND);
 
         // permet d'afficher une petite popup lorsque l'on survole une barre dans la vue gantt
         Tooltip tp = new Tooltip(t.getLibelle() + "\nDébut : " + t.getDateDebut() + "\nDurée : " + dureeJours + " jours");
@@ -319,9 +324,9 @@ public class VueGantt extends BorderPane implements Observateur {
         HBox bMere = barresGraphiques.get(mere);
 
         // Récupération des positions absolues dans la scène
-        javafx.geometry.Bounds boundsEnfant = bEnfant.localToScene(bEnfant.getBoundsInLocal());
-        javafx.geometry.Bounds boundsMere = bMere.localToScene(bMere.getBoundsInLocal());
-        javafx.geometry.Bounds boundsLayer = layerFleches.localToScene(layerFleches.getBoundsInLocal());
+        Bounds boundsEnfant = bEnfant.localToScene(bEnfant.getBoundsInLocal());
+        Bounds boundsMere = bMere.localToScene(bMere.getBoundsInLocal());
+        Bounds boundsLayer = layerFleches.localToScene(layerFleches.getBoundsInLocal());
 
         if (boundsLayer == null) return;
 
@@ -333,7 +338,7 @@ public class VueGantt extends BorderPane implements Observateur {
         double yEntree = boundsMere.getMinY() + (boundsMere.getHeight() / 2) - boundsLayer.getMinY();
 
         // Permet dessiner la courbe
-        javafx.scene.shape.CubicCurve courbe = new javafx.scene.shape.CubicCurve();
+        CubicCurve courbe = new CubicCurve();
         courbe.setStartX(xSortie);
         courbe.setStartY(ySortie);
         courbe.setEndX(xEntree);
@@ -351,7 +356,7 @@ public class VueGantt extends BorderPane implements Observateur {
         courbe.setFill(null);
 
         // Permet de créer la pointe de la flèche
-        javafx.scene.shape.Polygon pointe = new javafx.scene.shape.Polygon(0,0, -6,-4, -6,4);
+        Polygon pointe = new Polygon(0,0, -6,-4, -6,4);
         pointe.setFill(Color.web("#666666", 0.6));
         pointe.setTranslateX(xEntree);
         pointe.setTranslateY(yEntree);
