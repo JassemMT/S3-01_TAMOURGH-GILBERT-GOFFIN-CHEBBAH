@@ -93,6 +93,35 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
+    // --- DESARCHIVAGE RÉCURSIF ---
+    public void desarchiverTache(Tache tache) {
+        if (tache != null) {
+            desarchiverRecursif(tache);
+            notifierObservateur();
+        }
+    }
+
+    private void desarchiverRecursif(Tache t) {
+        t.setEtat(Tache.ETAT_A_FAIRE);
+        if (t.aDesEnfants()) {
+            for (Tache enfant : t.getEnfants()) {
+                desarchiverRecursif(enfant);
+            }
+        }
+    }
+
+    public List<Tache> getTachesArchives() {
+        //autre syntaxe possible avec boucle et conditionnelle simplement :
+        List<Tache> archives = new ArrayList<>();
+        for (Tache t : taches) {
+            if (t.isArchived()) {
+                archives.add(t);
+            }
+        }
+        return archives;
+
+    }
+
     public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
 
     public Map<String, List<Tache>> getColonnes() {
