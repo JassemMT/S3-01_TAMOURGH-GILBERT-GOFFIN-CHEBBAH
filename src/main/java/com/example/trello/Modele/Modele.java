@@ -59,10 +59,19 @@ public class Modele implements Sujet, Serializable {
 
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
 
-    // --- SUPPRESSION RÉCURSIVE ---
+    // --- SUPPRESSION DÉFINITIVE ---
     public void supprimerTache(Tache tache) {
         if (tache != null) {
+            // DÉTACHEMENT DU PARENT
+            // On utilise ta méthode existante pour trouver le père
+            Tache parent = getParentDirect(tache);
+            if (parent != null) {
+                parent.supprimerEnfant(tache);
+                }
+
+            // SUPPRESSION RÉCURSIVE DE LA LISTE PRINCIPALE
             supprimerRecursif(tache);
+
             notifierObservateur();
         }
     }
@@ -70,7 +79,8 @@ public class Modele implements Sujet, Serializable {
     private void supprimerRecursif(Tache t) {
         taches.remove(t);
         if (t.aDesEnfants()) {
-            for (Tache enfant : t.getEnfants()) {
+            List<Tache> enfants = new ArrayList<>(t.getEnfants()); // Copie pour éviter les problèmes de modification de liste
+            for (Tache enfant : enfants) {
                 supprimerRecursif(enfant);
             }
         }

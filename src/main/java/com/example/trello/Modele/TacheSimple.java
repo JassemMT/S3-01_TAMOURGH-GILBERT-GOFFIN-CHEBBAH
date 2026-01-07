@@ -44,4 +44,9 @@ public class TacheSimple extends Tache implements Serializable {
     public void remplacerEnfant(Tache ancienne, Tache nouvelle) {
         // Rien à faire pour une tâche simple
     }
+
+    @Override
+    public void supprimerEnfant(Tache t) {
+        // Rien à faire
+    }
 }

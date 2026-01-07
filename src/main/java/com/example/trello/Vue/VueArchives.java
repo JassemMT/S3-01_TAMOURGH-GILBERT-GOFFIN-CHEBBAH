@@ -1,16 +1,14 @@
 package com.example.trello.Vue;
 
 import com.example.trello.Controleur.ControleurDesarchiverTache;
-import com.example.trello.Controleur.ControleurOuvrirEditeur; // On garde l'éditeur pour voir les détails
+import com.example.trello.Controleur.ControleurOuvrirEditeur;
+import com.example.trello.Controleur.ControleurSupprimerTache; // <--- Import nécessaire
 import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.Sujet;
 import com.example.trello.Modele.Tache;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -45,8 +43,6 @@ public class VueArchives extends BorderPane implements Observateur {
         Label titreVue = new Label("🗄 Corbeille / Archives");
         titreVue.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #c62828;");
 
-        // Pas de bouton "Ajouter tâche" dans les archives
-
         entete.getChildren().add(titreVue);
         setTop(entete);
 
@@ -63,8 +59,6 @@ public class VueArchives extends BorderPane implements Observateur {
     public void actualiser(Sujet s) {
         if (s instanceof Modele) {
             Modele m = (Modele) s;
-            // IMPORTANT : On appelle la méthode spécifique pour les archives
-
             rafraichirDonnees(m.getTachesArchives());
         }
     }
@@ -79,8 +73,6 @@ public class VueArchives extends BorderPane implements Observateur {
             conteneurPrincipal.getChildren().add(lblVide);
             return;
         }
-
-        // --- Logique de tri par date (similaire VueListe) ---
 
         Set<LocalDate> datesUtilisees = new HashSet<>();
         for (Tache t : lesTaches) {
@@ -116,7 +108,7 @@ public class VueArchives extends BorderPane implements Observateur {
 
         Label lblJour = new Label(titreFormatte);
         lblJour.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-        lblJour.setTextFill(Color.GRAY); // Couleur grise pour montrer que c'est passé/archivé
+        lblJour.setTextFill(Color.GRAY);
 
         section.getChildren().add(lblJour);
 
@@ -131,15 +123,13 @@ public class VueArchives extends BorderPane implements Observateur {
         ColumnConstraints colDuree = new ColumnConstraints(80);
         ColumnConstraints colComm = new ColumnConstraints(150, 150, Double.MAX_VALUE);
         colComm.setHgrow(Priority.ALWAYS);
-        ColumnConstraints colActions = new ColumnConstraints(120); // Plus large pour le texte "Restaurer"
+
+        ColumnConstraints colActions = new ColumnConstraints(160);
 
         grille.getColumnConstraints().addAll(colLibelle, colEtat, colColonne, colDuree, colComm, colActions);
 
         int row = 0;
         for (Tache t : taches) {
-            // Note: Dans les archives, on affiche tout à plat ou on garde la hiérarchie ?
-            // Ici j'utilise une version simplifiée sans indentation complexe pour éviter
-            // les bugs si le parent n'est pas archivé mais l'enfant si.
             row = ajouterLigneTache(grille, t, row);
         }
         section.getChildren().add(grille);
@@ -152,8 +142,7 @@ public class VueArchives extends BorderPane implements Observateur {
 
         Label lLibelle = new Label(t.getLibelle());
         lLibelle.setFont(Font.font("System", FontWeight.NORMAL, 14));
-        lLibelle.setTextFill(Color.DARKGRAY); // Texte grisé
-        // On permet quand même d'ouvrir pour voir les infos
+        lLibelle.setTextFill(Color.DARKGRAY);
         lLibelle.setOnMouseClicked(new ControleurOuvrirEditeur(t, modele));
         lLibelle.setCursor(javafx.scene.Cursor.HAND);
 
@@ -172,18 +161,31 @@ public class VueArchives extends BorderPane implements Observateur {
         lComm.setTextFill(Color.GRAY);
         lComm.setFont(Font.font("System", FontPosture.ITALIC, 12));
 
-        // BOUTON RESTAURER
-        Button btnRestaurer = new Button("⟲ RESTAURER");
-        btnRestaurer.setStyle("-fx-background-color: transparent; -fx-text-fill: #2E7D32; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 11px;");
-        btnRestaurer.setTooltip(new Tooltip("Désarchiver la tâche"));
+        // --- ZONE ACTIONS (Restaurer + Supprimer) ---
+        HBox boxActions = new HBox(10);
+        boxActions.setAlignment(Pos.CENTER_RIGHT);
+
+        // 1. Bouton Restaurer (Icône ⟲)
+        Button btnRestaurer = new Button("⟲");
+        btnRestaurer.setStyle("-fx-background-color: white; -fx-text-fill: #2E7D32; -fx-border-color: #2E7D32; -fx-border-radius: 3; -fx-cursor: hand; -fx-font-weight: bold;");
+        btnRestaurer.setTooltip(new Tooltip("Restaurer la tâche"));
         btnRestaurer.setOnAction(new ControleurDesarchiverTache(modele, t));
 
+        // Bouton Supprimer Définitivement (Icône 🗑)
+        Button btnSupprimer = new Button("🗑");
+        btnSupprimer.setStyle("-fx-background-color: white; -fx-text-fill: #c0392b; -fx-border-color: #c0392b; -fx-border-radius: 3; -fx-cursor: hand;");
+        btnSupprimer.setTooltip(new Tooltip("Supprimer définitivement (Irréversible)"));
+        btnSupprimer.setOnAction(new ControleurSupprimerTache(modele, t));
+
+        boxActions.getChildren().addAll(btnRestaurer, btnSupprimer);
+
+        // Ajout à la grille
         grille.add(boxTitre, 0, row);
         grille.add(lEtat, 1, row);
         grille.add(lColonne, 2, row);
         grille.add(lDuree, 3, row);
         grille.add(lComm, 4, row);
-        grille.add(btnRestaurer, 5, row);
+        grille.add(boxActions, 5, row); // On ajoute la box contenant les 2 boutons
 
         return row + 1;
     }

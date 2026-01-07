@@ -109,4 +109,6 @@ public abstract class Tache implements Serializable {
         Period periode = Period.between(this.dateDebut, d);
         return periode.getDays();
     }
+
+    public abstract void supprimerEnfant(Tache t);
 }
