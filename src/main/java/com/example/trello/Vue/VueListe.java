@@ -225,7 +225,7 @@ public class VueListe extends BorderPane implements Observateur {
         lComm.setFont(Font.font("System", FontPosture.ITALIC, 12));
         lComm.setWrapText(false); // On évite que ça prenne trop de place verticalement
 
-        Button btnArchiver = new Button("✖");
+        Button btnArchiver = new Button("ARCHIVER");
         btnArchiver.setStyle("-fx-background-color: transparent; -fx-text-fill: #D32F2F; -fx-font-weight: bold; -fx-cursor: hand;");
         btnArchiver.setTooltip(new Tooltip("Archiver la tâche"));
         btnArchiver.setOnAction(new ControleurArchiverTache(modele, t));

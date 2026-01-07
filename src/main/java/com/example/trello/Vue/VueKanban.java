@@ -155,7 +155,7 @@ public class VueKanban extends BorderPane implements Observateur {
         }
 
         // 5. Bouton archiver
-        Button btnArchiver = new Button("🗄"); // Icone seule pour gagner de la place
+        Button btnArchiver = new Button("ARCHIVER"); // Icone seule pour gagner de la place
         btnArchiver.setStyle("-fx-font-size: 10px; -fx-background-color: transparent; -fx-text-fill: #666;");
         btnArchiver.setTooltip(new Tooltip("Archiver"));
         btnArchiver.setOnAction(new ControleurArchiverTache(modele, tache));
