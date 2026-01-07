@@ -69,4 +69,21 @@ public class TacheComposite extends Tache implements Serializable {
             enfants.set(index, nouvelle);
         }
     }
+
+    public void setDateDebut(LocalDate dateDebut, Tache parent) {
+        if (dateDebut != null) {
+            this.dateDebut = dateDebut;
+            if (parent != null) {
+                if (this.getDateFin().isAfter(parent.getDateDebut())) {
+                    parent.setDateDebut(this.getDateFin());
+                }
+                for (Tache tache : enfants) {
+                    if (this.getDateDebut().isBefore(tache.getDateDebut())) {
+                        tache.setDateDebut(this.getDateDebut().minusDays(tache.dureeEstimee));
+                    }
+                }
+            }
+        }
+    }
+
 }

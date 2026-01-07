@@ -44,4 +44,16 @@ public class TacheSimple extends Tache implements Serializable {
     public void remplacerEnfant(Tache ancienne, Tache nouvelle) {
         // Rien à faire pour une tâche simple
     }
+
+    @Override
+    public void setDateDebut(LocalDate dateDebut, Tache parent) {
+        if (dateDebut != null) {
+            this.dateDebut = dateDebut;
+            if (parent != null) {
+                if (this.getDateFin().isAfter(parent.getDateDebut())) {
+                    parent.setDateDebut(this.getDateFin());
+                }
+            }
+        }
+    }
 }

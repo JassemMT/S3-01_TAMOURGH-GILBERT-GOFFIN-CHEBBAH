@@ -89,6 +89,7 @@ public abstract class Tache implements Serializable {
     public void setDateDebut(LocalDate dateDebut) {
         if (dateDebut != null) this.dateDebut = dateDebut;
     }
+    public abstract void setDateDebut(LocalDate dateDebut, Tache parent);
 
     public LocalDate getDateFin() { return dateDebut.plusDays(dureeEstimee); }
 
