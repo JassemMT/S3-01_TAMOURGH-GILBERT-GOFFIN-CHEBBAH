@@ -38,6 +38,10 @@ public class TacheSimple extends Tache implements Serializable {
     public boolean aDesEnfants() {
         return false;
     }
+    @Override
+    public void supprimerEnfant(Tache t) {
+        // Une tâche simple n'a pas d'enfants, donc rien à faire.
+    }
 
     @Override
     public LinkedList<Tache> construirDependance() {

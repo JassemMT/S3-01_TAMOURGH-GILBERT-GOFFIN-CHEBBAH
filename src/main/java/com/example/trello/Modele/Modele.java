@@ -69,8 +69,53 @@ public class Modele implements Sujet, Serializable {
     public List<Tache> getTaches() { return taches.stream().filter(t -> !t.isArchived()).collect(Collectors.toList()); }
 
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
-    public void supprimerTache(Tache tache) { if (tache != null) { taches.remove(tache); notifierObservateur(); } }
-    public void archiverTache(Tache tache) { if (tache != null) { tache.setEtat(Tache.ETAT_ARCHIVE); notifierObservateur(); } }
+    /**
+     * Archive une tâche ainsi que tout son sous-arbre (enfants, petits-enfants...).
+     */
+    public void archiverTache(Tache tache) {
+        if (tache != null) {
+            // 1. On archive la tâche principale (la racine de l'action)
+            tache.setEtat(Tache.ETAT_ARCHIVE);
+
+            // 2. On récupère toute la descendance récursivement
+            // Grâce à votre méthode construireDependance(), on a la liste complète à plat.
+            List<Tache> descendants = tache.construirDependance();
+
+            // 3. On archive tous les descendants
+            for (Tache t : descendants) {
+                t.setEtat(Tache.ETAT_ARCHIVE);
+            }
+
+            // 4. On notifie les vues pour qu'elles retirent visuellement ces tâches
+            notifierObservateur();
+        }
+    }
+    /**
+     * Supprime une tâche et tout son sous-arbre (enfants, petits-enfants...)
+     * Retire également la tâche de la liste des enfants de son parent éventuel.
+     */
+    public void supprimerTache(Tache tacheASupprimer) {
+        if (tacheASupprimer != null) {
+            // 1. Identifier toute la famille à supprimer (La tâche + ses descendants)
+            List<Tache> familleASupprimer = new ArrayList<>();
+            familleASupprimer.add(tacheASupprimer);
+            familleASupprimer.addAll(tacheASupprimer.construirDependance()); // Récupère tous les enfants récursivement
+
+            // 2. Détacher la tâche de son parent (si elle en a un)
+            // Comme on n'a pas de champ "parent" dans Tache, on doit chercher qui la possède
+            for (Tache t : taches) {
+                if (t instanceof TacheComposite && !familleASupprimer.contains(t)) {
+                    // On supprime l'enfant du parent
+                    ((TacheComposite) t).supprimerEnfant(tacheASupprimer);
+                }
+            }
+
+            // 3. Supprimer tout le monde de la liste principale du modèle
+            taches.removeAll(familleASupprimer);
+
+            notifierObservateur();
+        }
+    }
 
     public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
 
@@ -122,14 +167,25 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
+
+
+    /**
+            * Déplace une tâche et applique ce changement à tous ses descendants.
+     */
     public void deplacerTacheColonne(Tache tache, String nouvelleColonne) {
         if (tache != null && nouvelleColonne != null && colonnesDisponibles.contains(nouvelleColonne)) {
+
+            // 1. On déplace la tâche principale
             tache.setColonne(nouvelleColonne);
-            if (tache instanceof TacheComposite){
-                for (Tache t : tache.getEnfants()) {
-                    t.setColonne(nouvelleColonne);
-                }
+
+            // 2. On récupère TOUS les descendants (enfants, petits-enfants, etc.)
+            List<Tache> descendants = tache.construirDependance();
+
+            // 3. On applique le changement de colonne
+            for (Tache descendant : descendants) {
+                descendant.setColonne(nouvelleColonne);
             }
+
             notifierObservateur();
         }
     }
