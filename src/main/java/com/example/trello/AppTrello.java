@@ -90,11 +90,68 @@ public class AppTrello extends Application {
         for (String col : colonnes) {
             modele.ajouterColonne(col);
         }
+        int annee = LocalDate.now().getYear();
+
+        // =========================================================================
+        // 2. COLONNE X : SCÉNARIO 10 taches
+        // =========================================================================
+        // --- ARBRE D (15/01, 2 semaines) ---
+        TacheComposite D = new TacheComposite("Tache D", "Racine dépendance", LocalDate.of(annee, 1, 15), "X", 14);
+        TacheSimple D1 = new TacheSimple("D1", "Sous-tache de D", LocalDate.of(annee, 1, 4), "X", 5);
+        D.ajouterEnfant(D1);
+
+        // --- TACHE C (01/02, 1 semaine) ---
+        // C est une tache simple ici (elle n'a pas d'enfants mentionnés dans l'énoncé structurel)
+        TacheSimple C = new TacheSimple("Tache C", "Dépend de D", LocalDate.of(annee, 2, 1), "X", 7);
+
+        // --- ARBRE A (15/02, 3 semaines) ---
+        TacheComposite A = new TacheComposite("Tache A", "Dépend de C", LocalDate.of(annee, 2, 15), "X", 21);
+        TacheSimple A1 = new TacheSimple("A1", "Sous-tache A1", LocalDate.of(annee, 2, 1), "X", 7);
+        TacheSimple A2 = new TacheSimple("A2", "Sous-tache A2", LocalDate.of(annee, 2, 2), "X", 7);
+        A.ajouterEnfant(A1);
+        A.ajouterEnfant(A2);
+
+        // --- ARBRE B (22/02, 5 semaines) ---
+        TacheComposite B = new TacheComposite("Tache B", "Gros Module", LocalDate.of(annee, 2, 22), "X", 35);
+
+        // Sous-tache B1 (Celle à déplacer plus tard)
+        TacheSimple B1 = new TacheSimple("B1", "A déplacer vers Q", LocalDate.of(annee, 2, 1), "X", 14);
+
+        // Sous-tache B3
+        TacheSimple B3 = new TacheSimple("B3", "Sous-tache B3", LocalDate.of(annee, 1, 5), "X", 21);
+
+        // Sous-tache B2 (Qui est elle-même un Composite car elle a des enfants)
+        TacheComposite B2 = new TacheComposite("B2", "Composite dans B", LocalDate.of(annee, 2, 12), "X", 7);
+        TacheSimple B21 = new TacheSimple("B21", "Enfant de B2", LocalDate.of(annee, 1, 12), "X", 2);
+        TacheSimple B23 = new TacheSimple("B23", "Enfant de B2", LocalDate.of(annee, 1, 14), "X", 2);
+
+        B2.ajouterEnfant(B21);
+        B2.ajouterEnfant(B23);
+
+        // Construction de l'arbre B
+        B.ajouterEnfant(B1);
+        B.ajouterEnfant(B2);
+        B.ajouterEnfant(B3);
 
 
+        modele.ajouterTache(D);
+        modele.ajouterTache(C);
 
 
-        String[] autresColonnes = {"O", "P", "R", "T", "Y", "Z"};
+        modele.ajouterTache(A);
+        modele.ajouterTache(B);
+
+        // Ajout d'une tâche de remplissage pour atteindre les 10 tâches dans X (4 parents + 10 enfants = 14 objets, mais visuellement on assure)
+        // Les enfants sont ajoutés automatiquement via les parents dans certaines vues, mais pour être sûr que tout est chargé :
+        modele.ajouterTache(D1);
+        modele.ajouterTache(A1);
+        modele.ajouterTache(A2);
+        modele.ajouterTache(B1);
+        modele.ajouterTache(B3);
+        modele.ajouterTache(B2);
+        modele.ajouterTache(B21);
+        modele.ajouterTache(B23);
+        String[] autresColonnes = {"O", "P", "Q", "R", "T", "Y", "Z"};
 
         for (String col : autresColonnes) {
             for (int i = 1; i <= 3; i++) {
