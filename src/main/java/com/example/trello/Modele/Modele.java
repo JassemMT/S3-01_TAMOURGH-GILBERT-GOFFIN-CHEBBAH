@@ -213,4 +213,59 @@ public class Modele implements Sujet, Serializable {
         this.observateurs = new ArrayList<>();
         ((ModeleRepository) repo).save(this);
     }
+
+    /**
+     * Récupère la liste de tous les ancêtres d'une tâche (Parents, Grands-parents...).
+     * @param cible La tâche dont on cherche les parents.
+     * @return Une liste ordonnée : [Grand-Grand-Père, Grand-Père, Père]. Vide si racine.
+     */
+    public List<Tache> getParents(Tache cible) {
+        List<Tache> lignee = new ArrayList<>();
+        if (cible == null) return lignee;
+
+        // On parcourt toutes les tâches racines du modèle
+        for (Tache racine : taches) {
+            // Si la tâche est une racine elle-même, elle n'a pas de parents
+            if (racine == cible) {
+                return lignee;
+            }
+
+            // On lance la recherche récursive
+            if (rechercheRecursiveParents(racine, cible, lignee)) {
+                return lignee;
+            }
+        }
+        return lignee; // Retourne vide si non trouvé
+    }
+
+    /**
+     * Méthode privée récursive pour construire le chemin
+     */
+    private boolean rechercheRecursiveParents(Tache parentActuel, Tache cible, List<Tache> lignee) {
+        // 1. Si le parent actuel contient directement la cible dans ses enfants immédiats
+        if (parentActuel.aDesEnfants() && parentActuel.getEnfants().contains(cible)) {
+            lignee.add(parentActuel); // On ajoute le père
+            return true; // On dit "C'est bon, on a trouvé le bas de la chaîne"
+        }
+
+        // 2. Sinon, on creuse dans les enfants du parent actuel
+        if (parentActuel.aDesEnfants()) {
+            for (Tache enfant : parentActuel.getEnfants()) {
+                // Appel récursif
+                if (rechercheRecursiveParents(enfant, cible, lignee)) {
+                    // Si on remonte true, c'est que la cible est quelque part sous cet enfant.
+                    // Donc 'parentActuel' est un Grand-Père (ou arrière-grand-père).
+                    // On l'insère au DÉBUT de la liste pour respecter l'ordre chronologique (Haut -> Bas)
+                    lignee.add(0, parentActuel);
+                    return true;
+                }
+            }
+        }
+
+        return false; // Pas trouvé dans cette branche
+    }
+
+    private Tache getFirstParent() {
+
+    }
 }

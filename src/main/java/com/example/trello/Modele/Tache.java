@@ -72,6 +72,9 @@ public abstract class Tache implements Serializable {
 
     public int getDureeEstimee() { return dureeEstimee; }
     public void setDureeEstimee(int dureeEstimee) { this.dureeEstimee = dureeEstimee; }
+    public void setDureeEstimee(int dureeEstimee, List<Tache> parents) {
+
+    }
 
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
