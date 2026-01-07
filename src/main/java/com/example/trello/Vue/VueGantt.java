@@ -162,6 +162,7 @@ public class VueGantt extends BorderPane implements Observateur {
             barre.setAlignment(Pos.CENTER);
             barre.setPrefHeight(24);
 
+            // permet de définir une couleur par défaut si la tache n'en a pas de base
             String couleurHex = t.getColor() != null ? t.getColor() : "#4A90E2";
             barre.setStyle("-fx-background-color: " + couleurHex + "; " +
                     "-fx-background-radius: 5; " +
@@ -169,23 +170,29 @@ public class VueGantt extends BorderPane implements Observateur {
                     "-fx-border-radius: 5; " +
                     "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3, 0, 0, 1);");
 
+
+            // Initialisation de l'élément graphique affichant le nombre d'heure sur la barre de remplissage
             Label lblDuree = new Label(t.getDureeEstimee() + "h");
-            lblDuree.setTextFill(contrasteCouleur(couleurHex));
-            lblDuree.setFont(Font.font("System", FontWeight.BOLD, 10));
+            // On définit la couleur (soit via contrasteCouleur, soit Color.WHITE)
+            Color couleurTexte = contrasteCouleur(couleurHex);
+            // On applique la couleur via setTextFill au label lblDuree
+            lblDuree.setTextFill(couleurTexte);
+            // On force la couleur via CSS pour éviter des conflits de couleur
+            lblDuree.setStyle("-fx-text-fill: " + toRGBCode(couleurTexte) + "; -fx-font-weight: bold;");
             barre.getChildren().add(lblDuree);
 
-            // Bindings pour le responsive
+            // Permet que la taille du graphe soit proportionnel à la taille de la fenêtre javaFX
             barre.translateXProperty().bind(conteneurBarre.widthProperty().multiply(departXPct / 100.0));
             barre.prefWidthProperty().bind(conteneurBarre.widthProperty().multiply(largeurBarrePct / 100.0));
 
-            // Centrage vertical de la barre dans la ligne
+            // Permet de centrer verticalement la barre dans la ligne, pour les jours
             AnchorPane.setTopAnchor(barre, 8.0);
 
-            // Interactions
+            // Interactions pour ouvrir l'interface d'éditeur de tache, et de modifier le curseur en tant que main quand le curseur est au dessus du rectangle d'une tache
             barre.setOnMouseClicked(new ControleurOuvrirEditeur(t, modele));
             barre.setCursor(javafx.scene.Cursor.HAND);
 
-            // Tooltip
+            // Tooltip, permet d'afficher une petite bulle d'information lorsque l'on laisse sa souris sur le rectangle de la tache
             Tooltip tp = new Tooltip(t.getLibelle() + "\nDurée : " + t.getDureeEstimee() + "h\nÉtat : " + getEtatString(t.getEtat()));
             Tooltip.install(barre, tp);
 
@@ -224,10 +231,14 @@ public class VueGantt extends BorderPane implements Observateur {
     private Color contrasteCouleur(String hexColor) {
         try {
             Color c = Color.web(hexColor);
+            // Formule de luminosité perçue standard
+            // on calcule la luminosité du fond pour savoir si le lblDuree est visible et difficilement percevable
             double brightness = c.getRed() * 0.299 + c.getGreen() * 0.587 + c.getBlue() * 0.114;
+
+            // Si c'est clair (> 0.6), on écrit en noir. Sinon en blanc.
             return brightness > 0.6 ? Color.BLACK : Color.WHITE;
         } catch (Exception e) {
-            return Color.BLACK;
+            return Color.BLACK; // Au cas où quelque chose donne une erreur
         }
     }
 
@@ -239,5 +250,13 @@ public class VueGantt extends BorderPane implements Observateur {
             case Tache.ETAT_TERMINE: return "Terminé";
             default: return "Inconnu";
         }
+    }
+    // Permet de convertir un code RGB d'une couleur , ici un Objet Color en une chaîne de caractères hexadécimales pouvant être utilisées par le CSS
+    private String toRGBCode(Color color) {
+        // renvoie dans le format suivant #FF5733
+        return String.format("#%02X%02X%02X",
+                (int) (color.getRed() * 255),
+                (int) (color.getGreen() * 255),
+                (int) (color.getBlue() * 255));
     }
 }

@@ -190,6 +190,7 @@ public class VueKanban extends BorderPane implements Observateur {
         });
     }
 
+
     private void configurerDropSurColonne(VBox colonne, String titreColonne) {
         colonne.setOnDragOver(event -> {
             if (event.getDragboard().hasString()) event.acceptTransferModes(TransferMode.MOVE);
