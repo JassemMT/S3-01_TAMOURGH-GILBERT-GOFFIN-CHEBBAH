@@ -39,7 +39,8 @@ public class ControleurSauvegarderModif implements EventHandler<ActionEvent> {
 
         // --- Mise à jour de la date (remplace setJour) ---
         if (nouvelleDate != null) {
-            tache.setDateDebut(nouvelleDate);
+            //tache.setDateDebut(nouvelleDate);
+            modele.deplacerTacheDate(tache, nouvelleDate); // plus propre d'utiliser le modele pour modifier les données de l'app que la tâche directement
         }
 
         if (nouvelleColonne != null) {

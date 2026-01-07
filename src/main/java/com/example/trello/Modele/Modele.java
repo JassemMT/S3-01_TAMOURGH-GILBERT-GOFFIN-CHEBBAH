@@ -160,7 +160,7 @@ public class Modele implements Sujet, Serializable {
 
     public void deplacerTacheDate(Tache tache, LocalDate nouvelleDate) {
         if (tache != null && nouvelleDate != null) {
-            tache.setDateDebut(nouvelleDate);
+            tache.setDateDebut(nouvelleDate, this.getParentDirect(tache), this);
             notifierObservateur();
         }
     }

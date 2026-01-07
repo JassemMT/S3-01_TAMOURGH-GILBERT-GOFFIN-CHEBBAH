@@ -46,12 +46,13 @@ public class TacheSimple extends Tache implements Serializable {
     }
 
     @Override
-    public void setDateDebut(LocalDate dateDebut, Tache parent) {
+    public void setDateDebut(LocalDate dateDebut, Tache parent, Modele modele) {
         if (dateDebut != null) {
             this.dateDebut = dateDebut;
             if (parent != null) {
                 if (this.getDateFin().isAfter(parent.getDateDebut())) {
-                    parent.setDateDebut(this.getDateFin());
+                    Tache parentDuParent = modele.getParentDirect(parent);
+                    parent.setDateDebut(this.getDateFin(), parentDuParent, modele);
                 }
             }
         }

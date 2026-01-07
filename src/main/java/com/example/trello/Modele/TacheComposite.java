@@ -70,19 +70,21 @@ public class TacheComposite extends Tache implements Serializable {
         }
     }
 
-    public void setDateDebut(LocalDate dateDebut, Tache parent) {
+    public void setDateDebut(LocalDate dateDebut, Tache parent, Modele modele) {
         if (dateDebut != null) {
             this.dateDebut = dateDebut;
             if (parent != null) {
                 if (this.getDateFin().isAfter(parent.getDateDebut())) {
-                    parent.setDateDebut(this.getDateFin());
-                }
-                for (Tache tache : enfants) {
-                    if (this.getDateDebut().isBefore(tache.getDateDebut())) {
-                        tache.setDateDebut(this.getDateDebut().minusDays(tache.dureeEstimee));
-                    }
+                    Tache parentDuParent = modele.getParentDirect(parent);
+                    parent.setDateDebut(this.getDateFin(), parentDuParent, modele);
                 }
             }
+            for (Tache tache : enfants) {
+                if (this.getDateDebut().isBefore(tache.getDateFin())) {
+                    tache.setDateDebut(this.getDateDebut().minusDays(tache.dureeEstimee), this, modele); //récursivité pour que toute la chaine des tâches interdépendantes se déplace
+                }
+            }
+
         }
     }
 

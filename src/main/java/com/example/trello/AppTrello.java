@@ -24,7 +24,7 @@ public class AppTrello extends Application {
     @Override
     public void start(Stage primaryStage) {
         // 1. Chargement de la sauvegarde
-        repository = new ModeleRepository("Sauvegarde/app.save");
+        repository = new ModeleRepository("Sauvegarde/testCohérenceApp.save");
         modele = repository.load();
 
         // 2. Si aucune sauvegarde n'existe (premier lancement), on crée des données de test
