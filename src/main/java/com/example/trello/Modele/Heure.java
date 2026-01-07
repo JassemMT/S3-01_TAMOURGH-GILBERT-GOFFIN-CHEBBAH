@@ -24,4 +24,10 @@ public class Heure implements Serializable {
     public void setHeure(int heure) {
         if (heure <= NB_HEURE_PAR_JOUR && heure >= 0) this.heure = heure;
     }
+
+    public int compareTo(Heure heure) {
+        if (heure.getHeure() == this.getHeure()) return 0;
+        else if (this.getHeure() > heure.getHeure()) return 1;
+        else return -1;
+    }
 }

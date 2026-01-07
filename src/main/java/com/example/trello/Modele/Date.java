@@ -56,6 +56,13 @@ public class Date implements Serializable {
         this.heure = heure;
     }
 
-    
+
+
+    public int compareTo(Date date) {
+        if (date.getJour().getJour().equals(this.getJour().getJour())) {
+            if (date.getHeure().getHeure() == this.heure.getHeure()) return 0;
+            else return this.heure.compareTo(date.getHeure());
+        } else return this.jour.compareTo(date.getJour());
+    }
 
 }
