@@ -17,6 +17,8 @@ public class Modele implements Sujet, Serializable {
     public static final int VUE_GANTT = 3;
 
     private int type_vue;
+
+    // "transient" empêche de sauvegarder les Vues (qui ne sont pas sérialisables)
     private transient List<Observateur> observateurs;
     private List<Tache> taches;
     private Set<String> colonnesDisponibles;
