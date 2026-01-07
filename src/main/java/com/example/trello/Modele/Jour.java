@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Jour implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String jour;
 
     public static final List<String> JOURS_AUTORISES = Arrays.asList(
@@ -22,6 +24,10 @@ public class Jour implements Serializable {
 
     public String getJour() {
         return jour;
+    }
+
+    public void setJour() {
+        if (this.JOURS_AUTORISES.contains(jour)) this.jour = jour;
     }
 
     public int compareTo(Jour jour) {
