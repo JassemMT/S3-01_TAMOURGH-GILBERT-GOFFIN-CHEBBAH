@@ -72,7 +72,10 @@ public abstract class Tache implements Serializable {
     public void setColonne(String colonne) { this.colonne = colonne; }
 
     public int getDureeEstimee() { return dureeEstimee; }
-    public void setDureeEstimee(int dureeEstimee) { this.dureeEstimee = dureeEstimee; }
+    public void setDureeEstimee(int dureeEstimee) {
+        if (dureeEstimee < 1) dureeEstimee = 1;
+        else{this.dureeEstimee = dureeEstimee;}
+    }
     public void setDureeEstimee(int dureeEstimee, Tache parent) {
         this.setDureeEstimee(dureeEstimee);
         if (parent != null) {
