@@ -4,7 +4,7 @@ import com.example.trello.Vue.Observateur;
 // import com.example.trello.Data.ModeleRepository;
 
 import java.io.Serializable;
-import java.time.LocalDate; // <--- IMPORTANT
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,8 +17,7 @@ public class Modele implements Sujet, Serializable {
     public static final int VUE_GANTT = 3;
 
     private int type_vue;
-
-    private List<Observateur> observateurs;
+    private transient List<Observateur> observateurs;
     private List<Tache> taches;
     private Set<String> colonnesDisponibles;
 
@@ -28,11 +27,9 @@ public class Modele implements Sujet, Serializable {
         this.type_vue = VUE_KANBAN;
         this.colonnesDisponibles = new LinkedHashSet<>();
 
-        // Initialisation des colonnes
         this.colonnesDisponibles.add("Principal");
         this.colonnesDisponibles.add("En cours");
         this.colonnesDisponibles.add("Terminé");
-
     }
 
     private Object readResolve() {
@@ -55,18 +52,47 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // --- GESTION VUES ---
     public void setTypeVue(int type) { if (type >= VUE_KANBAN && type <= VUE_GANTT) { this.type_vue = type; notifierObservateur(); } }
     public int getTypeVue() { return type_vue; }
 
-    // --- GESTION TACHES ---
     public List<Tache> getTaches() { return taches.stream().filter(t -> !t.isArchived()).collect(Collectors.toList()); }
 
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
-    public void supprimerTache(Tache tache) { if (tache != null) { taches.remove(tache); notifierObservateur(); } }
-    public void archiverTache(Tache tache) { if (tache != null) { tache.setEtat(Tache.ETAT_ARCHIVE); notifierObservateur(); } }
 
-    // --- GESTION COLONNES ---
+    // --- SUPPRESSION RÉCURSIVE ---
+    public void supprimerTache(Tache tache) {
+        if (tache != null) {
+            supprimerRecursif(tache);
+            notifierObservateur();
+        }
+    }
+
+    private void supprimerRecursif(Tache t) {
+        taches.remove(t);
+        if (t.aDesEnfants()) {
+            for (Tache enfant : t.getEnfants()) {
+                supprimerRecursif(enfant);
+            }
+        }
+    }
+
+    // --- ARCHIVAGE RÉCURSIF ---
+    public void archiverTache(Tache tache) {
+        if (tache != null) {
+            archiverRecursif(tache);
+            notifierObservateur();
+        }
+    }
+
+    private void archiverRecursif(Tache t) {
+        t.setEtat(Tache.ETAT_ARCHIVE);
+        if (t.aDesEnfants()) {
+            for (Tache enfant : t.getEnfants()) {
+                archiverRecursif(enfant);
+            }
+        }
+    }
+
     public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
 
     public Map<String, List<Tache>> getColonnes() {
@@ -90,7 +116,6 @@ public class Modele implements Sujet, Serializable {
     public void renommerColonne(String ancienNom, String nouveauNom) {
         if (ancienNom == null || nouveauNom == null || nouveauNom.trim().isEmpty()) return;
         if ("Principal".equals(ancienNom)) return;
-
         if (!colonnesDisponibles.contains(ancienNom) || colonnesDisponibles.contains(nouveauNom)) return;
 
         Set<String> nouveauSet = new LinkedHashSet<>();
@@ -105,7 +130,6 @@ public class Modele implements Sujet, Serializable {
 
     public void supprimerColonne(String nomColonne) {
         if ("Principal".equals(nomColonne)) return;
-
         if (colonnesDisponibles.contains(nomColonne)) {
             for (Tache t : taches) {
                 if (nomColonne.equals(t.getColonne())) {
@@ -117,56 +141,63 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
+    // --- DÉPLACEMENT RÉCURSIF ---
     public void deplacerTacheColonne(Tache tache, String nouvelleColonne) {
         if (tache != null && nouvelleColonne != null && colonnesDisponibles.contains(nouvelleColonne)) {
-            tache.setColonne(nouvelleColonne);
-            if (tache instanceof TacheComposite){
-                for (Tache t : tache.getEnfants()) {
-                    t.setColonne(nouvelleColonne);
-                }
-            }
+            deplacerColonneRecursif(tache, nouvelleColonne);
             notifierObservateur();
         }
     }
 
-    // --- GESTION DATES (Remplacement de la gestion "Jours String") ---
+    private void deplacerColonneRecursif(Tache t, String nouvelleColonne) {
+        t.setColonne(nouvelleColonne);
+        if (t.aDesEnfants()) {
+            for (Tache enfant : t.getEnfants()) {
+                deplacerColonneRecursif(enfant, nouvelleColonne);
+            }
+        }
+    }
 
-    // Ancienne méthode : deplacerTacheJour(String) -> Supprimée
-    // Nouvelle méthode :
     public void deplacerTacheDate(Tache tache, LocalDate nouvelleDate) {
         if (tache != null && nouvelleDate != null) {
-            tache.setDateDebut(nouvelleDate); // Utilise la nouvelle méthode de Tache
+            tache.setDateDebut(nouvelleDate);
             notifierObservateur();
         }
     }
 
-    // Ancienne méthode : getJours() avec String -> Remplacée par LocalDate
     public Map<LocalDate, List<Tache>> getJours() {
-        // TreeMap pour que les dates soient automatiquement triées
         Map<LocalDate, List<Tache>> joursMap = new TreeMap<>();
-
         for (Tache tache : taches) {
             if (!tache.isArchived()) {
                 LocalDate d = tache.getDateDebut();
-                // Si la date n'existe pas encore dans la map, on crée la liste
                 joursMap.putIfAbsent(d, new ArrayList<>());
-                // On ajoute la tâche
                 joursMap.get(d).add(tache);
             }
         }
         return joursMap;
     }
 
-    // --- PROMOTION & COMPOSITE ---
-
+    // --- PROMOTION CORRIGÉE (Gère les références parentes) ---
     public TacheComposite promouvoirEnComposite(TacheSimple ancienneTache) {
+        // 1. Clonage
         TacheComposite nouvelleTache = new TacheComposite(ancienneTache);
+
+        // 2. Remplacement dans la liste principale
         int index = taches.indexOf(ancienneTache);
         if (index != -1) {
             taches.set(index, nouvelleTache);
         } else {
             taches.add(nouvelleTache);
         }
+
+        // Mise à jour des parents potentiels
+        // On cherche si un parent contient l'ancienne tâche et on la remplace
+        for (Tache parentPotentiel : taches) {
+            if (parentPotentiel.aDesEnfants()) {
+                parentPotentiel.remplacerEnfant(ancienneTache, nouvelleTache);
+            }
+        }
+
         notifierObservateur();
         return nouvelleTache;
     }

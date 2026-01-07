@@ -39,4 +39,9 @@ public class TacheSimple extends Tache implements Serializable {
     public LinkedList<Tache> construirDependance() {
         return new LinkedList<>();
     }
+
+    @Override
+    public void remplacerEnfant(Tache ancienne, Tache nouvelle) {
+        // Rien à faire pour une tâche simple
+    }
 }

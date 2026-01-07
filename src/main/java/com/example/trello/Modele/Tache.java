@@ -13,11 +13,7 @@ public abstract class Tache implements Serializable {
     protected String commentaire;
     protected int etat;
     protected String colonne;
-
-    // Gestion par LocalDate
     protected LocalDate dateDebut;
-
-    // La durée est maintenant sémantiquement en JOURS
     protected int dureeEstimee;
     protected String color;
 
@@ -34,8 +30,6 @@ public abstract class Tache implements Serializable {
         this.dureeEstimee = dureeEstimee;
         this.etat = ETAT_A_FAIRE;
         this.color = "#C5D3D0";
-
-        // Sécurité : si date null, on met aujourd'hui
         this.dateDebut = (dateDebut != null) ? dateDebut : LocalDate.now();
     }
 
@@ -59,6 +53,9 @@ public abstract class Tache implements Serializable {
     public abstract boolean aDesEnfants();
     public abstract LinkedList<Tache> construirDependance();
 
+    // --- NOUVEAU : Méthode nécessaire pour corriger la référence parent lors de la promotion ---
+    public abstract void remplacerEnfant(Tache ancienne, Tache nouvelle);
+
     // --- GETTERS ET SETTERS ---
     public String getLibelle() { return libelle; }
     public void setLibelle(String libelle) { this.libelle = libelle; }
@@ -78,27 +75,15 @@ public abstract class Tache implements Serializable {
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
 
-    // --- NOUVEAUX GETTERS/SETTERS DATE ---
-
     public LocalDate getDateDebut() { return dateDebut; }
     public void setDateDebut(LocalDate dateDebut) {
         if (dateDebut != null) this.dateDebut = dateDebut;
     }
 
-    /**
-     * Calcule la date de fin basée sur DateDebut + Durée (en jours)
-     */
-    public LocalDate getDateFin() {
-        return dateDebut.plusDays(dureeEstimee);
-    }
+    public LocalDate getDateFin() { return dateDebut.plusDays(dureeEstimee); }
 
-    /**
-     * Retourne le nom du jour en Français (ex: "Lundi", "Mardi")
-     * Utile pour l'affichage dans VueListe
-     */
     public String getNomJour() {
         String jour = dateDebut.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.FRENCH);
-        // Mettre la première lettre en majuscule (lundi -> Lundi)
         return jour.substring(0, 1).toUpperCase() + jour.substring(1);
     }
 

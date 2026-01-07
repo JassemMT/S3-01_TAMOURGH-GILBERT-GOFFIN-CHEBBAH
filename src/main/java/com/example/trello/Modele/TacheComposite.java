@@ -12,30 +12,20 @@ public class TacheComposite extends Tache implements Serializable {
 
     private List<Tache> enfants;
 
-    /**
-     * Constructeur standard avec LocalDate
-     */
     public TacheComposite(String libelle, String commentaire, LocalDate dateDebut, String colonne, int dureeEstimee) {
         super(libelle, commentaire, dateDebut, colonne, dureeEstimee);
         this.enfants = new ArrayList<>();
     }
 
-    /**
-     * Constructeur de promotion (Copie les données d'une TacheSimple)
-     */
     public TacheComposite(TacheSimple t) {
-        // Modification ici : on utilise getDateDebut()
         super(t.getLibelle(), t.getCommentaire(), t.getDateDebut(), t.getColonne(), t.getDureeEstimee());
         this.enfants = new ArrayList<>();
-
-        // Copie des attributs visuels et d'état
         this.setEtat(t.getEtat());
         this.setColor(t.getColor());
     }
 
     public TacheComposite() {
         super();
-        // IMPORTANT : Initialiser la liste pour éviter le NullPointerException
         this.enfants = new ArrayList<>();
     }
 
@@ -64,5 +54,14 @@ public class TacheComposite extends Tache implements Serializable {
             dependances.addAll(enfant.construirDependance());
         }
         return dependances;
+    }
+
+    // --- Remplace l'ancienne référence par la nouvelle ---
+    @Override
+    public void remplacerEnfant(Tache ancienne, Tache nouvelle) {
+        int index = enfants.indexOf(ancienne);
+        if (index != -1) {
+            enfants.set(index, nouvelle);
+        }
     }
 }
