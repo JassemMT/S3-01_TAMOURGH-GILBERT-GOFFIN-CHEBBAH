@@ -26,7 +26,7 @@ public class Jour implements Serializable {
         return jour;
     }
 
-    public void setJour() {
+    public void setJour(String jour) {
         if (this.JOURS_AUTORISES.contains(jour)) this.jour = jour;
     }
 
