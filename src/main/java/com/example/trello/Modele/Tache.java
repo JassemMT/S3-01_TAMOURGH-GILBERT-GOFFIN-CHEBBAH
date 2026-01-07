@@ -73,9 +73,11 @@ public abstract class Tache implements Serializable {
     public int getDureeEstimee() { return dureeEstimee; }
     public void setDureeEstimee(int dureeEstimee) { this.dureeEstimee = dureeEstimee; }
     public void setDureeEstimee(int dureeEstimee, Tache parent) {
-        if (parent == null) this.setDureeEstimee(dureeEstimee);
-        else if (parent.getDateFin().isAfter(this.dateDebut)) {
-            parent.setDureeEstimee(parent.calculerComplement(this.dateDebut));
+        this.setDureeEstimee(dureeEstimee);
+        if (parent != null) {
+            if (this.getDateFin().isAfter(parent.getDateDebut())) {
+                this.setDureeEstimee(this.calculerComplement(parent.getDateDebut()));
+            }
         }
     }
 
