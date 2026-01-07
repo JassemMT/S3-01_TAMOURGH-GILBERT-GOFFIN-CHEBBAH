@@ -174,17 +174,17 @@ public class VueArchives extends BorderPane implements Observateur {
         lComm.setTextFill(Color.GRAY);
         lComm.setFont(Font.font("System", FontPosture.ITALIC, 12));
 
-        // --- ZONE ACTIONS (Restaurer + Supprimer) ---
+        // Actions (Restaurer + Supprimer)
         HBox boxActions = new HBox(10);
         boxActions.setAlignment(Pos.CENTER_RIGHT);
 
-        // 1. Bouton Restaurer (Icône ⟲)
+        // Bouton Restaurer
         Button btnRestaurer = new Button("⟲");
         btnRestaurer.setStyle("-fx-background-color: white; -fx-text-fill: #2E7D32; -fx-border-color: #2E7D32; -fx-border-radius: 3; -fx-cursor: hand; -fx-font-weight: bold;");
         btnRestaurer.setTooltip(new Tooltip("Restaurer la tâche"));
         btnRestaurer.setOnAction(new ControleurDesarchiverTache(modele, t));
 
-        // Bouton Supprimer Définitivement (Icône 🗑)
+        // Bouton Supprimer Définitivement
         Button btnSupprimer = new Button("🗑");
         btnSupprimer.setStyle("-fx-background-color: white; -fx-text-fill: #c0392b; -fx-border-color: #c0392b; -fx-border-radius: 3; -fx-cursor: hand;");
         btnSupprimer.setTooltip(new Tooltip("Supprimer définitivement (Irréversible)"));
@@ -192,7 +192,7 @@ public class VueArchives extends BorderPane implements Observateur {
 
         boxActions.getChildren().addAll(btnRestaurer, btnSupprimer);
 
-        // Ajout à la grille
+        // Placement sur la grille
         grille.add(boxTitre, 0, row);
         grille.add(lEtat, 1, row);
         grille.add(lColonne, 2, row);
