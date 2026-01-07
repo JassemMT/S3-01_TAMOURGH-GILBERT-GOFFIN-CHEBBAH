@@ -45,45 +45,45 @@ public class VueEditeurTache {
         grid.setPadding(new Insets(20));
         grid.setHgap(10); grid.setVgap(10);
 
-        // 1. Titre
+        // Titre
         grid.add(new Label("Titre:"), 0, 0);
         champTitre = new TextField(tache.getLibelle());
         grid.add(champTitre, 1, 0);
 
-        // 2. Colonne
+        // Colonne
         grid.add(new Label("Colonne:"), 0, 1);
         comboColonne = new ComboBox<>();
         comboColonne.getItems().addAll(modele.getColonnesDisponibles());
         comboColonne.setValue(tache.getColonne());
         grid.add(comboColonne, 1, 1);
 
-        // 3. État
+        // État
         grid.add(new Label("État:"), 0, 2);
         comboEtat = new ComboBox<>();
         comboEtat.getItems().addAll("À faire", "En cours", "Terminé", "Archivé");
         comboEtat.setValue(getEtatString(tache.getEtat()));
         grid.add(comboEtat, 1, 2);
 
-        // 4. MODIFIÉ : Date (DatePicker)
+        // Date (DatePicker)
         grid.add(new Label("Date début:"), 0, 3);
         datePicker = new DatePicker();
         // On initialise avec la date de la tâche
         datePicker.setValue(tache.getDateDebut());
         grid.add(datePicker, 1, 3);
 
-        // 5. Durée (en Jours maintenant)
+        // Durée (en jours maintenant)
         grid.add(new Label("Durée (jours):"), 0, 4);
         spinnerDuree = new Spinner<>(0, 365, tache.getDureeEstimee());
         spinnerDuree.setEditable(true);
         grid.add(spinnerDuree, 1, 4);
 
-        // 6. Couleur
+        // Couleur
         grid.add(new Label("Couleur:"), 0, 5);
         String webColor = tache.getColor() != null ? tache.getColor() : "#FFFFFF";
         colorPicker = new ColorPicker(Color.web(webColor));
         grid.add(colorPicker, 1, 5);
 
-        // 7. Commentaire
+        // Commentaire
         grid.add(new Label("Commentaire:"), 0, 6);
         champCommentaire = new TextArea(tache.getCommentaire());
         champCommentaire.setPrefRowCount(3);
@@ -112,7 +112,7 @@ public class VueEditeurTache {
             default: return "À faire";
         }
     }
-
+    // afficher ou fermer la scene
     public void afficher() { stage.showAndWait(); }
     public void fermer() { stage.close(); }
 
