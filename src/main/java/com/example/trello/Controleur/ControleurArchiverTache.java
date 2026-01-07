@@ -13,6 +13,7 @@ public class ControleurArchiverTache implements EventHandler<ActionEvent> {
         this.tache = tache;
     }
 
+    // méthode handle permettant de changer l'état d'une tache et de la passer en ARCHIVEE
     @Override
     public void handle(ActionEvent actionEvent) {
         modele.archiverTache(tache);
