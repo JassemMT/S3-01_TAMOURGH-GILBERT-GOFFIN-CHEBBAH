@@ -26,8 +26,6 @@ public class Heure implements Serializable {
     }
 
     public int compareTo(Heure heure) {
-        if (heure.getHeure() == this.getHeure()) return 0;
-        else if (this.getHeure() > heure.getHeure()) return 1;
-        else return -1;
+
     }
 }

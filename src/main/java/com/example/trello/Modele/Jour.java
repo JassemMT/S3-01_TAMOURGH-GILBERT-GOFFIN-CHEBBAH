@@ -35,4 +35,9 @@ public class Jour implements Serializable {
         else if(JOURS_AUTORISES.indexOf(this.getJour()) > JOURS_AUTORISES.indexOf(jour.getJour())) return 1;
         else return -1;
     }
+
+    public Jour ajouterNbJours(int nbJours) {
+        String jour = this.JOURS_AUTORISES.get((this.JOURS_AUTORISES.indexOf(this.jour)+nbJours) % 7);
+        return new Jour(jour);
+    }
 }
