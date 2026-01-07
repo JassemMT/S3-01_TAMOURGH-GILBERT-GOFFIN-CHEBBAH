@@ -29,6 +29,7 @@ public class TacheComposite extends Tache implements Serializable {
         this.enfants = new ArrayList<>();
     }
 
+    // permet d'ajouter un enfant à la tache courante
     @Override
     public void ajouterEnfant(Tache t) {
         if (t != null && !enfants.contains(t) && t != this) {
@@ -41,6 +42,7 @@ public class TacheComposite extends Tache implements Serializable {
         }
     }
 
+    // permet de récupérer la liste des enfants de la tache courante
     @Override
     public List<Tache> getEnfants() {
         return new ArrayList<>(enfants);
