@@ -23,6 +23,7 @@ public class TacheSimple extends Tache implements Serializable {
     // constructeur automatique
     public TacheSimple() { super(); }
 
+    // méthode pour ajouter un enfant a une tache simple renvoyant un message d'alerte
     @Override
     public void ajouterEnfant(Tache t) {
         System.out.println("Erreur: Impossible d'ajouter un enfant à une TacheSimple directement.");
