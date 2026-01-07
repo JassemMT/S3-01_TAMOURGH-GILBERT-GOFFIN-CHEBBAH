@@ -221,8 +221,16 @@ public class VueKanban extends BorderPane implements Observateur {
                     VBox carteTache = (VBox) source;
                     Object userData = carteTache.getUserData();
                     if (userData instanceof Tache) {
-                        modele.deplacerTacheColonne((Tache) userData, titreColonne);
-                        success = true;
+                        try {
+                            modele.deplacerTacheColonne((Tache) userData, titreColonne);
+                            success = true;
+                        }catch (Exception e) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Erreur de déplacement");
+                            alert.setHeaderText("Impossible de déplacer la tâche");
+                            alert.setContentText(e.getMessage());
+                            alert.showAndWait();
+                        }
                     }
                 }
             }

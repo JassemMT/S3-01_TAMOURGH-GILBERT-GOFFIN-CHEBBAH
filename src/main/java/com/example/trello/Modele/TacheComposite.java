@@ -88,4 +88,12 @@ public class TacheComposite extends Tache implements Serializable {
         }
     }
 
+
+    public void supprimerEnfant(Tache t) {
+        if (enfants != null) {
+            enfants.remove(t);
+        }
+    }
+
+
 }

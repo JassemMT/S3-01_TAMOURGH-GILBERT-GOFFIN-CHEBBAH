@@ -59,10 +59,19 @@ public class Modele implements Sujet, Serializable {
 
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
 
-    // --- SUPPRESSION RÉCURSIVE ---
+    // --- SUPPRESSION DÉFINITIVE ---
     public void supprimerTache(Tache tache) {
         if (tache != null) {
+            // DÉTACHEMENT DU PARENT
+            // On utilise ta méthode existante pour trouver le père
+            Tache parent = getParentDirect(tache);
+            if (parent != null) {
+                parent.supprimerEnfant(tache);
+                }
+
+            // SUPPRESSION RÉCURSIVE DE LA LISTE PRINCIPALE
             supprimerRecursif(tache);
+
             notifierObservateur();
         }
     }
@@ -70,7 +79,8 @@ public class Modele implements Sujet, Serializable {
     private void supprimerRecursif(Tache t) {
         taches.remove(t);
         if (t.aDesEnfants()) {
-            for (Tache enfant : t.getEnfants()) {
+            List<Tache> enfants = new ArrayList<>(t.getEnfants()); // Copie pour éviter les problèmes de modification de liste
+            for (Tache enfant : enfants) {
                 supprimerRecursif(enfant);
             }
         }
@@ -91,6 +101,35 @@ public class Modele implements Sujet, Serializable {
                 archiverRecursif(enfant);
             }
         }
+    }
+
+    // --- DESARCHIVAGE RÉCURSIF ---
+    public void desarchiverTache(Tache tache) {
+        if (tache != null) {
+            desarchiverRecursif(tache);
+            notifierObservateur();
+        }
+    }
+
+    private void desarchiverRecursif(Tache t) {
+        t.setEtat(Tache.ETAT_A_FAIRE);
+        if (t.aDesEnfants()) {
+            for (Tache enfant : t.getEnfants()) {
+                desarchiverRecursif(enfant);
+            }
+        }
+    }
+
+    public List<Tache> getTachesArchives() {
+        //autre syntaxe possible avec boucle et conditionnelle simplement :
+        List<Tache> archives = new ArrayList<>();
+        for (Tache t : taches) {
+            if (t.isArchived()) {
+                archives.add(t);
+            }
+        }
+        return archives;
+
     }
 
     public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
@@ -141,12 +180,28 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // --- DÉPLACEMENT RÉCURSIF ---
-    public void deplacerTacheColonne(Tache tache, String nouvelleColonne) {
-        if (tache != null && nouvelleColonne != null && colonnesDisponibles.contains(nouvelleColonne)) {
-            deplacerColonneRecursif(tache, nouvelleColonne);
-            notifierObservateur();
+    // --- DÉPLACEMENT AVEC CONTRAINTE FORTE (Sous-tâche bloquée par le parent) ---
+    public void deplacerTacheColonne(Tache tache, String nouvelleColonne) throws Exception {
+
+        if (tache == null || nouvelleColonne == null || !colonnesDisponibles.contains(nouvelleColonne)) {
+            return;
         }
+
+        //Récupérer le parent direct
+        Tache parent = getParentDirect(tache);
+
+        //VÉRIFICATION DE LA CONTRAINTE
+        if (parent != null) {
+            // C'est une sous-tâche.
+            // Est-ce que la colonne cible est différente de la colonne actuelle du parent ?
+            if (!parent.getColonne().equals(nouvelleColonne)) {
+                throw new Exception("Interdit : Une sous-tâche doit rester dans la colonne de son parent (" + parent.getColonne() + ").");
+            }
+        }
+
+        // 4. Si tout va bien (soit c'est une racine, soit la colonne est valide), on déplace
+        deplacerColonneRecursif(tache, nouvelleColonne);
+        notifierObservateur();
     }
 
     private void deplacerColonneRecursif(Tache t, String nouvelleColonne) {

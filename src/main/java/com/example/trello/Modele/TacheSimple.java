@@ -57,4 +57,9 @@ public class TacheSimple extends Tache implements Serializable {
             }
         }
     }
+
+    @Override
+    public void supprimerEnfant(Tache t) {
+        // Rien à faire
+    }
 }
