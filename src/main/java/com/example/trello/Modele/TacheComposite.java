@@ -75,15 +75,18 @@ public class TacheComposite extends Tache implements Serializable {
         }
     }
 
+    // permet de changer la dateDebut d'une tache ainsi que la dateDebut de son parent si cela est nécessaire et de ses enfants
     public void setDateDebut(LocalDate dateDebut, Tache parent, Modele modele) {
         if (dateDebut != null) {
             this.dateDebut = dateDebut;
             if (parent != null) {
+                // test la cohérence entre la date de fin de la tache et la date de début de son parent
                 if (this.getDateFin().isAfter(parent.getDateDebut())) {
                     Tache parentDuParent = modele.getParentDirect(parent);
                     parent.setDateDebut(this.getDateFin(), parentDuParent, modele);
                 }
             }
+            // boucle sur les enfants de la tache courante vérifiant dateDebut de la tache et DateFin de son enfant
             for (Tache tache : enfants) {
                 if (this.getDateDebut().isBefore(tache.getDateFin())) {
                     tache.setDateDebut(this.getDateDebut().minusDays(tache.dureeEstimee), this, modele); //récursivité pour que toute la chaine des tâches interdépendantes se déplace
@@ -94,6 +97,7 @@ public class TacheComposite extends Tache implements Serializable {
     }
 
 
+    // permet de supprimer une tache donnée en la supprimant de liste enfants
     public void supprimerEnfant(Tache t) {
         if (enfants != null) {
             enfants.remove(t);
