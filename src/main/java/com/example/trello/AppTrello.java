@@ -79,54 +79,36 @@ public class AppTrello extends Application {
 
     // Fonction permettant de créer des données factices
     private void initDonneesTest(Modele modele) {
-        // CORRECTION : Utilisation de LocalDate au lieu de String
         LocalDate aujourdhui = LocalDate.now();
         LocalDate demain = aujourdhui.plusDays(1);
+        // On supprime les colonnes par défaut du constructeur du Modele
+        modele.supprimerColonne("Principal");
+        modele.supprimerColonne("En cours");
+        modele.supprimerColonne("Terminé");
 
-        // Tâche simple pour aujourd'hui
-        TacheSimple t1 = new TacheSimple(
-                "Réunion Projet",
-                "Discuter budget",
-                aujourdhui, // <-- LocalDate
-                "Principal",
-                2
-        );
+        String[] colonnes = {"O", "P", "Q", "R", "T", "X", "Y", "Z"};
+        for (String col : colonnes) {
+            modele.ajouterColonne(col);
+        }
 
-        TacheSimple t2 = new TacheSimple(
-                "Dev Backend",
-                "API Rest",
-                aujourdhui, // <-- LocalDate
-                "En cours",
-                4
-        );
-        t2.setEtat(Tache.ETAT_EN_COURS);
 
-        // Tâche Composite (Dossier) pour demain
-        TacheComposite parent = new TacheComposite(
-                "Interface Graphique",
-                "JavaFX",
-                demain, // <-- LocalDate
-                "Principal",
-                10
-        );
 
-        // L'enfant est une TacheSimple (même jour que le parent ici)
-        TacheSimple enfant = new TacheSimple(
-                "Vue Liste",
-                "Implémentation",
-                demain, // <-- LocalDate
-                "A faire",
-                5
-        );
 
-        // Ajout de l'enfant au parent
-        parent.ajouterEnfant(enfant);
+        String[] autresColonnes = {"O", "P", "R", "T", "Y", "Z"};
 
-        // Ajout au modèle
-        modele.ajouterTache(t1);
-        modele.ajouterTache(t2);
-        modele.ajouterTache(parent);
-        modele.ajouterTache(enfant);
+        for (String col : autresColonnes) {
+            for (int i = 1; i <= 3; i++) {
+                TacheSimple t = new TacheSimple(
+                        "Tache " + col + "-" + i,
+                        "Remplissage",
+                        LocalDate.now().plusDays(i),
+                        col,
+                        2
+                );
+                modele.ajouterTache(t);
+            }
+        }
+
     }
 
     public static void main(String[] args) {
