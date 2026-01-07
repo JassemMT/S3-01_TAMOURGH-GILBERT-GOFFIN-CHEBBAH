@@ -208,7 +208,14 @@ public class Modele implements Sujet, Serializable {
         }
         return new LinkedList<>();
     }
-
+    public Tache trouverParentDe(Tache enfantCherche) {
+        for (Tache t : taches) {
+            if (t.aDesEnfants() && t.getEnfants().contains(enfantCherche)) {
+                return t;
+            }
+        }
+        return null;
+    }
     public void exit(Object repo) {
         this.observateurs = new ArrayList<>();
         ((ModeleRepository) repo).save(this);
