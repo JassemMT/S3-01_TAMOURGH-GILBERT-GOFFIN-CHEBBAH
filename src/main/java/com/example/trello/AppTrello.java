@@ -2,9 +2,9 @@ package com.example.trello;
 
 import com.example.trello.Modele.Modele;
 import com.example.trello.Modele.ModeleRepository;
-import com.example.trello.Modele.Tache; // Import pour les constantes statiques
-import com.example.trello.Modele.TacheComposite; // <--- Import
-import com.example.trello.Modele.TacheSimple;    // <--- Import
+import com.example.trello.Modele.Tache;
+import com.example.trello.Modele.TacheComposite;
+import com.example.trello.Modele.TacheSimple;
 import com.example.trello.Vue.VueGantt;
 import com.example.trello.Vue.VueKanban;
 import com.example.trello.Vue.VueListe;
@@ -58,7 +58,7 @@ public class AppTrello extends Application {
 
         // Création de la scène
         Scene scene = new Scene(tabPane, 1200, 700);
-        primaryStage.setTitle("Trello Clone - Composite & Sauvegarde");
+        primaryStage.setTitle("Trello Clone - LocalDate & Composite");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

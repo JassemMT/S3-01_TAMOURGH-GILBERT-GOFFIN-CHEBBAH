@@ -1,7 +1,7 @@
 package com.example.trello.Modele;
 
 import com.example.trello.Vue.Observateur;
-// import de repository si nécessaire (ex: com.example.trello.Data.ModeleRepository)
+// import com.example.trello.Data.ModeleRepository;
 
 import java.io.Serializable;
 import java.time.LocalDate; // <--- IMPORTANT
