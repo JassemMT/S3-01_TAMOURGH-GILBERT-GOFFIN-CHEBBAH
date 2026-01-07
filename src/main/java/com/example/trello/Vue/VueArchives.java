@@ -27,6 +27,7 @@ public class VueArchives extends BorderPane implements Observateur {
 
     private static final DateTimeFormatter FORMAT_DATE_COMPLET = DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH);
 
+    // constructeur vueArchive
     public VueArchives(Modele modele) {
         this.modele = modele;
         this.modele.ajouterObservateur(this);
@@ -34,12 +35,15 @@ public class VueArchives extends BorderPane implements Observateur {
         actualiser(modele);
     }
 
+    // initialise l'interface graphique
     private void initialiserInterface() {
+        // création de l'entête avec un HBox
         HBox entete = new HBox(10);
         entete.setPadding(new Insets(10));
         entete.setAlignment(Pos.CENTER_LEFT);
         entete.setStyle("-fx-background-color: #ffebee; -fx-border-color: #ffcdd2; -fx-border-width: 0 0 1 0;");
 
+        // titre de la vue avec un objet Label
         Label titreVue = new Label("🗄 Corbeille / Archives");
         titreVue.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #c62828;");
 
@@ -49,6 +53,7 @@ public class VueArchives extends BorderPane implements Observateur {
         conteneurPrincipal = new VBox(20);
         conteneurPrincipal.setPadding(new Insets(20));
 
+        // création d'un objet ScrollPane pour gérer le scroll de l'application
         ScrollPane scroll = new ScrollPane(conteneurPrincipal);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background-color: transparent;");
@@ -63,6 +68,7 @@ public class VueArchives extends BorderPane implements Observateur {
         }
     }
 
+    // permet de rafraichir les données
     private void rafraichirDonnees(List<Tache> lesTaches) {
         conteneurPrincipal.getChildren().clear();
 
