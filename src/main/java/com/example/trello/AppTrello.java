@@ -28,9 +28,14 @@ public class AppTrello extends Application {
         modele = repository.load();
 
         // 2. Si aucune sauvegarde n'existe (premier lancement), on crée des données de test
-        if (modele == null) {
-            System.out.println("Aucune sauvegarde trouvée, création d'un nouveau modèle.");
-            modele = new Modele();
+        if (modele == null || modele.getTaches().isEmpty()) {
+            System.out.println("Sauvegarde absente ou vide, création des données de test.");
+
+            // Si le repository a renvoyé null, on doit instancier.
+            // S'il a renvoyé un objet vide, on peut le réutiliser ou en refaire un.
+            if (modele == null) {
+                modele = new Modele();
+            }
             initDonneesTest(modele);
         }
 
