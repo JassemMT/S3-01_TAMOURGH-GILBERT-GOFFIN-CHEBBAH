@@ -180,12 +180,28 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // --- DÉPLACEMENT RÉCURSIF ---
-    public void deplacerTacheColonne(Tache tache, String nouvelleColonne) {
-        if (tache != null && nouvelleColonne != null && colonnesDisponibles.contains(nouvelleColonne)) {
-            deplacerColonneRecursif(tache, nouvelleColonne);
-            notifierObservateur();
+    // --- DÉPLACEMENT AVEC CONTRAINTE FORTE (Sous-tâche bloquée par le parent) ---
+    public void deplacerTacheColonne(Tache tache, String nouvelleColonne) throws Exception {
+
+        if (tache == null || nouvelleColonne == null || !colonnesDisponibles.contains(nouvelleColonne)) {
+            return;
         }
+
+        //Récupérer le parent direct
+        Tache parent = getParentDirect(tache);
+
+        //VÉRIFICATION DE LA CONTRAINTE
+        if (parent != null) {
+            // C'est une sous-tâche.
+            // Est-ce que la colonne cible est différente de la colonne actuelle du parent ?
+            if (!parent.getColonne().equals(nouvelleColonne)) {
+                throw new Exception("Interdit : Une sous-tâche doit rester dans la colonne de son parent (" + parent.getColonne() + ").");
+            }
+        }
+
+        // 4. Si tout va bien (soit c'est une racine, soit la colonne est valide), on déplace
+        deplacerColonneRecursif(tache, nouvelleColonne);
+        notifierObservateur();
     }
 
     private void deplacerColonneRecursif(Tache t, String nouvelleColonne) {
