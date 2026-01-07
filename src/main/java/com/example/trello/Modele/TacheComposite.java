@@ -32,6 +32,11 @@ public class TacheComposite extends Tache implements Serializable {
     @Override
     public void ajouterEnfant(Tache t) {
         if (t != null && !enfants.contains(t) && t != this) {
+            if (t.dateDebut.isAfter(this.dateDebut)) {
+                throw new RuntimeException("la tâche fille ne peut pas commencer après la tâche mère");
+            } else if (t.getDateFin().isAfter(this.dateDebut)) {
+                t.setDureeEstimee(t.calculerComplement(this.dateDebut));
+            }
             enfants.add(t);
         }
     }

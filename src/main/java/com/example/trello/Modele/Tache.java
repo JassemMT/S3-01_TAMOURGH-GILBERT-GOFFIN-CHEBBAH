@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.*;
+import java.time.Period;
 
 public abstract class Tache implements Serializable {
 
@@ -91,4 +92,9 @@ public abstract class Tache implements Serializable {
 
     @Override
     public String toString() { return libelle; }
+
+    public int calculerComplement(LocalDate d) {
+        Period periode = Period.between(this.dateDebut, d);
+        return periode.getDays();
+    }
 }
