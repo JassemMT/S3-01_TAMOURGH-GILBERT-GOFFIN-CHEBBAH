@@ -50,33 +50,40 @@ public class VueGantt extends BorderPane implements Observateur {
         actualiser(modele);
     }
 
+    // initialisation de l'interface graphique
     private void initialiserInterface() {
+        // titre de la vue
         Label titreVue = new Label("Vue Gantt (Chronologique)");
         titreVue.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-padding: 15;");
         setTop(titreVue);
 
+        // permet la superposition de plusieurs couches
         StackPane stackCentral = new StackPane(); // Permet la superposition
         VBox layoutCentral = new VBox(0);
 
+        // grille contenant les éléments jours
         headerJours = new GridPane();
         headerJours.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #ccc; -fx-border-width: 1 0 1 0;");
         layoutCentral.getChildren().add(headerJours);
 
+        // création d'un conteneur VBox pour les lignes
         conteneurLignes = new VBox(0);
         layoutCentral.getChildren().add(conteneurLignes);
 
-        // Initialisation du calque des flèches
+        // Initialisation de la couche des flèches
         layerFleches = new Pane();
         layerFleches.setMouseTransparent(true); // Pour cliquer sur les tâches à travers
 
         // On empile : le tableau en dessous, les flèches au dessus
         stackCentral.getChildren().addAll(layoutCentral, layerFleches);
 
+        // création d'un scrollPane
         scrollPane = new ScrollPane(stackCentral); // On met le stack dans le scroll
         scrollPane.setFitToWidth(true);
         setCenter(scrollPane);
     }
 
+    // méthode pour nettoyer la vue et reconstruire le tout
     @Override
     public void actualiser(Sujet s) {
         if (s instanceof Modele) {
@@ -98,10 +105,12 @@ public class VueGantt extends BorderPane implements Observateur {
     }
     // méthode permettant de créer les éléments du diagramme
     private void construireGantt(List<Tache> taches) {
+        // nettoyage des éléments dans la vue gantt
         conteneurLignes.getChildren().clear();
         headerJours.getChildren().clear();
         headerJours.getColumnConstraints().clear();
 
+        // test si la liste des taches est vide
         if (taches.isEmpty()) {
             conteneurLignes.getChildren().add(new Label("Aucune tâche à afficher."));
             return;
@@ -195,7 +204,7 @@ public class VueGantt extends BorderPane implements Observateur {
         ligne.setMinHeight(40);
         ligne.setStyle("-fx-border-color: #eee; -fx-border-width: 0 0 1 0; -fx-background-color: white;");
 
-        // --- Configuration des colonnes (Doit être IDENTIQUE au Header) ---
+        // Configuration des colonnes (doit être IDENTIQUE au Header)
         ColumnConstraints colTitre = new ColumnConstraints();
         colTitre.setPercentWidth(25);
         ligne.getColumnConstraints().add(colTitre);
@@ -216,7 +225,7 @@ public class VueGantt extends BorderPane implements Observateur {
             ligne.add(guide, i + 1, 0);
         }
 
-        // --- COLONNE 0 : NOM TACHE ---
+        // colonne 0 nom tache
         HBox boxNom = new HBox(5);
         boxNom.setAlignment(Pos.CENTER_LEFT);
         boxNom.setPadding(new Insets(0, 0, 0, 10 + (niveauIndent * 20)));
@@ -234,7 +243,7 @@ public class VueGantt extends BorderPane implements Observateur {
         boxNom.setCursor(Cursor.HAND);
         ligne.add(boxNom, 0, 0);
 
-        // --- BARRE GANTT ---
+        // barre gantt
         // Calculer le décalage par rapport au début du projet
         long joursDepuisDebut = ChronoUnit.DAYS.between(dateDebutProjet, t.getDateDebut());
 
@@ -259,11 +268,13 @@ public class VueGantt extends BorderPane implements Observateur {
         barre.setAlignment(Pos.CENTER);
         barre.setPrefHeight(20);
 
+        // implémentation d'une couleur par défaut pour les taches n'en ayant pas
         String couleurHex = t.getColor() != null ? t.getColor() : "#4A90E2";
         barre.setStyle("-fx-background-color: " + couleurHex + "; " +
                 "-fx-background-radius: 4; " +
                 "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 2, 0, 0, 1);");
 
+        // ajout de la durée en jour sur la barre gantt
         Label lblDuree = new Label(dureeJours + "j");
         lblDuree.setTextFill(contrasteCouleur(couleurHex));
         lblDuree.setFont(Font.font("System", FontWeight.BOLD, 9));
@@ -283,12 +294,14 @@ public class VueGantt extends BorderPane implements Observateur {
         Tooltip tp = new Tooltip(t.getLibelle() + "\nDébut : " + t.getDateDebut() + "\nDurée : " + dureeJours + " jours");
         Tooltip.install(barre, tp);
 
+        // création d'un menu pour gérer l'archivage
         ContextMenu contextMenu = new ContextMenu();
         MenuItem itemArchiver = new MenuItem("Archiver");
         itemArchiver.setOnAction(new ControleurArchiverTache(modele, t));
         contextMenu.getItems().add(itemArchiver);
         barre.setOnContextMenuRequested(e -> contextMenu.show(barre, e.getScreenX(), e.getScreenY()));
 
+        // ajout des éléments graphiques dans les différents conteneurs
         conteneurBarre.getChildren().add(barre);
         barresGraphiques.put(t, barre);
         conteneurLignes.getChildren().add(ligne);
@@ -330,14 +343,14 @@ public class VueGantt extends BorderPane implements Observateur {
 
         if (boundsLayer == null) return;
 
-        // Coordonnées pour définir la relation
+        // Permet d'obtenir les coordonnées des deux barres (fille, mere) pour définir la flèche ensuite
         double xSortie = boundsEnfant.getMaxX() - boundsLayer.getMinX();
         double ySortie = boundsEnfant.getMinY() + (boundsEnfant.getHeight() / 2) - boundsLayer.getMinY();
 
         double xEntree = boundsMere.getMinX() - boundsLayer.getMinX();
         double yEntree = boundsMere.getMinY() + (boundsMere.getHeight() / 2) - boundsLayer.getMinY();
 
-        // Permet dessiner la courbe
+        // Permet dessiner la courbe, en donnant 4 points différents pour l'amplitude du S
         CubicCurve courbe = new CubicCurve();
         courbe.setStartX(xSortie);
         courbe.setStartY(ySortie);
@@ -351,6 +364,7 @@ public class VueGantt extends BorderPane implements Observateur {
         courbe.setControlX2(xEntree - distance);
         courbe.setControlY2(yEntree);
 
+        // implémentation d'un style à la fleche
         courbe.setStroke(Color.web("#666666", 0.6));
         courbe.setStrokeWidth(1.5);
         courbe.setFill(null);
@@ -361,6 +375,7 @@ public class VueGantt extends BorderPane implements Observateur {
         pointe.setTranslateX(xEntree);
         pointe.setTranslateY(yEntree);
 
+        // ajout de la courbe + pointe pour former la fleche sur le layout layerFleche
         layerFleches.getChildren().addAll(courbe, pointe);
     }
     // Permet de savoir si le contraste entre la couleur du texte et la couleur du fond pose probème ou non

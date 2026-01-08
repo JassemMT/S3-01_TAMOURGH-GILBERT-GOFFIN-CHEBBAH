@@ -99,10 +99,12 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
                 if (parentSelectionne != null) {
                     if (parentSelectionne instanceof TacheComposite) {
                         parentSelectionne.ajouterEnfant(nouvelleTache);
+                        nouvelleTache.setDateDebut(nouvelleTache.getDateDebut(), parentSelectionne, modele); // la méthode setDateDebut est utilisée pour vérifier la cohérence (tous les tests sont dedant)
                     }
                     else if (parentSelectionne instanceof TacheSimple) {
                         TacheComposite nouveauParent = modele.promouvoirEnComposite((TacheSimple) parentSelectionne);
                         nouveauParent.ajouterEnfant(nouvelleTache);
+                        nouvelleTache.setDateDebut(nouvelleTache.getDateDebut(), nouveauParent, modele);
                     }
                 }
                 return nouvelleTache;
