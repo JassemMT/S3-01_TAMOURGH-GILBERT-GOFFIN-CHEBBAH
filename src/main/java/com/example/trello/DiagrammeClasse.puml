@@ -6,7 +6,20 @@ class com.example.trello.Controleur.ControleurArchiverTache {
 }
 
 
+class com.example.trello.Modele.TacheSimple {
+- {static} long serialVersionUID
++ void ajouterEnfant(Tache)
++ List<Tache> getEnfants()
++ boolean aDesEnfants()
++ LinkedList<Tache> construirDependance()
++ void remplacerEnfant(Tache,Tache)
++ void setDateDebut(LocalDate,Tache,Modele)
++ void supprimerEnfant(Tache)
+}
+
+
 class com.example.trello.Modele.Modele {
+- {static} long serialVersionUID
 + {static} int VUE_KANBAN
 + {static} int VUE_LISTE
 + {static} int VUE_GANTT
@@ -14,7 +27,7 @@ class com.example.trello.Modele.Modele {
 - List<Observateur> observateurs
 - List<Tache> taches
 - Set<String> colonnesDisponibles
-- Set<String> joursDisponibles
+- Object readResolve()
 + void ajouterObservateur(Observateur)
 + void supprimerObservateur(Observateur)
 + void notifierObservateur()
@@ -23,16 +36,60 @@ class com.example.trello.Modele.Modele {
 + List<Tache> getTaches()
 + void ajouterTache(Tache)
 + void supprimerTache(Tache)
+- void supprimerRecursif(Tache)
 + void archiverTache(Tache)
+- void archiverRecursif(Tache)
++ void desarchiverTache(Tache)
+- void desarchiverRecursif(Tache)
++ List<Tache> getTachesArchives()
 + Set<String> getColonnesDisponibles()
 + Map<String,List<Tache>> getColonnes()
 + void ajouterColonne(String)
 + void renommerColonne(String,String)
 + void supprimerColonne(String)
 + void deplacerTacheColonne(Tache,String)
-+ void deplacerTacheJour(Tache,String)
-+ Map<String,List<Tache>> getJours()
+- void deplacerColonneRecursif(Tache,String)
++ void deplacerTacheDate(Tache,LocalDate)
++ Map<LocalDate,List<Tache>> getJours()
++ TacheComposite promouvoirEnComposite(TacheSimple)
 + LinkedList<Tache> getDependance(Tache)
++ void exit(Object)
++ List<Tache> getParents(Tache)
+- boolean rechercheRecursiveParents(Tache,Tache,List<Tache>)
++ Tache getParentDirect(Tache)
+- Tache chercherParentDirectRecursif(Tache,Tache)
+}
+
+
+class com.example.trello.Vue.VueArchives {
+- Modele modele
+- VBox conteneurPrincipal
+- {static} DateTimeFormatter FORMAT_DATE_COMPLET
+- void initialiserInterface()
++ void actualiser(Sujet)
+- void rafraichirDonnees(List<Tache>)
+- void construireSectionJour(LocalDate,List<Tache>)
+- int ajouterLigneTache(GridPane,Tache,int)
+}
+
+
+class com.example.trello.Modele.TacheComposite {
+- {static} long serialVersionUID
+- List<Tache> enfants
++ void ajouterEnfant(Tache)
++ List<Tache> getEnfants()
++ boolean aDesEnfants()
++ LinkedList<Tache> construirDependance()
++ void remplacerEnfant(Tache,Tache)
++ void setDateDebut(LocalDate,Tache,Modele)
++ void supprimerEnfant(Tache)
+}
+
+
+class com.example.trello.Controleur.ControleurSupprimerTache {
+- Modele modele
+- Tache tache
++ void handle(ActionEvent)
 }
 
 
@@ -51,7 +108,7 @@ class com.example.trello.Vue.VueEditeurTache {
 - TextArea champCommentaire
 - ComboBox<String> comboEtat
 - ComboBox<String> comboColonne
-- ComboBox<String> comboJour
+- DatePicker datePicker
 - Spinner<Integer> spinnerDuree
 - ColorPicker colorPicker
 - void initialiserInterface()
@@ -62,7 +119,7 @@ class com.example.trello.Vue.VueEditeurTache {
 + String getCommentaireSaisi()
 + String getEtatSelectionne()
 + String getColonneSelectionnee()
-+ String getJourSelectionne()
++ LocalDate getDateSelectionnee()
 + int getDureeSaisie()
 + String getCouleurChoisie()
 }
@@ -90,20 +147,24 @@ class com.example.trello.Controleur.ControleurCreerTache {
 }
 
 
-class com.example.trello.MainListe {
+class com.example.trello.AppTrello {
+- Modele modele
+- ModeleRepository repository
 + void start(Stage)
++ void stop()
 - void initDonneesTest(Modele)
 + {static} void main(String[])
 }
 
+
 class com.example.trello.Vue.VueListe {
 - Modele modele
 - VBox conteneurPrincipal
-- {static} String[] ORDRE_JOURS
+- {static} DateTimeFormatter FORMAT_DATE_COMPLET
 - void initialiserInterface()
 + void actualiser(Sujet)
 - void rafraichirDonnees(List<Tache>)
-- void construireSectionJour(String,List<Tache>)
+- void construireSectionJour(LocalDate,List<Tache>)
 - int ajouterLigneTache(GridPane,Tache,int,int)
 - Label creerBadgeEtat(int)
 }
@@ -113,28 +174,24 @@ interface com.example.trello.Vue.Observateur {
 + void actualiser(Sujet)
 }
 
-class com.example.trello.MainKanban {
-+ void start(Stage)
-+ {static} void main(String[])
-}
-
-class com.example.trello.Modele.Tache {
+abstract class com.example.trello.Modele.Tache {
+- {static} long serialVersionUID
 # String libelle
 # String commentaire
 # int etat
 # String colonne
-# String jour
+# LocalDate dateDebut
 # int dureeEstimee
 # String color
-- List<Tache> enfants
 + {static} int ETAT_A_FAIRE
 + {static} int ETAT_EN_COURS
 + {static} int ETAT_TERMINE
 + {static} int ETAT_ARCHIVE
-+ {static} Set<String> JOURS_AUTORISES
-+ void ajouterEnfant(Tache)
-+ List<Tache> getEnfants()
-+ boolean aDesEnfants()
++ {abstract}void ajouterEnfant(Tache)
++ {abstract}List<Tache> getEnfants()
++ {abstract}boolean aDesEnfants()
++ {abstract}LinkedList<Tache> construirDependance()
++ {abstract}void remplacerEnfant(Tache,Tache)
 + String getLibelle()
 + void setLibelle(String)
 + String getCommentaire()
@@ -145,13 +202,18 @@ class com.example.trello.Modele.Tache {
 + void setColonne(String)
 + int getDureeEstimee()
 + void setDureeEstimee(int)
++ void setDureeEstimee(int,Tache)
 + String getColor()
 + void setColor(String)
-+ String getJour()
-+ void setJour(String)
++ LocalDate getDateDebut()
++ void setDateDebut(LocalDate)
++ {abstract}void setDateDebut(LocalDate,Tache,Modele)
++ LocalDate getDateFin()
++ String getNomJour()
 + boolean isArchived()
-+ LinkedList<Tache> construirDependance()
 + String toString()
++ int calculerComplement(LocalDate)
++ {abstract}void supprimerEnfant(Tache)
 }
 
 
@@ -167,9 +229,38 @@ class com.example.trello.Controleur.ControleurAjouterColonne {
 }
 
 
-class com.example.trello.Vue.VueGantt {
-+ void actualiser(Sujet)
+class com.example.trello.Modele.ModeleRepository {
+- String filePath
++ void save(Modele)
++ Modele load()
++ boolean exists()
++ void delete()
++ String getFilePath()
++ void setFilePath(String)
 }
+
+
+class com.example.trello.Vue.VueGantt {
+- Modele modele
+- VBox conteneurLignes
+- GridPane headerJours
+- ScrollPane scrollPane
+- Pane layerFleches
+- java.util.Map<Tache,HBox> barresGraphiques
+- LocalDate dateDebutProjet
+- long nombreJoursTotal
+- {static} DateTimeFormatter FORMAT_JOUR
+- void initialiserInterface()
++ void actualiser(Sujet)
+- void construireGantt(List<Tache>)
+- void calculerLimitesTemporelles(List<Tache>)
+- void construireHeader()
+- void ajouterLigneTache(Tache,int)
+- void dessinerToutesLesFleches()
+- void tracerLienBezier(Tache,Tache)
+- Color contrasteCouleur(String)
+}
+
 
 class com.example.trello.Controleur.ControleurSupprimerColonne {
 - Modele modele
@@ -181,6 +272,7 @@ class com.example.trello.Controleur.ControleurSupprimerColonne {
 class com.example.trello.Vue.VueKanban {
 - Modele modele
 - HBox conteneurColonnes
+- {static} DateTimeFormatter SHORT_DATE
 - void initialiserInterface()
 + void actualiser(Sujet)
 - VBox creerColonne(String,List<Tache>)
@@ -192,23 +284,38 @@ class com.example.trello.Vue.VueKanban {
 }
 
 
-com.example.trello.Modele.Modele --> "*" com.example.trello.Modele.Tache : "taches"
+class com.example.trello.Controleur.ControleurDesarchiverTache {
+- Modele modele
+- Tache tache
++ void handle(ActionEvent)
+}
+
+
 
 
 javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurArchiverTache
+java.io.Serializable <|.. com.example.trello.Modele.TacheSimple
+com.example.trello.Modele.Tache <|-- com.example.trello.Modele.TacheSimple
 com.example.trello.Modele.Sujet <|.. com.example.trello.Modele.Modele
+java.io.Serializable <|.. com.example.trello.Modele.Modele
+com.example.trello.Vue.Observateur <|.. com.example.trello.Vue.VueArchives
+com.example.trello.Vue.BorderPane <|-- com.example.trello.Vue.VueArchives
+java.io.Serializable <|.. com.example.trello.Modele.TacheComposite
+com.example.trello.Modele.Tache <|-- com.example.trello.Modele.TacheComposite
+javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurSupprimerTache
 javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurOuvrirEditeur
 javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurRenommerColonne
 javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurSauvegarderModif
 javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurCreerTache
-javafx.application.Application <|-- com.example.trello.MainListe
+javafx.application.Application <|-- com.example.trello.AppTrello
 com.example.trello.Vue.Observateur <|.. com.example.trello.Vue.VueListe
 com.example.trello.Vue.BorderPane <|-- com.example.trello.Vue.VueListe
-javafx.application.Application <|-- com.example.trello.MainKanban
+java.io.Serializable <|.. com.example.trello.Modele.Tache
 javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurAjouterColonne
 com.example.trello.Vue.Observateur <|.. com.example.trello.Vue.VueGantt
-javafx.scene.Scene <|-- com.example.trello.Vue.VueGantt
+com.example.trello.Vue.BorderPane <|-- com.example.trello.Vue.VueGantt
 javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurSupprimerColonne
 com.example.trello.Vue.Observateur <|.. com.example.trello.Vue.VueKanban
 com.example.trello.Vue.BorderPane <|-- com.example.trello.Vue.VueKanban
+javafx.event.EventHandler <|.. com.example.trello.Controleur.ControleurDesarchiverTache
 @enduml

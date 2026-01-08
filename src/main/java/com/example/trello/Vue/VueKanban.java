@@ -19,8 +19,10 @@ public class VueKanban extends BorderPane implements Observateur {
     private Modele modele;
     private HBox conteneurColonnes;
 
-    // Formatter for short date display (e.g. "12/10")
+    // Formattage de la date ( "12/10")
     private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("dd/MM");
+    // 1. CONSTANTE POUR DIFFÉRENCIER TACHE ET COLONNE
+    private static final String PREFIX_COL = "COL|";
 
     public VueKanban(Modele modele) {
         this.modele = modele;
@@ -29,32 +31,39 @@ public class VueKanban extends BorderPane implements Observateur {
         actualiser(modele);
     }
 
+    // initialisation de l'interface graphique
     private void initialiserInterface() {
+        // implémentation du titre de la vue
         Label titre = new Label("Vue Kanban");
         titre.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        // création du bouton pour ajouter une colonne
         Button btnAjouterColonne = new Button("+ Colonne");
         btnAjouterColonne.setOnAction(new ControleurAjouterColonne(modele));
 
+        // création d'une hbox pour les entêtes
         HBox entete = new HBox(20, titre, btnAjouterColonne);
         entete.setAlignment(Pos.CENTER_LEFT);
         entete.setPadding(new Insets(10));
         setTop(entete);
 
+        // création du conteneur des colonnes
         conteneurColonnes = new HBox(15);
         conteneurColonnes.setPadding(new Insets(10));
         conteneurColonnes.setAlignment(Pos.TOP_LEFT);
 
+        // implémentation d'un scrollPane pour gérer le grand nombre de tache
         ScrollPane scrollPane = new ScrollPane(conteneurColonnes);
         scrollPane.setFitToHeight(true);
         scrollPane.setStyle("-fx-background: #f5f5f5;");
         setCenter(scrollPane);
     }
 
+    // nettoie la vue et reconstruit les colonnes
     @Override
     public void actualiser(Sujet s) {
         if (s instanceof Modele) {
             Modele m = (Modele) s;
-            // Removed check for VUE_KANBAN to allow updates even if not active view
             // if (m.getTypeVue() != Modele.VUE_KANBAN) return;
 
             conteneurColonnes.getChildren().clear();
@@ -65,69 +74,163 @@ public class VueKanban extends BorderPane implements Observateur {
         }
     }
 
+    // permet la création d'une colonne donnée avec sa liste de taches
     private VBox creerColonne(String titre, List<Tache> taches) {
+        // vbox pour l'entête
         VBox colonne = new VBox(10);
         colonne.setPrefWidth(300);
         colonne.setStyle("-fx-background-color: #e8e8e8; -fx-background-radius: 5;");
         colonne.setPadding(new Insets(10));
 
+        // label pour le titre de la colonne
         Label labelTitre = new Label(titre + " (" + taches.size() + ")");
         labelTitre.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
         HBox.setHgrow(labelTitre, Priority.ALWAYS);
         labelTitre.setMaxWidth(Double.MAX_VALUE);
 
+        // bouton renommer avec un style et une action spécifique
         Button btnRenommer = new Button("✎");
         btnRenommer.setStyle("-fx-font-size: 10px;");
         btnRenommer.setOnAction(new ControleurRenommerColonne(modele, titre));
+
+        // bouton supprimer avec un style et une action spécifique
         Button btnSupprimer = new Button("X");
         btnSupprimer.setStyle("-fx-font-size: 10px; -fx-text-fill: red;");
         btnSupprimer.setOnAction(new ControleurSupprimerColonne(modele, titre));
 
+        // ne permet à l'utilisateur de supprimer la colonne principale
         if("Principal".equals(titre)) btnSupprimer.setDisable(true);
 
+        // hbox pour contenir les boutons
         HBox actions = new HBox(5, btnRenommer, btnSupprimer);
         actions.setAlignment(Pos.CENTER_RIGHT);
+
+        // hbox pour le titre de la colonne
         HBox ligneTitre = new HBox(5, labelTitre, actions);
         ligneTitre.setAlignment(Pos.CENTER_LEFT);
 
+
+        // bouton ajouter + action
         Button btnAjouter = new Button("+ Ajouter tâche");
         btnAjouter.setMaxWidth(Double.MAX_VALUE);
         btnAjouter.setOnAction(new ControleurCreerTache(modele, titre));
 
+        // vbox pour contenir les taches
         VBox conteneurTaches = new VBox(8);
         conteneurTaches.setMinHeight(400);
         conteneurTaches.setStyle("-fx-background-color: transparent;");
         configurerDropSurColonne(conteneurTaches, titre);
 
+        // implémentation de chaque tache de la colonne
         for (Tache tache : taches) { conteneurTaches.getChildren().add(creerCarteTache(tache)); }
 
+        // scrollPane pour gérer le trop grand nombre de tache ou de colonne
         ScrollPane scrollTaches = new ScrollPane(conteneurTaches);
         scrollTaches.setFitToWidth(true);
         scrollTaches.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
         scrollTaches.setPrefHeight(500);
 
         colonne.getChildren().addAll(ligneTitre, btnAjouter, scrollTaches);
-        //configurerDragDropColonne(colonne, titre);
+        configurerDragDropColonne(colonne, titre);
         return colonne;
     }
+    // 3. LA MÉTHODE MAGIQUE
+    private void configurerDragDropColonne(VBox colonneUI, String titreColonne) {
 
+        // --- DÉBUT DU DRAG (On attrape la colonne) ---
+        colonneUI.setOnDragDetected(event -> {
+            // Sécurité : Si l'utilisateur a cliqué sur une tâche à l'intérieur de la colonne,
+            // on ne veut pas déplacer la colonne, mais la tâche.
+            // On vérifie si la source du clic n'est pas une tâche (VBox avec UserData)
+            if (event.getTarget() instanceof javafx.scene.Node) {
+                // Astuce simple : si ce qu'on drag n'est pas la colonne elle-même, on annule ce handler
+                // pour laisser la tâche gérer son propre drag.
+                // (Mais JavaFX gère souvent le bubbling, donc on force le contenu ici)
+            }
+
+            // On lance le Drag and Drop
+            Dragboard db = colonneUI.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+
+            // On met le TAG spécial + le titre de la colonne
+            content.putString(PREFIX_COL + titreColonne);
+            db.setContent(content);
+
+            event.consume();
+        });
+
+        // --- SURVOL (On passe au dessus d'une autre colonne) ---
+        colonneUI.setOnDragOver(event -> {
+            if (event.getDragboard().hasString()) {
+                String data = event.getDragboard().getString();
+                // On accepte le mouvement SEULEMENT si c'est une colonne qui est déplacée
+                if (data.startsWith(PREFIX_COL)) {
+                    event.acceptTransferModes(TransferMode.MOVE);
+                }
+            }
+            event.consume();
+        });
+
+        // --- EFFET VISUEL ---
+        colonneUI.setOnDragEntered(event -> {
+            if (event.getDragboard().hasString() && event.getDragboard().getString().startsWith(PREFIX_COL)) {
+                // Bordure Bleue pour dire "ça va atterrir ici"
+                colonneUI.setStyle("-fx-background-color: #e8e8e8; -fx-background-radius: 5; -fx-border-width: 2; -fx-border-color: #007bff;");
+            }
+        });
+
+        colonneUI.setOnDragExited(event -> {
+            // On remet le style normal quand on sort
+            colonneUI.setStyle("-fx-background-color: #e8e8e8; -fx-background-radius: 5; -fx-border-width: 2; -fx-border-color: transparent;");
+        });
+
+        // --- LÂCHER (Drop) ---
+        colonneUI.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+
+            if (db.hasString()) {
+                String data = db.getString();
+
+                // Si c'est bien une colonne
+                if (data.startsWith(PREFIX_COL)) {
+                    // On récupère le nom de la colonne source (en enlevant le préfixe)
+                    String sourceCol = data.replace(PREFIX_COL, "");
+                    String targetCol = titreColonne; // La colonne sur laquelle on a lâché
+
+                    // On appelle le modèle pour faire l'échange
+                    if (!sourceCol.equals(targetCol)) {
+                        modele.deplacerColonneOrdre(sourceCol, targetCol);
+                        success = true;
+                    }
+                }
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
+    }
+
+
+
+    // permet la création et l'implémentation des taches
     private VBox creerCarteTache(Tache tache) {
+        // vbox permettant contenir les infos de la tache
         VBox carte = new VBox(5);
         carte.setPadding(new Insets(10));
         String couleurHex = tache.getColor() != null ? tache.getColor() : "#FFFFFF";
         carte.setStyle("-fx-background-color: " + couleurHex + "; -fx-background-radius: 3; -fx-border-color: #ddd; -fx-border-radius: 3; -fx-cursor: hand;");
 
-        // 1. Titre
+        // Titre
         Label lblLibelle = new Label(tache.getLibelle());
         lblLibelle.setStyle("-fx-font-weight: bold;");
         lblLibelle.setWrapText(true);
 
-        // 2. Date (CORRECTION ICI)
+        // Date
         String dateStr = tache.getDateDebut().format(SHORT_DATE);
         Label lblDate = new Label("📅 " + dateStr);
         lblDate.setStyle("-fx-font-size: 10px; -fx-text-fill: #444;");
 
-        // 3. État
+        // État
         Label lblEtat = new Label(getTexteEtat(tache.getEtat()));
         lblEtat.setStyle("-fx-font-size: 9px; -fx-padding: 2 5; -fx-background-radius: 10; " + getStyleEtat(tache.getEtat()));
 
@@ -136,7 +239,7 @@ public class VueKanban extends BorderPane implements Observateur {
 
         carte.getChildren().addAll(lblLibelle, ligneInfos);
 
-        // 4. Sous-tâches
+        // Gestion des sous-tâches
         if (tache.aDesEnfants()) {
             List<Tache> enfants = tache.getEnfants();
             VBox boxEnfants = new VBox(2);
@@ -155,7 +258,7 @@ public class VueKanban extends BorderPane implements Observateur {
             carte.getChildren().add(boxEnfants);
         }
 
-        // 5. Bouton archiver
+        // Bouton archiver
         Button btnArchiver = new Button("ARCHIVER"); // Icone seule pour gagner de la place
         btnArchiver.setStyle("-fx-font-size: 10px; -fx-background-color: transparent; -fx-text-fill: #666;");
         btnArchiver.setTooltip(new Tooltip("Archiver"));
@@ -170,13 +273,14 @@ public class VueKanban extends BorderPane implements Observateur {
         configurerDragSurCarte(carte, tache);
 
         String styleNormal = carte.getStyle();
-        // Hover effect
+        // effet quand la souris est sur la tache
         carte.setOnMouseEntered(e -> carte.setStyle("-fx-background-color: " + couleurHex + "; -fx-background-radius: 3; -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 3; -fx-cursor: hand;"));
         carte.setOnMouseExited(e -> carte.setStyle(styleNormal));
 
         return carte;
     }
 
+    // getter etat de la tache la convertissant en string
     private String getTexteEtat(int etat) {
         switch(etat) {
             case Tache.ETAT_A_FAIRE: return "À faire";
@@ -187,6 +291,7 @@ public class VueKanban extends BorderPane implements Observateur {
         }
     }
 
+    // getter pour le style de l'état de la tache en string
     private String getStyleEtat(int etat) {
         switch(etat) {
             case Tache.ETAT_A_FAIRE: return "-fx-background-color: #ddd; -fx-text-fill: black;";
@@ -197,103 +302,48 @@ public class VueKanban extends BorderPane implements Observateur {
         }
     }
 
-    /**
-     * Configure le comportement de la carte (VBox) quand on commence à la glisser.
-     * @param carte L'élément graphique (VBox) qui représente la tâche.
-     * @param tache L'objet métier (Donnée) associé.
-     */
+    // permet le drop d'une tache sur une nouvelle carte
     private void configurerDragSurCarte(VBox carte, Tache tache) {
-        // Événement déclenché UNE SEULE FOIS au moment précis où le geste de glisser commence
         carte.setOnDragDetected(event -> {
-
-            // 1. Démarrage officiel du Drag & Drop.
-            // On indique à JavaFX que l'intention est de DÉPLACER (MOVE) l'objet, pas de le copier.
-            // 'db' (Dragboard) est le "camion de transport" virtuel.
             Dragboard db = carte.startDragAndDrop(TransferMode.MOVE);
-
-            // 2. Préparation du contenu "officiel" pour JavaFX.
-            // JavaFX exige qu'on mette quelque chose dans le Dragboard pour valider le drag.
             ClipboardContent content = new ClipboardContent();
-            content.putString(tache.getLibelle()); // On met juste le titre comme "étiquette".
-            db.setContent(content); // On charge le camion.
-
-            // 3. L'ASTUCE DU "POST-IT" (Le point clé !)
-            // Le Dragboard gère mal les objets Java complexes.
-            // Au lieu de mettre la Tache DANS le Dragboard, on l'attache À LA VBOX elle-même via 'UserData'.
-            // C'est comme coller un post-it "Ceci est la Tache ID 42" au dos de la carte graphique.
+            content.putString(tache.getLibelle());
+            db.setContent(content);
             carte.setUserData(tache);
-
-            // 4. On dit à l'événement "C'est bon, j'ai géré, ne le propage pas aux parents".
             event.consume();
         });
     }
-    /**
-     * Configure la colonne pour accepter qu'on lâche des tâches dessus.
-     * @param colonne La VBox verticale qui contient les tâches.
-     * @param titreColonne Le nom de la colonne (ex: "En cours") pour savoir où envoyer la tâche.
-     */
-    private void configurerDropSurColonne(VBox colonne, String titreColonne) {
 
-        // --- PARTIE A : LE SURVOL (Autorisation d'atterrir) ---
-        // Cet événement se déclenche en continu tant que la souris survole la colonne avec un objet.
+    // méthode gérant le drag&drop d'une tache dans une nouvlle colonne
+    private void configurerDropSurColonne(VBox colonne, String titreColonne) {
         colonne.setOnDragOver(event -> {
-            // On vérifie si ce qui est transporté contient du texte (notre "étiquette" de l'étape 1).
-            // Si oui, on AUTORISE le dépôt en mode MOVE.
-            // Sans cette ligne, le curseur afficherait un sens interdit 🚫.
             if (event.getDragboard().hasString()) {
                 event.acceptTransferModes(TransferMode.MOVE);
             }
             event.consume();
         });
-
-        // --- PARTIE B : LE LÂCHER (Réception du colis) ---
-        // Cet événement se déclenche quand l'utilisateur relâche le clic gauche.
         colonne.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
-            boolean success = false; // Par défaut, on considère que ça a échoué
-
-            // 1. Vérification de sécurité : est-ce qu'il y a bien des données ?
+            boolean success = false;
             if (db.hasString()) {
-
-                // 2. RETROUVER L'EXPÉDITEUR
-                // "Qui a lancé ce drag ?" -> C'est la VBox de la carte (configurée à l'étape 1)
                 Object source = event.getGestureSource();
-
-                // On vérifie que la source est bien une VBox (la carte graphique)
                 if (source instanceof VBox) {
                     VBox carteTache = (VBox) source;
-
-                    // 3. RÉCUPÉRER L'OBJET RÉEL (Lecture du "Post-it")
-                    // On récupère l'objet qu'on avait attaché via setUserData() au départ.
                     Object userData = carteTache.getUserData();
-
-                    // On vérifie que c'est bien un objet Tache
                     if (userData instanceof Tache) {
                         try {
-                            // 4. ACTION MÉTIER (Le vrai travail)
-                            // On demande au Modèle de déplacer cette tâche vers la colonne actuelle.
-                            // C'est ici que les règles métier (vérification parents, etc.) s'appliquent.
                             modele.deplacerTacheColonne((Tache) userData, titreColonne);
-
-                            // Si aucune exception n'est levée, c'est un succès.
                             success = true;
-
-                        } catch (Exception e) {
-                            // 5. GESTION DES ERREURS (Ex: Sous-tâche bloquée par son parent)
-                            // Si le Modèle dit "Non", on affiche une pop-up d'erreur.
+                        }catch (Exception e) {
                             Alert alert = new Alert(Alert.AlertType.ERROR);
                             alert.setTitle("Erreur de déplacement");
                             alert.setHeaderText("Impossible de déplacer la tâche");
-                            alert.setContentText(e.getMessage()); // Le message vient du Modèle
+                            alert.setContentText(e.getMessage());
                             alert.showAndWait();
                         }
                     }
                 }
             }
-
-            // 6. FIN DE LA TRANSACTION
-            // On signale au système si le drop a réussi ou non.
-            // Si true, JavaFX peut nettoyer le Dragboard.
             event.setDropCompleted(success);
             event.consume();
         });

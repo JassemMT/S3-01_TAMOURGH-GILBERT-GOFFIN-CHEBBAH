@@ -28,7 +28,7 @@ public class VueListe extends BorderPane implements Observateur {
     private Modele modele;
     private VBox conteneurPrincipal;
 
-    // Formatteur pour afficher "Lundi 12 Octobre"
+    // Formatter pour afficher "Lundi 12 Octobre 2026"
     private static final DateTimeFormatter FORMAT_DATE_COMPLET = DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH);
 
     public VueListe(Modele modele) {
@@ -38,30 +38,38 @@ public class VueListe extends BorderPane implements Observateur {
         actualiser(modele);
     }
 
+    // initialisation de l'intergace graphique
     private void initialiserInterface() {
+        // hbox gérant l'entête
         HBox entete = new HBox(10);
         entete.setPadding(new Insets(10));
         entete.setAlignment(Pos.CENTER_LEFT);
 
+        // titre de la vue + style
         Label titreVue = new Label("Vue Liste (Chronologique)");
         titreVue.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
+        // bouton ajouter + style + action
         Button btnAjouter = new Button("+ Nouvelle Tâche");
         btnAjouter.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;");
         btnAjouter.setOnAction(new ControleurCreerTache(modele, "Principal"));
 
+        // ajout des élements dans la hbox entete
         entete.getChildren().addAll(titreVue, btnAjouter);
         setTop(entete);
 
+        // vbox pour le conteneur principal
         conteneurPrincipal = new VBox(20);
         conteneurPrincipal.setPadding(new Insets(20));
 
+        // scrollPane contenant les éléments graphiques
         ScrollPane scroll = new ScrollPane(conteneurPrincipal);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background-color: transparent;");
         setCenter(scroll);
     }
 
+    // permet de rafraichir mes donnees du modele
     @Override
     public void actualiser(Sujet s) {
         if (s instanceof Modele) {
@@ -70,6 +78,7 @@ public class VueListe extends BorderPane implements Observateur {
         }
     }
 
+    // met a jour les donnees du modele en nettoyant celui-ci
     private void rafraichirDonnees(List<Tache> lesTaches) {
         conteneurPrincipal.getChildren().clear();
 
@@ -78,16 +87,16 @@ public class VueListe extends BorderPane implements Observateur {
             return;
         }
 
-        // 1. Calculer la plage de dates (Min -> Max)
+        // Calculer la plage de dates (Min -> Max)
         Set<LocalDate> datesUtilisees = new HashSet<>();
         for (Tache t : lesTaches) {
-            // SÉCURITÉ : On ignore les tâches qui auraient une date null (bug de migration)
+            // On ignore les tâches qui auraient une date null (bug de migration)
             if (t.getDateDebut() != null) {
                 datesUtilisees.add(t.getDateDebut());
             }
         }
 
-        // SÉCURITÉ : Si après filtrage, aucune date valide n'est trouvée, on arrête.
+        // Si après filtrage, aucune date valide n'est trouvée, on arrête
         if (datesUtilisees.isEmpty()) {
             conteneurPrincipal.getChildren().add(new Label("Aucune date valide trouvée pour les tâches."));
             return;
@@ -106,14 +115,14 @@ public class VueListe extends BorderPane implements Observateur {
             }
         }
 
-        // 2. Boucle temporelle du premier jour au dernier jour
+        // Boucle temporelle du premier jour au dernier jour
         LocalDate currentDate = minDate;
 
         // On boucle jusqu'à maxDate inclus
         while (!currentDate.isAfter(maxDate)) {
             final LocalDate jourCourant = currentDate; // pour la lambda
 
-            // Récupérer les tâches de CE jour précis
+            // Récupérer les tâches de ce jour précis
             List<Tache> toutesTachesDuJour = lesTaches.stream()
                     .filter(t -> t.getDateDebut() != null && t.getDateDebut().isEqual(jourCourant))
                     .collect(Collectors.toList());
@@ -143,6 +152,7 @@ public class VueListe extends BorderPane implements Observateur {
         }
     }
 
+    // permet de construire l'entete des taches
     private void construireSectionJour(LocalDate dateDuJour, List<Tache> tachesRacines) {
         VBox section = new VBox(10);
         section.setStyle("-fx-background-color: #FAFAFA; -fx-background-radius: 5; -fx-padding: 10; -fx-border-color: #EEE; -fx-border-radius: 5;");
@@ -170,6 +180,7 @@ public class VueListe extends BorderPane implements Observateur {
             lblVide.setFont(Font.font("System", FontPosture.ITALIC, 11));
             section.getChildren().add(lblVide);
         } else {
+            // création de la grille
             GridPane grille = new GridPane();
             grille.setHgap(10);
             grille.setVgap(8);
@@ -196,8 +207,9 @@ public class VueListe extends BorderPane implements Observateur {
         conteneurPrincipal.getChildren().add(section);
     }
 
+    // permet d'ajouter une tache dans une grille, sur une ligne donnée avec un niveau d'indentation spécifique
     private int ajouterLigneTache(GridPane grille, Tache t, int row, int niveauIndent) {
-
+        // titre + style + placement
         HBox boxTitre = new HBox(5);
         boxTitre.setAlignment(Pos.CENTER_LEFT);
         boxTitre.setPadding(new Insets(0, 0, 0, niveauIndent * 20));
@@ -208,6 +220,7 @@ public class VueListe extends BorderPane implements Observateur {
             boxTitre.getChildren().add(indicateur);
         }
 
+        // libelle
         Label lLibelle = new Label(t.getLibelle());
         lLibelle.setFont(Font.font("System", FontWeight.SEMI_BOLD, 14));
         lLibelle.setCursor(javafx.scene.Cursor.HAND);
@@ -215,21 +228,25 @@ public class VueListe extends BorderPane implements Observateur {
         lLibelle.setOnMouseClicked(new ControleurOuvrirEditeur(t, modele));
         boxTitre.getChildren().add(lLibelle);
 
+        // etat
         Label lEtat = creerBadgeEtat(t.getEtat());
         Label lColonne = new Label(t.getColonne());
         Label lDuree = new Label(t.getDureeEstimee() + "j"); // Affichage en Jours
 
+        // commentaire
         String commentaireText = t.getCommentaire() != null ? t.getCommentaire() : "";
         Label lComm = new Label(commentaireText);
         lComm.setTextFill(Color.GRAY);
         lComm.setFont(Font.font("System", FontPosture.ITALIC, 12));
         lComm.setWrapText(false); // On évite que ça prenne trop de place verticalement
 
+        // bouton archiver + style + en tant que popup + action
         Button btnArchiver = new Button("ARCHIVER");
         btnArchiver.setStyle("-fx-background-color: transparent; -fx-text-fill: #D32F2F; -fx-font-weight: bold; -fx-cursor: hand;");
         btnArchiver.setTooltip(new Tooltip("Archiver la tâche"));
         btnArchiver.setOnAction(new ControleurArchiverTache(modele, t));
 
+        // placement des éléments graphiques dans la grille
         grille.add(boxTitre, 0, row);
         grille.add(lEtat, 1, row);
         grille.add(lColonne, 2, row);
@@ -272,6 +289,7 @@ public class VueListe extends BorderPane implements Observateur {
         return row;
     }
 
+    // permet la création d'un certain style aux différents etat de tache
     private Label creerBadgeEtat(int etat) {
         String text = "";
         String colorStyle = "-fx-background-color: #E0E0E0;";
