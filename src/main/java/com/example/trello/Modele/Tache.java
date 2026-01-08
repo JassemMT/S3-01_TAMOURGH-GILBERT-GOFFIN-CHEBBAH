@@ -24,6 +24,7 @@ public abstract class Tache implements Serializable {
     public static final int ETAT_TERMINE = 2;
     public static final int ETAT_ARCHIVE = 3;
 
+    // constructeur complet
     public Tache(String libelle, String commentaire, LocalDate dateDebut, String colonne, int dureeEstimee) {
         this.libelle = libelle;
         this.commentaire = commentaire;
@@ -35,10 +36,12 @@ public abstract class Tache implements Serializable {
         this.dateDebut = (dateDebut != null) ? dateDebut : LocalDate.now();
     }
 
+    // constructeur simplifié
     public Tache(String libelle, String commentaire) {
         this(libelle, commentaire, LocalDate.now(), "Principal", 0);
     }
 
+    // constructeur automatique
     protected Tache() {
         this.libelle = "";
         this.commentaire = "";
@@ -49,16 +52,16 @@ public abstract class Tache implements Serializable {
         this.color = "#C5D3D0";
     }
 
-    // --- MÉTHODES ABSTRAITES ---
+    // méthodes abstraites
     public abstract void ajouterEnfant(Tache t);
     public abstract List<Tache> getEnfants();
     public abstract boolean aDesEnfants();
     public abstract LinkedList<Tache> construirDependance();
 
-    // --- NOUVEAU : Méthode nécessaire pour corriger la référence parent lors de la promotion ---
+    // Méthode nécessaire pour corriger la référence parent lors de la promotion
     public abstract void remplacerEnfant(Tache ancienne, Tache nouvelle);
 
-    // --- GETTERS ET SETTERS ---
+    // Getters & Setters
     public String getLibelle() { return libelle; }
     public void setLibelle(String libelle) { this.libelle = libelle; }
 
@@ -92,6 +95,7 @@ public abstract class Tache implements Serializable {
     public void setDateDebut(LocalDate dateDebut) {
         if (dateDebut != null) this.dateDebut = dateDebut;
     }
+    public abstract void setDateDebut(LocalDate dateDebut, Tache parent, Modele modele);
 
     public LocalDate getDateFin() { return dateDebut.plusDays(dureeEstimee); }
 
@@ -100,13 +104,17 @@ public abstract class Tache implements Serializable {
         return jour.substring(0, 1).toUpperCase() + jour.substring(1);
     }
 
+    // vérifie si la tache est archivée
     public boolean isArchived() { return etat == ETAT_ARCHIVE; }
 
     @Override
     public String toString() { return libelle; }
 
+    // permet de calculer le nombre de jours entre la date de début de la tache courante et une date donnée
     public int calculerComplement(LocalDate d) {
         Period periode = Period.between(this.dateDebut, d);
         return periode.getDays();
     }
+
+    public abstract void supprimerEnfant(Tache t);
 }

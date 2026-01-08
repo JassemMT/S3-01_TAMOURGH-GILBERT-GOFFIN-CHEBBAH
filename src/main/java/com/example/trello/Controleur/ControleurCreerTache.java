@@ -7,6 +7,7 @@ import com.example.trello.Modele.TacheSimple;
 import com.example.trello.Vue.VueEditeurTache;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 
@@ -24,21 +25,26 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
 
     @Override
     public void handle(ActionEvent actionEvent) {
+        // permet de créer une nouvelle fenêtre de dialogue
         Dialog<Tache> dialog = new Dialog<>();
         dialog.setTitle("Nouvelle Tâche");
         dialog.setHeaderText("Création rapide dans : " + nomColonne);
 
+        // création du bouton pour valider la création de la tache
         ButtonType createButtonType = new ButtonType("Créer & Éditer", ButtonBar.ButtonData.OK_DONE);
+        // ajout du bouton à la fenêtre de dialogue
         dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
 
+        // création d'un conteneur GridPane
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
 
+        // création d'un élément graphique TextField pour renseigner le titre de la nouvelle tache
         TextField champTitre = new TextField();
         champTitre.setPromptText("Titre de la tâche");
 
-        // --- NOUVEAU : DatePicker pour choisir la date ---
+        // élément graphique DatePicker pour choisir la date
         DatePicker datePicker = new DatePicker(LocalDate.now());
         datePicker.setPromptText("Date de début");
 
@@ -57,6 +63,7 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
         });
         comboParents.setButtonCell(comboParents.getCellFactory().call(null));
 
+        // placement des différents éléments graphiques sur le gridPane
         grid.add(new Label("Titre:"), 0, 0);
         grid.add(champTitre, 1, 0);
         grid.add(new Label("Date début:"), 0, 1); // Ajout du label date
@@ -66,7 +73,7 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
 
         dialog.getDialogPane().setContent(grid);
 
-        javafx.scene.Node loginButton = dialog.getDialogPane().lookupButton(createButtonType);
+        Node loginButton = dialog.getDialogPane().lookupButton(createButtonType);
         loginButton.setDisable(true);
         champTitre.textProperty().addListener((observable, oldValue, newValue) -> {
             loginButton.setDisable(newValue.trim().isEmpty());

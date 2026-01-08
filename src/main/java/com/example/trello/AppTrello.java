@@ -5,6 +5,7 @@ import com.example.trello.Modele.ModeleRepository;
 import com.example.trello.Modele.Tache;
 import com.example.trello.Modele.TacheComposite;
 import com.example.trello.Modele.TacheSimple;
+import com.example.trello.Vue.VueArchives;
 import com.example.trello.Vue.VueGantt;
 import com.example.trello.Vue.VueKanban;
 import com.example.trello.Vue.VueListe;
@@ -24,7 +25,7 @@ public class AppTrello extends Application {
     @Override
     public void start(Stage primaryStage) {
         // 1. Chargement de la sauvegarde
-        repository = new ModeleRepository("Sauvegarde/app.save");
+        repository = new ModeleRepository("Sauvegarde/testCohérenceApp.save");
         modele = repository.load();
 
         // 2. Si aucune sauvegarde n'existe (premier lancement), on crée des données de test
@@ -44,6 +45,8 @@ public class AppTrello extends Application {
         VueKanban vueKanban = new VueKanban(modele);
         VueGantt vueGantt = new VueGantt(modele);
 
+        VueArchives vueArchives = new VueArchives(modele);
+
         // TabPane pour gérer les trois vues
         TabPane tabPane = new TabPane();
 
@@ -59,7 +62,12 @@ public class AppTrello extends Application {
         tabGantt.setContent(vueGantt);
         tabGantt.setClosable(false);
 
-        tabPane.getTabs().addAll(tabListe, tabKanban, tabGantt);
+        Tab tabArchive = new Tab("Vue Archives");
+        tabArchive.setContent(vueArchives);
+        tabArchive.setClosable(false);
+
+
+        tabPane.getTabs().addAll(tabListe, tabKanban, tabGantt, tabArchive);
 
         // Création de la scène
         Scene scene = new Scene(tabPane, 1200, 700);

@@ -20,9 +20,10 @@ public class ControleurSauvegarderModif implements EventHandler<ActionEvent> {
         this.vue = vue;
     }
 
+    // méthode permettant de sauvegarder les modifications apportées
     @Override
     public void handle(ActionEvent actionEvent) {
-        // 1. Récupération
+        // Récupération des nouvelles informations
         String nouveauTitre = vue.getTitreSaisi();
         String nouveauCom = vue.getCommentaireSaisi();
         String nouvelEtatStr = vue.getEtatSelectionne();
@@ -32,30 +33,32 @@ public class ControleurSauvegarderModif implements EventHandler<ActionEvent> {
 
         LocalDate nouvelleDate = vue.getDateSelectionnee();
 
+        // intégration des nouvelles données à la tache
         tache.setLibelle(nouveauTitre);
         tache.setCommentaire(nouveauCom);
         tache.setDureeEstimee(duree, modele.getParentDirect(tache));
         tache.setColor(couleur);
 
-        // --- Mise à jour de la date (remplace setJour) ---
+        // Mise à jour de la date (remplace setJour)
         if (nouvelleDate != null) {
-            tache.setDateDebut(nouvelleDate);
+            //tache.setDateDebut(nouvelleDate);
+            modele.deplacerTacheDate(tache, nouvelleDate); // plus propre d'utiliser le modele pour modifier les données de l'app que la tâche directement
         }
 
         if (nouvelleColonne != null) {
             tache.setColonne(nouvelleColonne);
         }
 
-        // 4. Modification INDÉPENDANTE de l'état
+        // Modification INDÉPENDANTE de l'état
         if ("À faire".equals(nouvelEtatStr)) tache.setEtat(Tache.ETAT_A_FAIRE);
         else if ("En cours".equals(nouvelEtatStr)) tache.setEtat(Tache.ETAT_EN_COURS);
         else if ("Terminé".equals(nouvelEtatStr)) tache.setEtat(Tache.ETAT_TERMINE);
         else if ("Archivé".equals(nouvelEtatStr)) tache.setEtat(Tache.ETAT_ARCHIVE);
 
-        // 5. Notification
+        // Actualisation du modèle ainsi que des vues
         modele.notifierObservateur();
 
-        // 6. Fermeture de la fenêtre
+        // Fermeture de la fenêtre
         vue.fermer();
     }
 }

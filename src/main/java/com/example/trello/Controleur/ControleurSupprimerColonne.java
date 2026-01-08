@@ -16,9 +16,11 @@ public class ControleurSupprimerColonne implements EventHandler<ActionEvent> {
         this.nomColonne = nomColonne;
     }
 
+    // permet de supprimer une colonne
     @Override
     public void handle(ActionEvent event) {
-        // Vérification "Principal"
+        // Vérification si le colonne voulant être supprimée est la colonne "Principal"
+        // si tel est le cas alors cela renvoie une erreur car il n'est pas possible de supprimer cette colonne
         if ("Principal".equals(nomColonne)) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Action impossible");
@@ -28,6 +30,7 @@ public class ControleurSupprimerColonne implements EventHandler<ActionEvent> {
             return;
         }
 
+        // demande de confirmation de suppression de la colonne voulu
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Supprimer la colonne");
         alert.setHeaderText("Supprimer la colonne : " + nomColonne + " ?");
