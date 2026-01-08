@@ -44,3 +44,4 @@ mvnw.cmd
 *.xml
 *.class
 *.fxml
+/Sauvegarde/app.save
