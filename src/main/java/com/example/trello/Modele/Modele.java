@@ -8,19 +8,45 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Classe principale du Modèle (MVC) représentant l'état global de l'application.
+ * <p>
+ * Cette classe agit comme un "Sujet" dans le pattern <b>Observateur</b>. Elle centralise
+ * toutes les données (tâches, colonnes, vue active) et la logique métier.
+ * Elle notifie les vues (Observateurs) à chaque modification d'état.
+ * </p>
+ * <p>
+ * Elle implémente {@link Serializable} pour permettre la sauvegarde complète du projet,
+ * avec une gestion spécifique des attributs non-sérialisables (transient).
+ * </p>
+ */
 public class Modele implements Sujet, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /** Constante pour identifier la Vue Kanban. */
     public static final int VUE_KANBAN = 1;
+    /** Constante pour identifier la Vue Liste. */
     public static final int VUE_LISTE = 2;
+    /** Constante pour identifier la Vue Gantt. */
     public static final int VUE_GANTT = 3;
 
     private int type_vue;
+
+    /**
+     * Liste des observateurs (Vues).
+     * <br><b>Transient :</b> Cette liste n'est pas sauvegardée dans le fichier car les composants
+     * graphiques JavaFX ne sont pas sérialisables. Elle est reconstruite au chargement.
+     */
     private transient List<Observateur> observateurs;
+
     private List<Tache> taches;
     private Set<String> colonnesDisponibles;
 
+    /**
+     * Constructeur par défaut.
+     * Initialise les listes et définit les colonnes par défaut.
+     */
     public Modele() {
         this.observateurs = new ArrayList<>();
         this.taches = new ArrayList<>();
@@ -32,7 +58,13 @@ public class Modele implements Sujet, Serializable {
         this.colonnesDisponibles.add("Terminé");
     }
 
-    // permet de recréer la liste de observateurs après une deserialisation
+    /**
+     * Méthode spéciale appelée par la machine virtuelle Java lors de la désérialisation.
+     * Elle permet de réinitialiser la liste {@code observateurs} qui était {@code null}
+     * car marquée {@code transient}.
+     *
+     * @return L'instance du modèle restaurée.
+     */
     private Object readResolve() {
         if (observateurs == null) {
             observateurs = new ArrayList<>();
@@ -40,33 +72,64 @@ public class Modele implements Sujet, Serializable {
         return this;
     }
 
-    // permet d'ajouter un observateur à la liste des observateurs du modèle
+    /**
+     * Ajoute un observateur (une Vue) à la liste de notification.
+     *
+     * @param o L'observateur à ajouter.
+     */
     @Override public void ajouterObservateur(Observateur o) {
         if (observateurs == null) observateurs = new ArrayList<>();
         if (o != null && !observateurs.contains(o)) observateurs.add(o);
     }
-    // permet de supprimer un observateur donné présent dans la liste des observateurs
+
+    /**
+     * Retire un observateur de la liste.
+     * @param o L'observateur à retirer.
+     */
     @Override public void supprimerObservateur(Observateur o) {
         if (observateurs != null) observateurs.remove(o);
     }
 
-    // permet d'actualiser tous les observateurs
+    /**
+     * Déclenche la mise à jour de toutes les Vues abonnées.
+     * Doit être appelée après chaque modification de données (ajout, suppression, déplacement...).
+     */
     @Override public void notifierObservateur() {
         if (observateurs != null) {
             for (Observateur obs : observateurs) obs.actualiser(this);
         }
     }
-    // Setter & Getter pour le type de la vue en cours
+
+    /**
+     * Change la vue active (Kanban, Liste, Gantt) et notifie l'interface.
+     * @param type Le code entier de la vue (voir constantes VUE_*).
+     */
     public void setTypeVue(int type) { if (type >= VUE_KANBAN && type <= VUE_GANTT) { this.type_vue = type; notifierObservateur(); } }
+
+    /** @return Le code de la vue actuellement affichée. */
     public int getTypeVue() { return type_vue; }
 
-    // permet de récupérer toutes les taches sans les taches archivées
+    /**
+     * Récupère la liste des tâches actives (non archivées).
+     * @return Une liste filtrée de tâches.
+     */
     public List<Tache> getTaches() { return taches.stream().filter(t -> !t.isArchived()).collect(Collectors.toList()); }
 
-    // ajoute une tache donnée à la liste des taches et actualise les observateurs
+    /**
+     * Ajoute une nouvelle tâche racine au projet.
+     * @param tache La tâche à ajouter.
+     */
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
 
-    // permet de supprimer une tache donnée
+    /**
+     * Supprime définitivement une tâche et toute sa descendance.
+     * <p>
+     * Gère automatiquement le détachement du parent (si c'est une sous-tâche)
+     * avant de lancer la suppression récursive.
+     * </p>
+     *
+     * @param tache La tâche à supprimer.
+     */
     public void supprimerTache(Tache tache) {
         if (tache != null) {
             // on détache la tache de son pere
@@ -74,7 +137,7 @@ public class Modele implements Sujet, Serializable {
             Tache parent = getParentDirect(tache);
             if (parent != null) {
                 parent.supprimerEnfant(tache);
-                }
+            }
 
             // supprime de façon récursive sa présence dans la liste des taches
             supprimerRecursif(tache);
@@ -84,7 +147,9 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // méthode pour supprimer récursivement une tache ainsi que ses enfants
+    /**
+     * Méthode récursive pour supprimer une tâche et nettoyer ses enfants.
+     */
     private void supprimerRecursif(Tache t) {
         taches.remove(t);
         if (t.aDesEnfants()) {
@@ -95,7 +160,10 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // permet d'archiver une tache
+    /**
+     * Archive une tâche (changement d'état sans suppression).
+     * @param tache La tâche à archiver.
+     */
     public void archiverTache(Tache tache) {
         if (tache != null) {
             archiverRecursif(tache);
@@ -103,7 +171,9 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // permet d'archiver une tache ainsi que ses enfants
+    /**
+     * Archive récursivement une tâche et tous ses enfants.
+     */
     private void archiverRecursif(Tache t) {
         t.setEtat(Tache.ETAT_ARCHIVE);
         if (t.aDesEnfants()) {
@@ -113,14 +183,20 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // permet de désarchiver une tache
+    /**
+     * Restaure une tâche archivée (remet l'état "A FAIRE").
+     * @param tache La tâche à restaurer.
+     */
     public void desarchiverTache(Tache tache) {
         if (tache != null) {
             desarchiverRecursif(tache);
             notifierObservateur();
         }
     }
-    // désarchive une tache donnée ainsi que ses enfants de façon récursive
+
+    /**
+     * Restaure récursivement une tâche et tous ses enfants.
+     */
     private void desarchiverRecursif(Tache t) {
         t.setEtat(Tache.ETAT_A_FAIRE);
         if (t.aDesEnfants()) {
@@ -130,7 +206,10 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // permet de récupérer toutes les taches archivées sous forme de liste
+    /**
+     * Récupère la liste de toutes les tâches ayant le statut "Archivé".
+     * @return Une liste de tâches archivées.
+     */
     public List<Tache> getTachesArchives() {
         //autre syntaxe possible avec boucle et conditionnelle simplement :
         List<Tache> archives = new ArrayList<>();
@@ -143,10 +222,18 @@ public class Modele implements Sujet, Serializable {
 
     }
 
-    // retourne la liste des colonnes existantes et disponibles
+    /** @return Un ensemble (Set) des noms de colonnes disponibles. */
     public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
 
-    // permet de récupérer sous forme de dictionnaire les colonnes ainsi que les taches attribuées à celles-ci
+    /**
+     * Organise les tâches par colonne pour la Vue Kanban.
+     * <p>
+     * Crée une Map où la clé est le nom de la colonne et la valeur est la liste des tâches
+     * contenues dans cette colonne. Gère le cas des colonnes supprimées (renvoi vers "Principal").
+     * </p>
+     *
+     * @return Une Map ordonnée {NomColonne -> ListeTaches}.
+     */
     public Map<String, List<Tache>> getColonnes() {
         Map<String, List<Tache>> colonnesMap = new LinkedHashMap<>();
         for (String nomCol : colonnesDisponibles) colonnesMap.put(nomCol, new ArrayList<>());
@@ -163,10 +250,18 @@ public class Modele implements Sujet, Serializable {
         return colonnesMap;
     }
 
-    // permet d'ajouter une colonne donnée à la liste des colonnes
+    /**
+     * Crée une nouvelle colonne dans le tableau.
+     * @param nc Le nom de la nouvelle colonne.
+     */
     public void ajouterColonne(String nc) { if (nc != null && !nc.isEmpty() && colonnesDisponibles.add(nc.trim())) notifierObservateur(); }
 
-    // permet de renommer une colonne en renseignant son nom courant ainsi que le nouveau
+    /**
+     * Renomme une colonne existante et met à jour toutes les tâches qui y sont liées.
+     *
+     * @param ancienNom Le nom actuel.
+     * @param nouveauNom Le nouveau nom souhaité.
+     */
     public void renommerColonne(String ancienNom, String nouveauNom) {
         if (ancienNom == null || nouveauNom == null || nouveauNom.trim().isEmpty()) return;
         if ("Principal".equals(ancienNom)) return;
@@ -182,7 +277,14 @@ public class Modele implements Sujet, Serializable {
         notifierObservateur();
     }
 
-    // permet de supprimer une colonne donnée
+    /**
+     * Supprime une colonne.
+     * <p>
+     * Les tâches contenues dans cette colonne ne sont pas supprimées mais déplacées
+     * vers la colonne par défaut "Principal".
+     * </p>
+     * @param nomColonne Le nom de la colonne à supprimer.
+     */
     public void supprimerColonne(String nomColonne) {
         if ("Principal".equals(nomColonne)) return;
         if (colonnesDisponibles.contains(nomColonne)) {
@@ -196,8 +298,17 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // déplacement avec contrainte forte (Sous-tâche bloquée par le parent)
-    // permet de déplacer une tache donnée dans une colonne donnée, cela en vérifiant la validité de ce déplacement selon l'emplacement du parent
+    /**
+     * Tente de déplacer une tâche vers une nouvelle colonne avec validation stricte.
+     * <p>
+     * <b>Règle Métier :</b> Une sous-tâche ne peut pas être déplacée dans une colonne différente
+     * de celle de son parent. Si cette règle est violée, une exception est levée.
+     * </p>
+     *
+     * @param tache La tâche à déplacer.
+     * @param nouvelleColonne Le nom de la colonne cible.
+     * @throws Exception Si le déplacement viole la contrainte parent/enfant.
+     */
     public void deplacerTacheColonne(Tache tache, String nouvelleColonne) throws Exception {
 
         if (tache == null || nouvelleColonne == null || !colonnesDisponibles.contains(nouvelleColonne)) {
@@ -221,7 +332,9 @@ public class Modele implements Sujet, Serializable {
         notifierObservateur();
     }
 
-    // permet de deplacer une tache ainsi que ses enfants dans la colonne cible de façon récursive
+    /**
+     * Applique le changement de colonne récursivement à la tâche et à tous ses enfants.
+     */
     private void deplacerColonneRecursif(Tache t, String nouvelleColonne) {
         t.setColonne(nouvelleColonne);
         if (t.aDesEnfants()) {
@@ -231,7 +344,12 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // permet de changer la date d'une tache
+    /**
+     * Change la date de début d'une tâche et propage les contraintes temporelles.
+     *
+     * @param tache La tâche concernée.
+     * @param nouvelleDate La nouvelle date.
+     */
     public void deplacerTacheDate(Tache tache, LocalDate nouvelleDate) {
         if (tache != null && nouvelleDate != null) {
             tache.setDateDebut(nouvelleDate, this.getParentDirect(tache), this);
@@ -239,7 +357,10 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // permet de récupérer un dictionnaire indiquant les taches inscrites pour chaque jours
+    /**
+     * Récupère les tâches organisées par date de début (utile pour un calendrier).
+     * @return Une Map {Date -> ListeTaches} triée par ordre chronologique.
+     */
     public Map<LocalDate, List<Tache>> getJours() {
         Map<LocalDate, List<Tache>> joursMap = new TreeMap<>();
         for (Tache tache : taches) {
@@ -252,7 +373,16 @@ public class Modele implements Sujet, Serializable {
         return joursMap;
     }
 
-    // permet de convertir une tache simple en une composite (gère les références parentes)
+    /**
+     * Transforme une TacheSimple en TacheComposite (Pattern Promotion).
+     * <p>
+     * Cette méthode crée une nouvelle instance de {@link TacheComposite} avec les données
+     * de l'ancienne tâche, puis remplace la référence dans la liste principale ou chez le parent.
+     * </p>
+     *
+     * @param ancienneTache La tâche simple à promouvoir.
+     * @return La nouvelle tâche composite créée.
+     */
     public TacheComposite promouvoirEnComposite(TacheSimple ancienneTache) {
         // Clonage de la tache simple
         TacheComposite nouvelleTache = new TacheComposite(ancienneTache);
@@ -277,7 +407,11 @@ public class Modele implements Sujet, Serializable {
         return nouvelleTache;
     }
 
-    // permet d'obtenir une liste de dépendances d'une tache donnée
+    /**
+     * Récupère la liste linéaire de toutes les dépendances d'une tâche.
+     * @param tache La tâche racine.
+     * @return Une liste chaînée de tous les descendants.
+     */
     public LinkedList<Tache> getDependance(Tache tache) {
         if (tache != null) {
             return tache.construirDependance();
@@ -285,15 +419,24 @@ public class Modele implements Sujet, Serializable {
         return new LinkedList<>();
     }
 
-    // méthode utilisé pour la serialization, réinitialisant la liste des observateurs et sauvegardant les données
+    /**
+     * Prépare la fermeture de l'application en sauvegardant les données.
+     * Réinitialise la liste des observateurs pour éviter de sérialiser les Vues.
+     *
+     * @param repo Le repository responsable de la persistance (JSON/Binaire).
+     */
     public void exit(Object repo) {
         this.observateurs = new ArrayList<>();
-        ((ModeleRepository) repo).save(this);
+        ((ModeleRepository) repo).save(this); // Cast nécessaire selon votre architecture
     }
 
 
-    // Récupère la liste de tous les ancêtres d'une tâche donnée (Parents, Grands-parents...)
-    // Renvoie une liste ordonnée : [Grand-Grand-Père, Grand-Père, Père]. Vide si racine.
+    /**
+     * Récupère la liste de tous les ancêtres d'une tâche donnée.
+     *
+     * @param cible La tâche dont on cherche les ancêtres.
+     * @return Une liste ordonnée [Grand-Père, Père]. Vide si racine.
+     */
     public List<Tache> getParents(Tache cible) {
         List<Tache> lignee = new ArrayList<>();
         if (cible == null) return lignee;
@@ -313,7 +456,15 @@ public class Modele implements Sujet, Serializable {
         return lignee; // Retourne vide si non trouvé
     }
 
-    // --- NOUVELLE MÉTHODE POUR LE DRAG & DROP DES COLONNES ---
+    /**
+     * Change l'ordre des colonnes dans l'affichage.
+     * <p>
+     * Échange la position de deux colonnes dans la liste interne.
+     * </p>
+     *
+     * @param nomColSource La colonne déplacée.
+     * @param nomColCible La colonne cible (avec qui on échange).
+     */
     public void deplacerColonneOrdre(String nomColSource, String nomColCible) {
         // Vérifications de sécurité
         if (nomColSource == null || nomColCible == null || nomColSource.equals(nomColCible)) return;
@@ -340,7 +491,10 @@ public class Modele implements Sujet, Serializable {
     }
 
 
-    // méthode privée permettant de construire le chemin de façon récursive
+    /**
+     * Méthode de recherche récursive (DFS - Depth First Search).
+     * Remplit la liste 'lignee' avec le chemin vers la cible.
+     */
     private boolean rechercheRecursiveParents(Tache parentActuel, Tache cible, List<Tache> lignee) {
         // Si le parent actuel contient directement la cible dans ses enfants immédiats
         if (parentActuel.aDesEnfants() && parentActuel.getEnfants().contains(cible)) {
@@ -366,10 +520,16 @@ public class Modele implements Sujet, Serializable {
     }
 
     /**
-
-     Trouve le parent direct (père) d'une tâche.
-     @param cible La tâche dont on cherche le père.
-     @return La tâche parente, ou null si la cible est une racine (pas de parent).*/
+     * Trouve le parent direct (père) d'une tâche.
+     * <p>
+     * Comme la structure est unilatérale (Parent -> Enfant), nous devons parcourir
+     * tout l'arbre depuis les racines pour trouver "qui possède cet enfant".
+     *
+     * </p>
+     *
+     * @param cible La tâche dont on cherche le père.
+     * @return La tâche parente, ou {@code null} si la cible est une racine (pas de parent).
+     */
     public Tache getParentDirect(Tache cible) {
         if (cible == null) return null;
 
@@ -386,6 +546,9 @@ public class Modele implements Sujet, Serializable {
         return null; // Pas trouvé (cas bizarre ou tâche orpheline)
     }
 
+    /**
+     * Recherche récursive du parent direct.
+     */
     private Tache chercherParentDirectRecursif(Tache parentActuel, Tache cible) {
         // Vérification directe : Est-ce que JE suis ton père ?
         if (parentActuel.aDesEnfants()) {
@@ -402,5 +565,4 @@ public class Modele implements Sujet, Serializable {
         }
         return null;
     }
-
 }

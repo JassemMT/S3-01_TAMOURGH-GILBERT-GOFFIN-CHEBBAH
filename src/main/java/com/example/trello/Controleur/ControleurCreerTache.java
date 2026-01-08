@@ -14,15 +14,44 @@ import javafx.scene.layout.GridPane;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/**
+ * Contrôleur gérant la création d'une nouvelle tâche.
+ * <p>
+ * Déclenché par le bouton "+ Ajouter tâche" d'une colonne. Ce contrôleur :
+ * <ul>
+ * <li>Affiche une boîte de dialogue (Dialog) pour la saisie rapide.</li>
+ * <li>Permet de choisir un parent existant pour créer directement une sous-tâche.</li>
+ * <li>Gère la <b>Promotion Automatique</b> : si on attache la nouvelle tâche à un parent qui était "Simple",
+ * celui-ci est transformé en "Composite" à la volée.</li>
+ * <li>Ouvre immédiatement l'éditeur détaillé après la création.</li>
+ * </ul>
+ * </p>
+ */
 public class ControleurCreerTache implements EventHandler<ActionEvent> {
+
+    /** Référence vers le modèle pour manipuler les données. */
     private Modele modele;
+
+    /** Nom de la colonne où le bouton a été cliqué (colonne par défaut de la nouvelle tâche). */
     private String nomColonne;
 
+    /**
+     * Constructeur du contrôleur.
+     *
+     * @param modele     Le modèle principal de l'application.
+     * @param nomColonne Le nom de la colonne cible (ex: "A faire").
+     */
     public ControleurCreerTache(Modele modele, String nomColonne) {
         this.modele = modele;
         this.nomColonne = nomColonne;
     }
 
+    /**
+     * Gère l'événement de clic sur le bouton d'ajout.
+     * Construit et affiche le formulaire de création.
+     *
+     * @param actionEvent L'événement JavaFX.
+     */
     @Override
     public void handle(ActionEvent actionEvent) {
         // permet de créer une nouvelle fenêtre de dialogue
@@ -49,10 +78,12 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
         datePicker.setPromptText("Date de début");
 
         // On charge toutes les tâches comme parents potentiels
+        // Cela permet de créer une sous-tâche directement depuis ce menu
         ComboBox<Tache> comboParents = new ComboBox<>();
         comboParents.getItems().addAll(modele.getTaches());
         comboParents.setPromptText("Aucun parent (Racine)");
 
+        // Configuration de l'affichage de la ComboBox pour montrer les libellés
         comboParents.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Tache item, boolean empty) {
@@ -73,19 +104,22 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
 
         dialog.getDialogPane().setContent(grid);
 
+        // Validation : Le bouton créer est désactivé si le titre est vide
         Node loginButton = dialog.getDialogPane().lookupButton(createButtonType);
         loginButton.setDisable(true);
         champTitre.textProperty().addListener((observable, oldValue, newValue) -> {
             loginButton.setDisable(newValue.trim().isEmpty());
         });
 
+        // --- CONVERSION DU RÉSULTAT ---
+        // C'est ici que la logique métier de création s'opère
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == createButtonType) {
                 // Récupération de la date (ou aujourd'hui par défaut)
                 LocalDate dateChoisie = datePicker.getValue();
                 if (dateChoisie == null) dateChoisie = LocalDate.now();
 
-                // 1. Création avec LocalDate
+                // 1. Création de base d'une TacheSimple
                 TacheSimple nouvelleTache = new TacheSimple(
                         champTitre.getText(),
                         "",
@@ -96,12 +130,17 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
 
                 Tache parentSelectionne = comboParents.getValue();
 
+                // 2. Gestion de la hiérarchie et de la Promotion
                 if (parentSelectionne != null) {
                     if (parentSelectionne instanceof TacheComposite) {
+                        // Cas facile : le parent est déjà un dossier
                         parentSelectionne.ajouterEnfant(nouvelleTache);
-                        nouvelleTache.setDateDebut(nouvelleTache.getDateDebut(), parentSelectionne, modele); // la méthode setDateDebut est utilisée pour vérifier la cohérence (tous les tests sont dedant)
+                        // Vérification de la cohérence temporelle
+                        nouvelleTache.setDateDebut(nouvelleTache.getDateDebut(), parentSelectionne, modele);
                     }
                     else if (parentSelectionne instanceof TacheSimple) {
+                        // Cas complexe : PROMOTION D'OBJET
+                        // Le parent était simple, il devient Composite pour accueillir l'enfant
                         TacheComposite nouveauParent = modele.promouvoirEnComposite((TacheSimple) parentSelectionne);
                         nouveauParent.ajouterEnfant(nouvelleTache);
                         nouvelleTache.setDateDebut(nouvelleTache.getDateDebut(), nouveauParent, modele);
@@ -112,8 +151,10 @@ public class ControleurCreerTache implements EventHandler<ActionEvent> {
             return null;
         });
 
+        // Affichage bloquant de la fenêtre
         Optional<Tache> result = dialog.showAndWait();
 
+        // Une fois la tâche créée, on l'ajoute au modèle et on ouvre l'éditeur détaillé
         result.ifPresent(tache -> {
             modele.ajouterTache(tache);
             VueEditeurTache editeur = new VueEditeurTache(tache, modele);
