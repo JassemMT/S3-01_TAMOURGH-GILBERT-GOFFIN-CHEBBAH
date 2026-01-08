@@ -10,16 +10,20 @@ public class TacheSimple extends Tache implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    // constructeur complet
     public TacheSimple(String libelle, String commentaire, LocalDate dateDebut, String colonne, int dureeEstimee) {
         super(libelle, commentaire, dateDebut, colonne, dureeEstimee);
     }
 
+    // constructeur simplifié
     public TacheSimple(String libelle, String commentaire) {
         super(libelle, commentaire);
     }
 
+    // constructeur automatique
     public TacheSimple() { super(); }
 
+    // méthode pour ajouter un enfant a une tache simple renvoyant un message d'alerte
     @Override
     public void ajouterEnfant(Tache t) {
         System.out.println("Erreur: Impossible d'ajouter un enfant à une TacheSimple directement.");
@@ -43,6 +47,19 @@ public class TacheSimple extends Tache implements Serializable {
     @Override
     public void remplacerEnfant(Tache ancienne, Tache nouvelle) {
         // Rien à faire pour une tâche simple
+    }
+
+    @Override
+    public void setDateDebut(LocalDate dateDebut, Tache parent, Modele modele) {
+        if (dateDebut != null) {
+            this.dateDebut = dateDebut;
+            if (parent != null) {
+                if (this.getDateFin().isAfter(parent.getDateDebut())) {
+                    Tache parentDuParent = modele.getParentDirect(parent);
+                    parent.setDateDebut(this.getDateFin(), parentDuParent, modele);
+                }
+            }
+        }
     }
 
     @Override
