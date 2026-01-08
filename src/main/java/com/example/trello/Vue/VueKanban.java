@@ -197,44 +197,103 @@ public class VueKanban extends BorderPane implements Observateur {
         }
     }
 
+    /**
+     * Configure le comportement de la carte (VBox) quand on commence à la glisser.
+     * @param carte L'élément graphique (VBox) qui représente la tâche.
+     * @param tache L'objet métier (Donnée) associé.
+     */
     private void configurerDragSurCarte(VBox carte, Tache tache) {
+        // Événement déclenché UNE SEULE FOIS au moment précis où le geste de glisser commence
         carte.setOnDragDetected(event -> {
+
+            // 1. Démarrage officiel du Drag & Drop.
+            // On indique à JavaFX que l'intention est de DÉPLACER (MOVE) l'objet, pas de le copier.
+            // 'db' (Dragboard) est le "camion de transport" virtuel.
             Dragboard db = carte.startDragAndDrop(TransferMode.MOVE);
+
+            // 2. Préparation du contenu "officiel" pour JavaFX.
+            // JavaFX exige qu'on mette quelque chose dans le Dragboard pour valider le drag.
             ClipboardContent content = new ClipboardContent();
-            content.putString(tache.getLibelle());
-            db.setContent(content);
+            content.putString(tache.getLibelle()); // On met juste le titre comme "étiquette".
+            db.setContent(content); // On charge le camion.
+
+            // 3. L'ASTUCE DU "POST-IT" (Le point clé !)
+            // Le Dragboard gère mal les objets Java complexes.
+            // Au lieu de mettre la Tache DANS le Dragboard, on l'attache À LA VBOX elle-même via 'UserData'.
+            // C'est comme coller un post-it "Ceci est la Tache ID 42" au dos de la carte graphique.
             carte.setUserData(tache);
+
+            // 4. On dit à l'événement "C'est bon, j'ai géré, ne le propage pas aux parents".
             event.consume();
         });
     }
-
+    /**
+     * Configure la colonne pour accepter qu'on lâche des tâches dessus.
+     * @param colonne La VBox verticale qui contient les tâches.
+     * @param titreColonne Le nom de la colonne (ex: "En cours") pour savoir où envoyer la tâche.
+     */
     private void configurerDropSurColonne(VBox colonne, String titreColonne) {
+
+        // --- PARTIE A : LE SURVOL (Autorisation d'atterrir) ---
+        // Cet événement se déclenche en continu tant que la souris survole la colonne avec un objet.
         colonne.setOnDragOver(event -> {
-            if (event.getDragboard().hasString()) event.acceptTransferModes(TransferMode.MOVE);
+            // On vérifie si ce qui est transporté contient du texte (notre "étiquette" de l'étape 1).
+            // Si oui, on AUTORISE le dépôt en mode MOVE.
+            // Sans cette ligne, le curseur afficherait un sens interdit 🚫.
+            if (event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
             event.consume();
         });
+
+        // --- PARTIE B : LE LÂCHER (Réception du colis) ---
+        // Cet événement se déclenche quand l'utilisateur relâche le clic gauche.
         colonne.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
-            boolean success = false;
+            boolean success = false; // Par défaut, on considère que ça a échoué
+
+            // 1. Vérification de sécurité : est-ce qu'il y a bien des données ?
             if (db.hasString()) {
+
+                // 2. RETROUVER L'EXPÉDITEUR
+                // "Qui a lancé ce drag ?" -> C'est la VBox de la carte (configurée à l'étape 1)
                 Object source = event.getGestureSource();
+
+                // On vérifie que la source est bien une VBox (la carte graphique)
                 if (source instanceof VBox) {
                     VBox carteTache = (VBox) source;
+
+                    // 3. RÉCUPÉRER L'OBJET RÉEL (Lecture du "Post-it")
+                    // On récupère l'objet qu'on avait attaché via setUserData() au départ.
                     Object userData = carteTache.getUserData();
+
+                    // On vérifie que c'est bien un objet Tache
                     if (userData instanceof Tache) {
                         try {
+                            // 4. ACTION MÉTIER (Le vrai travail)
+                            // On demande au Modèle de déplacer cette tâche vers la colonne actuelle.
+                            // C'est ici que les règles métier (vérification parents, etc.) s'appliquent.
                             modele.deplacerTacheColonne((Tache) userData, titreColonne);
+
+                            // Si aucune exception n'est levée, c'est un succès.
                             success = true;
-                        }catch (Exception e) {
+
+                        } catch (Exception e) {
+                            // 5. GESTION DES ERREURS (Ex: Sous-tâche bloquée par son parent)
+                            // Si le Modèle dit "Non", on affiche une pop-up d'erreur.
                             Alert alert = new Alert(Alert.AlertType.ERROR);
                             alert.setTitle("Erreur de déplacement");
                             alert.setHeaderText("Impossible de déplacer la tâche");
-                            alert.setContentText(e.getMessage());
+                            alert.setContentText(e.getMessage()); // Le message vient du Modèle
                             alert.showAndWait();
                         }
                     }
                 }
             }
+
+            // 6. FIN DE LA TRANSACTION
+            // On signale au système si le drop a réussi ou non.
+            // Si true, JavaFX peut nettoyer le Dragboard.
             event.setDropCompleted(success);
             event.consume();
         });
