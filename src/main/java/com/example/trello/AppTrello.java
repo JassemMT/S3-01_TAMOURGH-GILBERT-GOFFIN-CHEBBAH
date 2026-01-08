@@ -76,6 +76,7 @@ public class AppTrello extends Application {
         primaryStage.show();
     }
 
+
     @Override
     public void stop() throws Exception {
         // Sauvegarde à la fermeture

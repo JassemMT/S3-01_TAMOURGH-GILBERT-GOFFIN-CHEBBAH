@@ -327,16 +327,10 @@ public class Modele implements Sujet, Serializable {
 
         // 2. Déplacement
         // On retire l'élément source
-        listeOrdonnee.remove(indexSource);
+        String tmp_name = nomColSource;
+        listeOrdonnee.set(indexSource, nomColCible);
+        listeOrdonnee.set(indexCible, tmp_name);
 
-        // Petite subtilité : si l'élément source était avant la cible,
-        // l'index de la cible a reculé de 1 suite à la suppression.
-        if (indexSource < indexCible) {
-            indexCible--;
-        }
-
-        // On insère à la nouvelle position
-        listeOrdonnee.add(indexCible, nomColSource);
 
         // 3. Reconstruction du LinkedHashSet (qui garantit l'ordre d'itération)
         this.colonnesDisponibles = new LinkedHashSet<>(listeOrdonnee);

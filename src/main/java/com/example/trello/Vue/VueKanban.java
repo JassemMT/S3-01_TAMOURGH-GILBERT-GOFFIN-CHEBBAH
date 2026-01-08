@@ -21,6 +21,8 @@ public class VueKanban extends BorderPane implements Observateur {
 
     // Formatter for short date display (e.g. "12/10")
     private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("dd/MM");
+    // 1. CONSTANTE POUR DIFFÉRENCIER TACHE ET COLONNE
+    private static final String PREFIX_COL = "COL|";
 
     public VueKanban(Modele modele) {
         this.modele = modele;
@@ -107,9 +109,86 @@ public class VueKanban extends BorderPane implements Observateur {
         scrollTaches.setPrefHeight(500);
 
         colonne.getChildren().addAll(ligneTitre, btnAjouter, scrollTaches);
-        //configurerDragDropColonne(colonne, titre);
+        configurerDragDropColonne(colonne, titre);
         return colonne;
     }
+    // 3. LA MÉTHODE MAGIQUE
+    private void configurerDragDropColonne(VBox colonneUI, String titreColonne) {
+
+        // --- DÉBUT DU DRAG (On attrape la colonne) ---
+        colonneUI.setOnDragDetected(event -> {
+            // Sécurité : Si l'utilisateur a cliqué sur une tâche à l'intérieur de la colonne,
+            // on ne veut pas déplacer la colonne, mais la tâche.
+            // On vérifie si la source du clic n'est pas une tâche (VBox avec UserData)
+            if (event.getTarget() instanceof javafx.scene.Node) {
+                // Astuce simple : si ce qu'on drag n'est pas la colonne elle-même, on annule ce handler
+                // pour laisser la tâche gérer son propre drag.
+                // (Mais JavaFX gère souvent le bubbling, donc on force le contenu ici)
+            }
+
+            // On lance le Drag and Drop
+            Dragboard db = colonneUI.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+
+            // On met le TAG spécial + le titre de la colonne
+            content.putString(PREFIX_COL + titreColonne);
+            db.setContent(content);
+
+            event.consume();
+        });
+
+        // --- SURVOL (On passe au dessus d'une autre colonne) ---
+        colonneUI.setOnDragOver(event -> {
+            if (event.getDragboard().hasString()) {
+                String data = event.getDragboard().getString();
+                // On accepte le mouvement SEULEMENT si c'est une colonne qui est déplacée
+                if (data.startsWith(PREFIX_COL)) {
+                    event.acceptTransferModes(TransferMode.MOVE);
+                }
+            }
+            event.consume();
+        });
+
+        // --- EFFET VISUEL ---
+        colonneUI.setOnDragEntered(event -> {
+            if (event.getDragboard().hasString() && event.getDragboard().getString().startsWith(PREFIX_COL)) {
+                // Bordure Bleue pour dire "ça va atterrir ici"
+                colonneUI.setStyle("-fx-background-color: #e8e8e8; -fx-background-radius: 5; -fx-border-width: 2; -fx-border-color: #007bff;");
+            }
+        });
+
+        colonneUI.setOnDragExited(event -> {
+            // On remet le style normal quand on sort
+            colonneUI.setStyle("-fx-background-color: #e8e8e8; -fx-background-radius: 5; -fx-border-width: 2; -fx-border-color: transparent;");
+        });
+
+        // --- LÂCHER (Drop) ---
+        colonneUI.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+
+            if (db.hasString()) {
+                String data = db.getString();
+
+                // Si c'est bien une colonne
+                if (data.startsWith(PREFIX_COL)) {
+                    // On récupère le nom de la colonne source (en enlevant le préfixe)
+                    String sourceCol = data.replace(PREFIX_COL, "");
+                    String targetCol = titreColonne; // La colonne sur laquelle on a lâché
+
+                    // On appelle le modèle pour faire l'échange
+                    if (!sourceCol.equals(targetCol)) {
+                        modele.deplacerColonneOrdre(sourceCol, targetCol);
+                        success = true;
+                    }
+                }
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
+    }
+
+
 
     private VBox creerCarteTache(Tache tache) {
         VBox carte = new VBox(5);
@@ -210,7 +289,9 @@ public class VueKanban extends BorderPane implements Observateur {
 
     private void configurerDropSurColonne(VBox colonne, String titreColonne) {
         colonne.setOnDragOver(event -> {
-            if (event.getDragboard().hasString()) event.acceptTransferModes(TransferMode.MOVE);
+            if (event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
             event.consume();
         });
         colonne.setOnDragDropped(event -> {
