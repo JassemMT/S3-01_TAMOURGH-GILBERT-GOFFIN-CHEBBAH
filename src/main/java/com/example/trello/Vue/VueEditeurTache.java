@@ -30,17 +30,21 @@ public class VueEditeurTache {
     private Spinner<Integer> spinnerDuree;
     private ColorPicker colorPicker;
 
+    // constructeur de la vue editeur de tache
     public VueEditeurTache(Tache tache, Modele modele) {
         this.tache = tache;
         this.modele = modele;
         initialiserInterface();
     }
 
+    // créer l'interface graphique
     private void initialiserInterface() {
+        // création de la scene
         stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Éditer : " + tache.getLibelle());
 
+        // création de la grille pour agencer le placement des éléments graphiques
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setHgap(10); grid.setVgap(10);
@@ -89,20 +93,24 @@ public class VueEditeurTache {
         champCommentaire.setPrefRowCount(3);
         grid.add(champCommentaire, 1, 6);
 
-        // Boutons
+        // Boutons pour sauvegarder et annuler
         Button btnSauvegarder = new Button("Sauvegarder");
         Button btnAnnuler = new Button("Annuler");
 
+        // Instanciation des évènements
         btnSauvegarder.setOnAction(new ControleurSauvegarderModif(modele, tache, this));
         btnAnnuler.setOnAction(e -> stage.close());
 
+        // Emplacement pour les boutons
         HBox boutons = new HBox(10, btnSauvegarder, btnAnnuler);
         grid.add(boutons, 1, 7);
 
+        // implémentation de la scene avec la grille
         Scene scene = new Scene(grid);
         stage.setScene(scene);
     }
 
+    // getter pour l'état de la tache le convertissant en string
     private String getEtatString(int etat) {
         switch (etat) {
             case Tache.ETAT_A_FAIRE: return "À faire";
@@ -125,6 +133,7 @@ public class VueEditeurTache {
     // Retourne la LocalDate choisie
     public LocalDate getDateSelectionnee() { return datePicker.getValue(); }
 
+    // getter pour la durée de la tache
     public int getDureeSaisie() { return spinnerDuree.getValue(); }
 
     // getter pour la couleur choisie
