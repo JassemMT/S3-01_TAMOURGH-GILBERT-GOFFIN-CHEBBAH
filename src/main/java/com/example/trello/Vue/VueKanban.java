@@ -134,10 +134,10 @@ public class VueKanban extends BorderPane implements Observateur {
         configurerDragDropColonne(colonne, titre);
         return colonne;
     }
-    // 3. LA MÉTHODE MAGIQUE
+
     private void configurerDragDropColonne(VBox colonneUI, String titreColonne) {
 
-        // --- DÉBUT DU DRAG (On attrape la colonne) ---
+        // DÉBUT DU DRAG (On attrape la colonne)
         colonneUI.setOnDragDetected(event -> {
             // Sécurité : Si l'utilisateur a cliqué sur une tâche à l'intérieur de la colonne,
             // on ne veut pas déplacer la colonne, mais la tâche.
