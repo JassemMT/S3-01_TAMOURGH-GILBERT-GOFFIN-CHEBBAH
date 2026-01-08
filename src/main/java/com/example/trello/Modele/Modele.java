@@ -32,6 +32,7 @@ public class Modele implements Sujet, Serializable {
         this.colonnesDisponibles.add("Terminé");
     }
 
+    // permet de recréer la liste de observateurs après une deserialisation
     private Object readResolve() {
         if (observateurs == null) {
             observateurs = new ArrayList<>();
@@ -39,43 +40,51 @@ public class Modele implements Sujet, Serializable {
         return this;
     }
 
+    // permet d'ajouter un observateur à la liste des observateurs du modèle
     @Override public void ajouterObservateur(Observateur o) {
         if (observateurs == null) observateurs = new ArrayList<>();
         if (o != null && !observateurs.contains(o)) observateurs.add(o);
     }
+    // permet de supprimer un observateur donné présent dans la liste des observateurs
     @Override public void supprimerObservateur(Observateur o) {
         if (observateurs != null) observateurs.remove(o);
     }
+
+    // permet d'actualiser tous les observateurs
     @Override public void notifierObservateur() {
         if (observateurs != null) {
             for (Observateur obs : observateurs) obs.actualiser(this);
         }
     }
-
+    // Setter & Getter pour le type de la vue en cours
     public void setTypeVue(int type) { if (type >= VUE_KANBAN && type <= VUE_GANTT) { this.type_vue = type; notifierObservateur(); } }
     public int getTypeVue() { return type_vue; }
 
+    // permet de récupérer toutes les taches sans les taches archivées
     public List<Tache> getTaches() { return taches.stream().filter(t -> !t.isArchived()).collect(Collectors.toList()); }
 
+    // ajoute une tache donnée à la liste des taches et actualise les observateurs
     public void ajouterTache(Tache tache) { if (tache != null && !taches.contains(tache)) { taches.add(tache); notifierObservateur(); } }
 
-    // --- SUPPRESSION DÉFINITIVE ---
+    // permet de supprimer une tache donnée
     public void supprimerTache(Tache tache) {
         if (tache != null) {
-            // DÉTACHEMENT DU PARENT
-            // On utilise ta méthode existante pour trouver le père
+            // on détache la tache de son pere
+            // On utilise la méthode suivante pour trouver le père
             Tache parent = getParentDirect(tache);
             if (parent != null) {
                 parent.supprimerEnfant(tache);
                 }
 
-            // SUPPRESSION RÉCURSIVE DE LA LISTE PRINCIPALE
+            // supprime de façon récursive sa présence dans la liste des taches
             supprimerRecursif(tache);
 
+            // actualise les observateurs
             notifierObservateur();
         }
     }
 
+    // méthode pour supprimer récursivement une tache ainsi que ses enfants
     private void supprimerRecursif(Tache t) {
         taches.remove(t);
         if (t.aDesEnfants()) {
@@ -86,7 +95,7 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // --- ARCHIVAGE RÉCURSIF ---
+    // permet d'archiver une tache
     public void archiverTache(Tache tache) {
         if (tache != null) {
             archiverRecursif(tache);
@@ -94,6 +103,7 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
+    // permet d'archiver une tache ainsi que ses enfants
     private void archiverRecursif(Tache t) {
         t.setEtat(Tache.ETAT_ARCHIVE);
         if (t.aDesEnfants()) {
@@ -103,14 +113,14 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // --- DESARCHIVAGE RÉCURSIF ---
+    // permet de désarchiver une tache
     public void desarchiverTache(Tache tache) {
         if (tache != null) {
             desarchiverRecursif(tache);
             notifierObservateur();
         }
     }
-
+    // désarchive une tache donnée ainsi que ses enfants de façon récursive
     private void desarchiverRecursif(Tache t) {
         t.setEtat(Tache.ETAT_A_FAIRE);
         if (t.aDesEnfants()) {
@@ -120,6 +130,7 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
+    // permet de récupérer toutes les taches archivées sous forme de liste
     public List<Tache> getTachesArchives() {
         //autre syntaxe possible avec boucle et conditionnelle simplement :
         List<Tache> archives = new ArrayList<>();
@@ -132,8 +143,10 @@ public class Modele implements Sujet, Serializable {
 
     }
 
+    // retourne la liste des colonnes existantes et disponibles
     public Set<String> getColonnesDisponibles() { return new LinkedHashSet<>(colonnesDisponibles); }
 
+    // permet de récupérer sous forme de dictionnaire les colonnes ainsi que les taches attribuées à celles-ci
     public Map<String, List<Tache>> getColonnes() {
         Map<String, List<Tache>> colonnesMap = new LinkedHashMap<>();
         for (String nomCol : colonnesDisponibles) colonnesMap.put(nomCol, new ArrayList<>());
@@ -150,8 +163,10 @@ public class Modele implements Sujet, Serializable {
         return colonnesMap;
     }
 
+    // permet d'ajouter une colonne donnée à la liste des colonnes
     public void ajouterColonne(String nc) { if (nc != null && !nc.isEmpty() && colonnesDisponibles.add(nc.trim())) notifierObservateur(); }
 
+    // permet de renommer une colonne en renseignant son nom courant ainsi que le nouveau
     public void renommerColonne(String ancienNom, String nouveauNom) {
         if (ancienNom == null || nouveauNom == null || nouveauNom.trim().isEmpty()) return;
         if ("Principal".equals(ancienNom)) return;
@@ -167,6 +182,7 @@ public class Modele implements Sujet, Serializable {
         notifierObservateur();
     }
 
+    // permet de supprimer une colonne donnée
     public void supprimerColonne(String nomColonne) {
         if ("Principal".equals(nomColonne)) return;
         if (colonnesDisponibles.contains(nomColonne)) {
@@ -180,30 +196,32 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
-    // --- DÉPLACEMENT AVEC CONTRAINTE FORTE (Sous-tâche bloquée par le parent) ---
+    // déplacement avec contrainte forte (Sous-tâche bloquée par le parent)
+    // permet de déplacer une tache donnée dans une colonne donnée, cela en vérifiant la validité de ce déplacement selon l'emplacement du parent
     public void deplacerTacheColonne(Tache tache, String nouvelleColonne) throws Exception {
 
         if (tache == null || nouvelleColonne == null || !colonnesDisponibles.contains(nouvelleColonne)) {
             return;
         }
 
-        //Récupérer le parent direct
+        // Récupérer le parent direct de la tache passée en paramètre
         Tache parent = getParentDirect(tache);
 
-        //VÉRIFICATION DE LA CONTRAINTE
+        // on vérifie l'existance d'un parent direct
         if (parent != null) {
-            // C'est une sous-tâche.
-            // Est-ce que la colonne cible est différente de la colonne actuelle du parent ?
+            // Cela signifie que c'est une sous-tâche, la tache a un parent
+            // On regarde si la colonne cible est différente de la colonne actuel du parent
             if (!parent.getColonne().equals(nouvelleColonne)) {
                 throw new Exception("Interdit : Une sous-tâche doit rester dans la colonne de son parent (" + parent.getColonne() + ").");
             }
         }
 
-        // 4. Si tout va bien (soit c'est une racine, soit la colonne est valide), on déplace
+        // Si tout va bien (soit c'est une racine, soit la colonne est valide), on déplace
         deplacerColonneRecursif(tache, nouvelleColonne);
         notifierObservateur();
     }
 
+    // permet de deplacer une tache ainsi que ses enfants dans la colonne cible de façon récursive
     private void deplacerColonneRecursif(Tache t, String nouvelleColonne) {
         t.setColonne(nouvelleColonne);
         if (t.aDesEnfants()) {
@@ -213,6 +231,7 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
+    // permet de changer la date d'une tache
     public void deplacerTacheDate(Tache tache, LocalDate nouvelleDate) {
         if (tache != null && nouvelleDate != null) {
             tache.setDateDebut(nouvelleDate, this.getParentDirect(tache), this);
@@ -220,6 +239,7 @@ public class Modele implements Sujet, Serializable {
         }
     }
 
+    // permet de récupérer un dictionnaire indiquant les taches inscrites pour chaque jours
     public Map<LocalDate, List<Tache>> getJours() {
         Map<LocalDate, List<Tache>> joursMap = new TreeMap<>();
         for (Tache tache : taches) {
@@ -232,12 +252,12 @@ public class Modele implements Sujet, Serializable {
         return joursMap;
     }
 
-    // --- PROMOTION CORRIGÉE (Gère les références parentes) ---
+    // permet de convertir une tache simple en une composite (gère les références parentes)
     public TacheComposite promouvoirEnComposite(TacheSimple ancienneTache) {
-        // 1. Clonage
+        // Clonage de la tache simple
         TacheComposite nouvelleTache = new TacheComposite(ancienneTache);
 
-        // 2. Remplacement dans la liste principale
+        // Remplacement dans la liste principale
         int index = taches.indexOf(ancienneTache);
         if (index != -1) {
             taches.set(index, nouvelleTache);
@@ -257,6 +277,7 @@ public class Modele implements Sujet, Serializable {
         return nouvelleTache;
     }
 
+    // permet d'obtenir une liste de dépendances d'une tache donnée
     public LinkedList<Tache> getDependance(Tache tache) {
         if (tache != null) {
             return tache.construirDependance();
@@ -264,16 +285,15 @@ public class Modele implements Sujet, Serializable {
         return new LinkedList<>();
     }
 
+    // méthode utilisé pour la serialization, réinitialisant la liste des observateurs et sauvegardant les données
     public void exit(Object repo) {
         this.observateurs = new ArrayList<>();
         ((ModeleRepository) repo).save(this);
     }
 
-    /**
-     * Récupère la liste de tous les ancêtres d'une tâche (Parents, Grands-parents...).
-     * @param cible La tâche dont on cherche les parents.
-     * @return Une liste ordonnée : [Grand-Grand-Père, Grand-Père, Père]. Vide si racine.
-     */
+
+    // Récupère la liste de tous les ancêtres d'une tâche donnée (Parents, Grands-parents...)
+    // Renvoie une liste ordonnée : [Grand-Grand-Père, Grand-Père, Père]. Vide si racine.
     public List<Tache> getParents(Tache cible) {
         List<Tache> lignee = new ArrayList<>();
         if (cible == null) return lignee;
@@ -293,17 +313,16 @@ public class Modele implements Sujet, Serializable {
         return lignee; // Retourne vide si non trouvé
     }
 
-    /**
-     * Méthode privée récursive pour construire le chemin
-     */
+
+    // méthode privée permettant de construire le chemin de façon récursive
     private boolean rechercheRecursiveParents(Tache parentActuel, Tache cible, List<Tache> lignee) {
-        // 1. Si le parent actuel contient directement la cible dans ses enfants immédiats
+        // Si le parent actuel contient directement la cible dans ses enfants immédiats
         if (parentActuel.aDesEnfants() && parentActuel.getEnfants().contains(cible)) {
             lignee.add(parentActuel); // On ajoute le père
             return true; // On dit "C'est bon, on a trouvé le bas de la chaîne"
         }
 
-        // 2. Sinon, on creuse dans les enfants du parent actuel
+        // Sinon, on creuse dans les enfants du parent actuel
         if (parentActuel.aDesEnfants()) {
             for (Tache enfant : parentActuel.getEnfants()) {
                 // Appel récursif
@@ -342,14 +361,14 @@ public class Modele implements Sujet, Serializable {
     }
 
     private Tache chercherParentDirectRecursif(Tache parentActuel, Tache cible) {
-        // 1. Vérification directe : Est-ce que JE suis ton père ?
+        // Vérification directe : Est-ce que JE suis ton père ?
         if (parentActuel.aDesEnfants()) {
             // On regarde si la liste de mes enfants contient la cible
             if (parentActuel.getEnfants().contains(cible)) {
                 return parentActuel;
             }
 
-            // 2. Sinon, on demande à mes enfants de chercher dans leurs propres enfants
+            // Sinon, on demande à mes enfants de chercher dans leurs propres enfants
             for (Tache enfant : parentActuel.getEnfants()) {
                 Tache res = chercherParentDirectRecursif(enfant, cible);
                 if (res != null) return res;

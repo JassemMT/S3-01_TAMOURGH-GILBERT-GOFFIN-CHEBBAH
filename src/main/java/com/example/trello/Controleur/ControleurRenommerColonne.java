@@ -16,9 +16,11 @@ public class ControleurRenommerColonne implements EventHandler<ActionEvent> {
         this.ancienNom = ancienNom;
     }
 
+    // méthode handle permettant de renommer une colonne
     @Override
     public void handle(ActionEvent event) {
 
+        // check si l'ancien nom est 'Principal' car il est impossible de modifier le nom de cette colonne
         if ("Principal".equals(ancienNom)) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Action impossible");
@@ -28,11 +30,13 @@ public class ControleurRenommerColonne implements EventHandler<ActionEvent> {
             return;
         }
 
+        // permet de créer une fenetre de dialogue pour renseigner le nouveau nom de la colonne
         TextInputDialog dialog = new TextInputDialog(ancienNom);
         dialog.setTitle("Renommer la colonne");
         dialog.setHeaderText("Renommer : " + ancienNom);
         dialog.setContentText("Nouveau nom :");
 
+        // récupère le nouveau nom de la colonne
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(nouveauNom -> {
             modele.renommerColonne(ancienNom, nouveauNom);

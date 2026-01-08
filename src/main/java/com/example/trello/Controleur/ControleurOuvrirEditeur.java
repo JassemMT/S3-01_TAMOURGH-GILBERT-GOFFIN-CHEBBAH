@@ -7,21 +7,20 @@ import javafx.scene.input.MouseEvent;
 
 public class ControleurOuvrirEditeur implements EventHandler<MouseEvent> {
     private Tache tache;
-    private Modele modele; // Nécessaire pour rafraichir après modif
+    private Modele modele;
 
-    // Ajoute 'Modele modele' dans l'appel depuis VueKanban
+
     public ControleurOuvrirEditeur(Tache tache, Modele modele) {
         this.tache = tache;
         this.modele = modele;
     }
 
-    // Constructeur de compatibilité si tu ne veux pas modifier VueKanban tout de suite
-    // (Mais la mise à jour visuelle ne se fera pas automatiquement après édition)
     public ControleurOuvrirEditeur(Tache tache) {
         this.tache = tache;
         this.modele = null;
     }
 
+    // méthode permettant d'ouvrir la VueEditeurTache si un double click a été constaté
     @Override
     public void handle(MouseEvent event) {
         if (event.getClickCount() == 2) {

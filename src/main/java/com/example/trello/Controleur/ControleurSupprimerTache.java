@@ -18,14 +18,16 @@ public class ControleurSupprimerTache implements EventHandler<ActionEvent> {
         this.tache = tache;
     }
 
+    // permet de supprimer la tache voulu
     @Override
     public void handle(ActionEvent event) {
-        // Petite sécurité : Boite de dialogue de confirmation
+        // Boite de dialogue de confirmation
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Suppression définitive");
         alert.setHeaderText("Supprimer '" + tache.getLibelle() + "' ?");
         alert.setContentText("Cette action est irréversible. La tâche et ses sous-tâches seront perdues.");
 
+        // récupération du résultat
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK){
             modele.supprimerTache(tache);

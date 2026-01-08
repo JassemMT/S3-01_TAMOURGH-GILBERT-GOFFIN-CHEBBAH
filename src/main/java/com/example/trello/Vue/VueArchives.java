@@ -27,6 +27,7 @@ public class VueArchives extends BorderPane implements Observateur {
 
     private static final DateTimeFormatter FORMAT_DATE_COMPLET = DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH);
 
+    // constructeur vueArchive
     public VueArchives(Modele modele) {
         this.modele = modele;
         this.modele.ajouterObservateur(this);
@@ -34,12 +35,15 @@ public class VueArchives extends BorderPane implements Observateur {
         actualiser(modele);
     }
 
+    // initialise l'interface graphique
     private void initialiserInterface() {
+        // création de l'entête avec un HBox
         HBox entete = new HBox(10);
         entete.setPadding(new Insets(10));
         entete.setAlignment(Pos.CENTER_LEFT);
         entete.setStyle("-fx-background-color: #ffebee; -fx-border-color: #ffcdd2; -fx-border-width: 0 0 1 0;");
 
+        // titre de la vue avec un objet Label
         Label titreVue = new Label("🗄 Corbeille / Archives");
         titreVue.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #c62828;");
 
@@ -49,6 +53,7 @@ public class VueArchives extends BorderPane implements Observateur {
         conteneurPrincipal = new VBox(20);
         conteneurPrincipal.setPadding(new Insets(20));
 
+        // création d'un objet ScrollPane pour gérer le scroll de l'application
         ScrollPane scroll = new ScrollPane(conteneurPrincipal);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background-color: transparent;");
@@ -63,9 +68,12 @@ public class VueArchives extends BorderPane implements Observateur {
         }
     }
 
+    // permet de rafraichir les données
     private void rafraichirDonnees(List<Tache> lesTaches) {
+        // nettoie le conteneur principal
         conteneurPrincipal.getChildren().clear();
 
+        // affiche un message si la liste est vide
         if (lesTaches.isEmpty()) {
             Label lblVide = new Label("La corbeille est vide.");
             lblVide.setFont(Font.font("System", FontPosture.ITALIC, 14));
@@ -74,6 +82,7 @@ public class VueArchives extends BorderPane implements Observateur {
             return;
         }
 
+        // permet de regrouper toutes les dates dans un hashSet
         Set<LocalDate> datesUtilisees = new HashSet<>();
         for (Tache t : lesTaches) {
             if (t.getDateDebut() != null) datesUtilisees.add(t.getDateDebut());
@@ -81,6 +90,7 @@ public class VueArchives extends BorderPane implements Observateur {
 
         if (datesUtilisees.isEmpty()) return;
 
+        // on détermine la date minimum et maximum présente dans la liste des dates
         LocalDate minDate = Collections.min(datesUtilisees);
         LocalDate maxDate = Collections.max(datesUtilisees);
 
@@ -98,20 +108,23 @@ public class VueArchives extends BorderPane implements Observateur {
             currentDate = currentDate.plusDays(1);
         }
     }
-
+    // permet de créer graphiquement la représentation des jours dans la vueArchive
     private void construireSectionJour(LocalDate dateDuJour, List<Tache> taches) {
+        // création d'une vbox pour délimiter chaque jours
         VBox section = new VBox(10);
         section.setStyle("-fx-background-color: #FFF; -fx-background-radius: 5; -fx-padding: 10; -fx-border-color: #EEE; -fx-border-radius: 5;");
 
         String titreFormatte = dateDuJour.format(FORMAT_DATE_COMPLET);
         titreFormatte = titreFormatte.substring(0, 1).toUpperCase() + titreFormatte.substring(1);
-
+        // objet label pour la date du jour avec un style spécifique
         Label lblJour = new Label(titreFormatte);
         lblJour.setFont(Font.font("Arial", FontWeight.BOLD, 16));
         lblJour.setTextFill(Color.GRAY);
 
+        // ajout du label dans la vbox
         section.getChildren().add(lblJour);
 
+        // création d'un gridPane pour placer tous les élements graphiques
         GridPane grille = new GridPane();
         grille.setHgap(10);
         grille.setVgap(8);
@@ -161,17 +174,17 @@ public class VueArchives extends BorderPane implements Observateur {
         lComm.setTextFill(Color.GRAY);
         lComm.setFont(Font.font("System", FontPosture.ITALIC, 12));
 
-        // --- ZONE ACTIONS (Restaurer + Supprimer) ---
+        // Actions (Restaurer + Supprimer)
         HBox boxActions = new HBox(10);
         boxActions.setAlignment(Pos.CENTER_RIGHT);
 
-        // 1. Bouton Restaurer (Icône ⟲)
+        // Bouton Restaurer
         Button btnRestaurer = new Button("⟲");
         btnRestaurer.setStyle("-fx-background-color: white; -fx-text-fill: #2E7D32; -fx-border-color: #2E7D32; -fx-border-radius: 3; -fx-cursor: hand; -fx-font-weight: bold;");
         btnRestaurer.setTooltip(new Tooltip("Restaurer la tâche"));
         btnRestaurer.setOnAction(new ControleurDesarchiverTache(modele, t));
 
-        // Bouton Supprimer Définitivement (Icône 🗑)
+        // Bouton Supprimer Définitivement
         Button btnSupprimer = new Button("🗑");
         btnSupprimer.setStyle("-fx-background-color: white; -fx-text-fill: #c0392b; -fx-border-color: #c0392b; -fx-border-radius: 3; -fx-cursor: hand;");
         btnSupprimer.setTooltip(new Tooltip("Supprimer définitivement (Irréversible)"));
@@ -179,7 +192,7 @@ public class VueArchives extends BorderPane implements Observateur {
 
         boxActions.getChildren().addAll(btnRestaurer, btnSupprimer);
 
-        // Ajout à la grille
+        // Placement sur la grille
         grille.add(boxTitre, 0, row);
         grille.add(lEtat, 1, row);
         grille.add(lColonne, 2, row);

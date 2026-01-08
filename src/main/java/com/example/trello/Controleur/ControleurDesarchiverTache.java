@@ -14,6 +14,7 @@ public class ControleurDesarchiverTache implements EventHandler<ActionEvent> {
         this.tache = tache;
     }
 
+    // méthode permettant de désarchiver une tache
     @Override
     public void handle(ActionEvent actionEvent) {
         // On remet la tâche "A FAIRE" (ou on pourrait restaurer son état précédent si on le stockait)
