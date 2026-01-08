@@ -19,7 +19,7 @@ public class VueKanban extends BorderPane implements Observateur {
     private Modele modele;
     private HBox conteneurColonnes;
 
-    // Formatter for short date display (e.g. "12/10")
+    // Formattage de la date ( "12/10")
     private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("dd/MM");
     // 1. CONSTANTE POUR DIFFÉRENCIER TACHE ET COLONNE
     private static final String PREFIX_COL = "COL|";
@@ -31,32 +31,39 @@ public class VueKanban extends BorderPane implements Observateur {
         actualiser(modele);
     }
 
+    // initialisation de l'interface graphique
     private void initialiserInterface() {
+        // implémentation du titre de la vue
         Label titre = new Label("Vue Kanban");
         titre.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        // création du bouton pour ajouter une colonne
         Button btnAjouterColonne = new Button("+ Colonne");
         btnAjouterColonne.setOnAction(new ControleurAjouterColonne(modele));
 
+        // création d'une hbox pour les entêtes
         HBox entete = new HBox(20, titre, btnAjouterColonne);
         entete.setAlignment(Pos.CENTER_LEFT);
         entete.setPadding(new Insets(10));
         setTop(entete);
 
+        // création du conteneur des colonnes
         conteneurColonnes = new HBox(15);
         conteneurColonnes.setPadding(new Insets(10));
         conteneurColonnes.setAlignment(Pos.TOP_LEFT);
 
+        // implémentation d'un scrollPane pour gérer le grand nombre de tache
         ScrollPane scrollPane = new ScrollPane(conteneurColonnes);
         scrollPane.setFitToHeight(true);
         scrollPane.setStyle("-fx-background: #f5f5f5;");
         setCenter(scrollPane);
     }
 
+    // nettoie la vue et reconstruit les colonnes
     @Override
     public void actualiser(Sujet s) {
         if (s instanceof Modele) {
             Modele m = (Modele) s;
-            // Removed check for VUE_KANBAN to allow updates even if not active view
             // if (m.getTypeVue() != Modele.VUE_KANBAN) return;
 
             conteneurColonnes.getChildren().clear();
@@ -67,42 +74,57 @@ public class VueKanban extends BorderPane implements Observateur {
         }
     }
 
+    // permet la création d'une colonne donnée avec sa liste de taches
     private VBox creerColonne(String titre, List<Tache> taches) {
+        // vbox pour l'entête
         VBox colonne = new VBox(10);
         colonne.setPrefWidth(300);
         colonne.setStyle("-fx-background-color: #e8e8e8; -fx-background-radius: 5;");
         colonne.setPadding(new Insets(10));
 
+        // label pour le titre de la colonne
         Label labelTitre = new Label(titre + " (" + taches.size() + ")");
         labelTitre.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
         HBox.setHgrow(labelTitre, Priority.ALWAYS);
         labelTitre.setMaxWidth(Double.MAX_VALUE);
 
+        // bouton renommer avec un style et une action spécifique
         Button btnRenommer = new Button("✎");
         btnRenommer.setStyle("-fx-font-size: 10px;");
         btnRenommer.setOnAction(new ControleurRenommerColonne(modele, titre));
+
+        // bouton supprimer avec un style et une action spécifique
         Button btnSupprimer = new Button("X");
         btnSupprimer.setStyle("-fx-font-size: 10px; -fx-text-fill: red;");
         btnSupprimer.setOnAction(new ControleurSupprimerColonne(modele, titre));
 
+        // ne permet à l'utilisateur de supprimer la colonne principale
         if("Principal".equals(titre)) btnSupprimer.setDisable(true);
 
+        // hbox pour contenir les boutons
         HBox actions = new HBox(5, btnRenommer, btnSupprimer);
         actions.setAlignment(Pos.CENTER_RIGHT);
+
+        // hbox pour le titre de la colonne
         HBox ligneTitre = new HBox(5, labelTitre, actions);
         ligneTitre.setAlignment(Pos.CENTER_LEFT);
 
+
+        // bouton ajouter + action
         Button btnAjouter = new Button("+ Ajouter tâche");
         btnAjouter.setMaxWidth(Double.MAX_VALUE);
         btnAjouter.setOnAction(new ControleurCreerTache(modele, titre));
 
+        // vbox pour contenir les taches
         VBox conteneurTaches = new VBox(8);
         conteneurTaches.setMinHeight(400);
         conteneurTaches.setStyle("-fx-background-color: transparent;");
         configurerDropSurColonne(conteneurTaches, titre);
 
+        // implémentation de chaque tache de la colonne
         for (Tache tache : taches) { conteneurTaches.getChildren().add(creerCarteTache(tache)); }
 
+        // scrollPane pour gérer le trop grand nombre de tache ou de colonne
         ScrollPane scrollTaches = new ScrollPane(conteneurTaches);
         scrollTaches.setFitToWidth(true);
         scrollTaches.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
@@ -190,23 +212,25 @@ public class VueKanban extends BorderPane implements Observateur {
 
 
 
+    // permet la création et l'implémentation des taches
     private VBox creerCarteTache(Tache tache) {
+        // vbox permettant contenir les infos de la tache
         VBox carte = new VBox(5);
         carte.setPadding(new Insets(10));
         String couleurHex = tache.getColor() != null ? tache.getColor() : "#FFFFFF";
         carte.setStyle("-fx-background-color: " + couleurHex + "; -fx-background-radius: 3; -fx-border-color: #ddd; -fx-border-radius: 3; -fx-cursor: hand;");
 
-        // 1. Titre
+        // Titre
         Label lblLibelle = new Label(tache.getLibelle());
         lblLibelle.setStyle("-fx-font-weight: bold;");
         lblLibelle.setWrapText(true);
 
-        // 2. Date (CORRECTION ICI)
+        // Date
         String dateStr = tache.getDateDebut().format(SHORT_DATE);
         Label lblDate = new Label("📅 " + dateStr);
         lblDate.setStyle("-fx-font-size: 10px; -fx-text-fill: #444;");
 
-        // 3. État
+        // État
         Label lblEtat = new Label(getTexteEtat(tache.getEtat()));
         lblEtat.setStyle("-fx-font-size: 9px; -fx-padding: 2 5; -fx-background-radius: 10; " + getStyleEtat(tache.getEtat()));
 
@@ -215,7 +239,7 @@ public class VueKanban extends BorderPane implements Observateur {
 
         carte.getChildren().addAll(lblLibelle, ligneInfos);
 
-        // 4. Sous-tâches
+        // Gestion des sous-tâches
         if (tache.aDesEnfants()) {
             List<Tache> enfants = tache.getEnfants();
             VBox boxEnfants = new VBox(2);
@@ -234,7 +258,7 @@ public class VueKanban extends BorderPane implements Observateur {
             carte.getChildren().add(boxEnfants);
         }
 
-        // 5. Bouton archiver
+        // Bouton archiver
         Button btnArchiver = new Button("ARCHIVER"); // Icone seule pour gagner de la place
         btnArchiver.setStyle("-fx-font-size: 10px; -fx-background-color: transparent; -fx-text-fill: #666;");
         btnArchiver.setTooltip(new Tooltip("Archiver"));
@@ -249,13 +273,14 @@ public class VueKanban extends BorderPane implements Observateur {
         configurerDragSurCarte(carte, tache);
 
         String styleNormal = carte.getStyle();
-        // Hover effect
+        // effet quand la souris est sur la tache
         carte.setOnMouseEntered(e -> carte.setStyle("-fx-background-color: " + couleurHex + "; -fx-background-radius: 3; -fx-border-color: #4a90e2; -fx-border-width: 2; -fx-border-radius: 3; -fx-cursor: hand;"));
         carte.setOnMouseExited(e -> carte.setStyle(styleNormal));
 
         return carte;
     }
 
+    // getter etat de la tache la convertissant en string
     private String getTexteEtat(int etat) {
         switch(etat) {
             case Tache.ETAT_A_FAIRE: return "À faire";
@@ -266,6 +291,7 @@ public class VueKanban extends BorderPane implements Observateur {
         }
     }
 
+    // getter pour le style de l'état de la tache en string
     private String getStyleEtat(int etat) {
         switch(etat) {
             case Tache.ETAT_A_FAIRE: return "-fx-background-color: #ddd; -fx-text-fill: black;";
@@ -276,6 +302,7 @@ public class VueKanban extends BorderPane implements Observateur {
         }
     }
 
+    // permet le drop d'une tache sur une nouvelle carte
     private void configurerDragSurCarte(VBox carte, Tache tache) {
         carte.setOnDragDetected(event -> {
             Dragboard db = carte.startDragAndDrop(TransferMode.MOVE);
@@ -287,6 +314,7 @@ public class VueKanban extends BorderPane implements Observateur {
         });
     }
 
+    // méthode gérant le drag&drop d'une tache dans une nouvlle colonne
     private void configurerDropSurColonne(VBox colonne, String titreColonne) {
         colonne.setOnDragOver(event -> {
             if (event.getDragboard().hasString()) {

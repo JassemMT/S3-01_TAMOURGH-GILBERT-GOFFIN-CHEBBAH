@@ -24,12 +24,12 @@ public class AppTrello extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // 1. Chargement de la sauvegarde
+        // Chargement de la sauvegarde
         repository = new ModeleRepository("Sauvegarde/testCohérenceApp.save");
         modele = repository.load();
 
-        // 2. Si aucune sauvegarde n'existe (premier lancement), on crée des données de test
-        if (modele == null || modele.getTaches().isEmpty()) {
+        // Si aucune sauvegarde n'existe (premier lancement), on crée des données de test
+        if (modele == null) {
             System.out.println("Sauvegarde absente ou vide, création des données de test.");
 
             // Si le repository a renvoyé null, on doit instancier.
@@ -48,25 +48,31 @@ public class AppTrello extends Application {
         VueArchives vueArchives = new VueArchives(modele);
 
         // TabPane pour gérer les trois vues
+        // agit comme un navigateur avec différents onglets
         TabPane tabPane = new TabPane();
 
+        // onglet vue Liste
         Tab tabListe = new Tab("Vue Liste");
         tabListe.setContent(vueListe);
         tabListe.setClosable(false);
 
+        // onglet vue Kanban
         Tab tabKanban = new Tab("Vue Kanban");
         tabKanban.setContent(vueKanban);
         tabKanban.setClosable(false);
 
+        // onglet vue Gantt
         Tab tabGantt = new Tab("Vue Gantt");
         tabGantt.setContent(vueGantt);
         tabGantt.setClosable(false);
 
+        // onglet vue Archive
         Tab tabArchive = new Tab("Vue Archives");
         tabArchive.setContent(vueArchives);
         tabArchive.setClosable(false);
 
 
+        // ajout des onglets le navigateur (objet Tab -> objet tabpane)
         tabPane.getTabs().addAll(tabListe, tabKanban, tabGantt, tabArchive);
 
         // Création de la scène
@@ -100,27 +106,24 @@ public class AppTrello extends Application {
             modele.ajouterColonne(col);
         }
         int annee = LocalDate.now().getYear();
-
-        // =========================================================================
-        // 2. COLONNE X : SCÉNARIO 10 taches
-        // =========================================================================
-        // --- ARBRE D (15/01, 2 semaines) ---
+        // Colonne X : scénario 10 taches
+        // Arbre D (15/01, 2 semaines)
         TacheComposite D = new TacheComposite("Tache D", "Racine dépendance", LocalDate.of(annee, 1, 15), "X", 14);
         TacheSimple D1 = new TacheSimple("D1", "Sous-tache de D", LocalDate.of(annee, 1, 4), "X", 5);
         D.ajouterEnfant(D1);
 
-        // --- TACHE C (01/02, 1 semaine) ---
+        // tache C (01/02, 1 semaine)
         // C est une tache simple ici (elle n'a pas d'enfants mentionnés dans l'énoncé structurel)
         TacheSimple C = new TacheSimple("Tache C", "Dépend de D", LocalDate.of(annee, 2, 1), "X", 7);
 
-        // --- ARBRE A (15/02, 3 semaines) ---
+        // Arbre A (15/02, 3 semaines)
         TacheComposite A = new TacheComposite("Tache A", "Dépend de C", LocalDate.of(annee, 2, 15), "X", 21);
         TacheSimple A1 = new TacheSimple("A1", "Sous-tache A1", LocalDate.of(annee, 2, 1), "X", 7);
         TacheSimple A2 = new TacheSimple("A2", "Sous-tache A2", LocalDate.of(annee, 2, 2), "X", 7);
         A.ajouterEnfant(A1);
         A.ajouterEnfant(A2);
 
-        // --- ARBRE B (22/02, 5 semaines) ---
+        // Arbre B (22/02, 5 semaines)
         TacheComposite B = new TacheComposite("Tache B", "Gros Module", LocalDate.of(annee, 2, 22), "X", 35);
 
         // Sous-tache B1 (Celle à déplacer plus tard)
