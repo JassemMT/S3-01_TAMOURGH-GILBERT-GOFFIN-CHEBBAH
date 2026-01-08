@@ -336,7 +336,7 @@ public class VueGantt extends BorderPane implements Observateur {
         HBox bEnfant = barresGraphiques.get(enfant);
         HBox bMere = barresGraphiques.get(mere);
 
-        // Récupération des positions absolues dans la scène
+        // Récupération des positions absolues dans la scène, les bordures des barres de taches
         Bounds boundsEnfant = bEnfant.localToScene(bEnfant.getBoundsInLocal());
         Bounds boundsMere = bMere.localToScene(bMere.getBoundsInLocal());
         Bounds boundsLayer = layerFleches.localToScene(layerFleches.getBoundsInLocal());
@@ -344,20 +344,22 @@ public class VueGantt extends BorderPane implements Observateur {
         if (boundsLayer == null) return;
 
         // Permet d'obtenir les coordonnées des deux barres (fille, mere) pour définir la flèche ensuite
+        // point de départ
         double xSortie = boundsEnfant.getMaxX() - boundsLayer.getMinX();
         double ySortie = boundsEnfant.getMinY() + (boundsEnfant.getHeight() / 2) - boundsLayer.getMinY();
 
+        // point d'arrivé
         double xEntree = boundsMere.getMinX() - boundsLayer.getMinX();
         double yEntree = boundsMere.getMinY() + (boundsMere.getHeight() / 2) - boundsLayer.getMinY();
 
-        // Permet dessiner la courbe, en donnant 4 points différents pour l'amplitude du S
+        // Permet de dessiner la courbe, en donnant 4 points différents pour le tracet du S
         CubicCurve courbe = new CubicCurve();
         courbe.setStartX(xSortie);
         courbe.setStartY(ySortie);
         courbe.setEndX(xEntree);
         courbe.setEndY(yEntree);
 
-        // Permet de définir le style de la flèche en forme de S
+        // Permet de définir le style de la flèche en forme de S et son amplitude via setControlX/Y
         double distance = Math.abs(xEntree - xSortie) * 0.5;
         courbe.setControlX1(xSortie + distance);
         courbe.setControlY1(ySortie);
