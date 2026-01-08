@@ -107,6 +107,7 @@ public class VueKanban extends BorderPane implements Observateur {
         scrollTaches.setPrefHeight(500);
 
         colonne.getChildren().addAll(ligneTitre, btnAjouter, scrollTaches);
+        //configurerDragDropColonne(colonne, titre);
         return colonne;
     }
 

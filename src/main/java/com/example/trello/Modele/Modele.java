@@ -313,6 +313,38 @@ public class Modele implements Sujet, Serializable {
         return lignee; // Retourne vide si non trouvé
     }
 
+    // --- NOUVELLE MÉTHODE POUR LE DRAG & DROP DES COLONNES ---
+    public void deplacerColonneOrdre(String nomColSource, String nomColCible) {
+        // Vérifications de sécurité
+        if (nomColSource == null || nomColCible == null || nomColSource.equals(nomColCible)) return;
+        if (!colonnesDisponibles.contains(nomColSource) || !colonnesDisponibles.contains(nomColCible)) return;
+
+        // 1. Conversion en Liste pour manipuler l'ordre
+        List<String> listeOrdonnee = new ArrayList<>(colonnesDisponibles);
+
+        int indexSource = listeOrdonnee.indexOf(nomColSource);
+        int indexCible = listeOrdonnee.indexOf(nomColCible);
+
+        // 2. Déplacement
+        // On retire l'élément source
+        listeOrdonnee.remove(indexSource);
+
+        // Petite subtilité : si l'élément source était avant la cible,
+        // l'index de la cible a reculé de 1 suite à la suppression.
+        if (indexSource < indexCible) {
+            indexCible--;
+        }
+
+        // On insère à la nouvelle position
+        listeOrdonnee.add(indexCible, nomColSource);
+
+        // 3. Reconstruction du LinkedHashSet (qui garantit l'ordre d'itération)
+        this.colonnesDisponibles = new LinkedHashSet<>(listeOrdonnee);
+
+        // 4. Notification de la vue pour redessiner les colonnes dans le bon ordre
+        notifierObservateur();
+    }
+
 
     // méthode privée permettant de construire le chemin de façon récursive
     private boolean rechercheRecursiveParents(Tache parentActuel, Tache cible, List<Tache> lignee) {
